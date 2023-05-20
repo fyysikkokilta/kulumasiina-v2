@@ -1,0 +1,76 @@
+.row {
+    display:flex;
+    justify-content: center;
+}
+
+.column {
+    width: 800px;
+    max-width: 80vw;
+}
+
+.titleSpacer {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.addButtons .ant-btn {
+    margin-right: 8px;
+}
+
+.addButtons .ant-btn:last-child {
+    margin-right: 0px;
+}
+
+.expenseCard .date, .expenseCard .value {
+    margin-right: 1.5em;
+}
+
+.separator {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.plate-no {
+    border: 1px solid;
+    border-radius: 3px;
+    padding: 0px 5px;
+    color: #888;
+}
+
+.date {
+    font-weight: bold;
+}
+
+p.route {
+    margin-top: 0;
+    color: #333;
+    font-size: small;
+}
+
+.fakeReceipt {
+    width: 50px;
+    height: 50px;
+    background: #eee;
+    display: inline-block;
+    border-radius: 5px;
+    border: 1px solid #333;
+    margin-right: 1em;
+}
+
+
+.expenseCard > div{
+    cursor: pointer;
+    box-shadow: #00000033 0 1px 3px;
+    border-radius: 16px;
+    padding-top: 16px;
+    border: 1px solid #fff;
+    padding-bottom: 8px;
+}
+
+.expenseCard > div:hover {
+    background: #f6f6f6;
+    box-shadow: none;
+    border: 1px solid #eaeaea;
+}
