@@ -6,10 +6,10 @@ import type { ItemState, MileageState, addItemInterface } from './formSlice';
 import './ExpenseForm.css';
 import { useAppSelector, useAppDispatch } from '../../app/hooks';
 import {
-  addEntry,
   addItem,
+  addMileage,
+  removeEntry,
 } from './formSlice';
-import styles from './Counter.module.css';
 
 const mileageReimbursementRate = 0.22;
 
@@ -30,14 +30,20 @@ const formatDate = (date: Date) => {
   return `${y}-${m}-${d}`;
 }
 
-const Mileage = ({...mileage}: MileageState) => {
+interface MileageProps {
+  mileage: MileageState;
+  onEdit: () => void;
+  onRemove: () => void;
+}
+
+const Mileage = ({mileage, onEdit, onRemove}: MileageProps) => {
   return (
     <Form.Item
       className="expenseCard mileage"
       key={mileage.id}
       label="Mileage"
       // wrapperCol={{span: 20, offset: 0}}
-      wrapperCol={{span: 16, offset: 0}}
+      wrapperCol={{span: 20, offset: 0}}
     >
       <div className="separator">
         <span>
@@ -45,7 +51,10 @@ const Mileage = ({...mileage}: MileageState) => {
           <span className="value">{KM.format(mileage.distance)} &rarr; {EUR.format(mileage.distance * mileageReimbursementRate)}</span>
           <span className="plate-no"># {mileage.plate_no.toUpperCase()}</span>
         </span>
-        <Button type="primary" danger>Remove</Button>
+        <div>
+          <Button type="link" onClick={onEdit}>Edit</Button>
+          <Button type="primary" danger onClick={onRemove}>Remove</Button>
+        </div>
       </div>
       <p className="description">{mileage.description}</p>
       <p className="route">{mileage.route}</p>
@@ -53,7 +62,13 @@ const Mileage = ({...mileage}: MileageState) => {
   );
 };
 
-const Item = ({...entry}: ItemState) => {
+interface ItemProps {
+  item: ItemState;
+  onEdit: () => void;
+  onRemove: () => void;
+}
+
+const Item = ({item, onEdit, onRemove}: ItemProps) => {
   return (
     // <div className="expenseCard item" key={entry.id}>
     //   <span className="type">Expense item</span>
@@ -64,19 +79,22 @@ const Item = ({...entry}: ItemState) => {
     // </div>
     <Form.Item
       className="expenseCard item"
-      key={entry.id}
+      key={item.id}
       label="Expense item"
-      wrapperCol={{span: 16, offset: 0}}
+      wrapperCol={{span: 20, offset: 0}}
     >
         {/* <span className="type">Expense item</span> */}
         <div className="separator">
           <span>
-            <span className="date">{entry.date}</span>
-            <span className="value">{EUR.format(entry.value)}</span>
+            <span className="date">{item.date}</span>
+            <span className="value">{EUR.format(item.value)}</span>
           </span>
-          <Button type="primary" danger style={{float:'right'}}>Remove</Button>
+          <div>
+            <Button type="link" onClick={onEdit}>Edit</Button>
+            <Button type="primary" danger onClick={onRemove}>Remove</Button>
+          </div>
         </div>
-        <p className="description">{entry.description}</p>
+        <p className="description">{item.description}</p>
         <div className="receipts">
           <div className='fakeReceipt' />
           <div className='fakeReceipt' />
@@ -109,9 +127,9 @@ export function ExpenseForm() {
   const showMileage = () => {
     setModal("mileage");
   };
-  const handleOk = () => {
-    setModal(null);
-  };
+  const handleRemove = (id: Number) => {
+    dispatch(removeEntry(id));
+  }
   const handleOkExpense = () => {
     // gather the data from the form
     const values = expenseForm.getFieldsValue();
@@ -122,9 +140,20 @@ export function ExpenseForm() {
     setModal(null);
     expenseForm.resetFields();
   };
+  const handleOkMileage = () => {
+    const values = mileageForm.getFieldsValue();
+    values.date = values.date.format('YYYY-MM-DD');
+    dispatch(addMileage(values));
+    setModal(null);
+    mileageForm.resetFields();
+  };
   const handleCancelExpense = () => {
     setModal(null);
     expenseForm.resetFields();
+  };
+  const handleCancelMileage = () => {
+    setModal(null);
+    mileageForm.resetFields();
   };
   return (
     <div className="row">
@@ -142,26 +171,31 @@ export function ExpenseForm() {
             form={mainForm}
           >
             <Form.Item label="Payee name">
-              <Input placeholder="N.N"/>
+              <Input placeholder="First Last"/>
             </Form.Item>
             <Form.Item label="Payee concact">
               <Input 
-                  placeholder="Telegram, Email, Phone"
+                  placeholder="Telegram / Email / Phone"
               />
             </Form.Item>
             <Form.Item label="IBAN">
               <Input placeholder="FI 12 3456 7890 1234 56"/>
             </Form.Item>
             <Form.Item label="Claim title">
-              <Input placeholder="Expense report xx.yy"/>
+              <Input placeholder="<event> expenses and mileages"/>
             </Form.Item>
-          <Divider />
+          {entries.length > 0 ? <Divider /> : null} 
           <div className="entries">
             {entries.map((entry) => {
               if (entry.kind === "item") {
-                return <Item key={entry.id} {...entry}/>
+                return <Item key={entry.id} item={entry} onEdit={() => {}} onRemove={() => handleRemove(entry.id)}/>
               } else {
-                return <Mileage key={entry.id} {...entry} />
+                return <Mileage
+                  key={entry.id}
+                  mileage={entry}
+                  onEdit={() => {}}
+                  onRemove={() => {handleRemove(entry.id)}}
+                />
               }
             })
           }
@@ -227,9 +261,31 @@ export function ExpenseForm() {
           <Modal
             title="Add a mileage"
             open={modal === "mileage"}
-            onOk={handleOk}
-            onCancel={handleOk}
+            onOk={handleOkMileage}
+            onCancel={handleCancelMileage}
           >
+            <Form
+              labelCol={{span: 6}}
+              wrapperCol={{span: 18}}
+              layout="horizontal"
+              form={mileageForm}
+            >
+              <Form.Item name="description" label="Description">
+                <Input placeholder="Description"/>
+              </Form.Item>
+              <Form.Item name="date" label="Date">
+                <DatePicker format="YYYY-MM-DD" picker="date"/>
+              </Form.Item>
+              <Form.Item name="route" label="Route">
+                <Input placeholder="guild room - venue <address> - guild room"/>
+              </Form.Item>
+              <Form.Item name="distance" label="Distance">
+                <Input placeholder="0"/>
+              </Form.Item>
+              <Form.Item name="plate_no" label="Plate number">
+                <Input placeholder="ABC-123"/>
+              </Form.Item>
+            </Form>
           </Modal>
       </div>
     </div>

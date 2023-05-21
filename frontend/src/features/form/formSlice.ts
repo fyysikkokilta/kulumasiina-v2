@@ -55,6 +55,14 @@ export interface addItemInterface {
   value: number;
 }
 
+export interface addMileageInterface {
+  description: string;
+  date: string;
+  route: string;
+  distance: number;
+  plate_no: string;
+}
+
 export const formSlice = createSlice({
   name: 'form',
   initialState,
@@ -73,9 +81,25 @@ export const formSlice = createSlice({
       state.maxId = item.id;
       state.entries.push(item);
     },
+    addMileage: (state, action: PayloadAction<addMileageInterface>) => {
+      const item: MileageState = {
+        kind: 'mileage',
+        id: state.maxId + 1,
+        description: action.payload.description,
+        date: action.payload.date,
+        route: action.payload.route,
+        distance: action.payload.distance,
+        plate_no: action.payload.plate_no,
+      };
+      state.maxId = item.id;
+      state.entries.push(item);
+    },
+    removeEntry: (state, action: PayloadAction<Number>) => {
+      state.entries = state.entries.filter((entry) => entry.id !== action.payload);
+    },
   },
 });
 
-export const { addEntry, addItem } = formSlice.actions;
+export const { addEntry, addItem, removeEntry, addMileage } = formSlice.actions;
 
 export default formSlice.reducer;
