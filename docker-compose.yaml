@@ -1,0 +1,19 @@
+version: '3'
+services:
+  server:
+    image: nginx:alpine
+    ports:
+      - "8024:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - build:/usr/share/nginx/html
+    depends_on:
+      - web-builder
+  web-builder:
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+    volumes:
+      - build:/build
+volumes:
+  build:

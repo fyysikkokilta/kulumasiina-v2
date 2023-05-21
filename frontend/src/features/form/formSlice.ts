@@ -55,6 +55,16 @@ export interface addItemInterface {
   value: number;
 }
 
+interface editItemInterface {
+  item: addItemInterface;
+  editTarget: number;
+}
+
+interface editMileageInterface {
+  mileage: addMileageInterface;
+  editTarget: number;
+}
+
 export interface addMileageInterface {
   description: string;
   date: string;
@@ -76,10 +86,20 @@ export const formSlice = createSlice({
         id: state.maxId + 1,
         description: action.payload.description,
         date: action.payload.date,
-        value: action.payload.value,
+        value: Number(action.payload.value),
       };
       state.maxId = item.id;
       state.entries.push(item);
+    },
+    editItem: (state, action: PayloadAction<editItemInterface>) => {
+      const item: ItemState = {
+        kind: 'item',
+        id: action.payload.editTarget,
+        description: action.payload.item.description,
+        date: action.payload.item.date,
+        value: Number(action.payload.item.value),
+      };
+      state.entries = state.entries.map((entry) => entry.id === action.payload.editTarget ? item : entry);
     },
     addMileage: (state, action: PayloadAction<addMileageInterface>) => {
       const item: MileageState = {
@@ -88,18 +108,34 @@ export const formSlice = createSlice({
         description: action.payload.description,
         date: action.payload.date,
         route: action.payload.route,
-        distance: action.payload.distance,
+        distance: Number(action.payload.distance),
         plate_no: action.payload.plate_no,
       };
       state.maxId = item.id;
       state.entries.push(item);
     },
+    editMileage: (state, action: PayloadAction<editMileageInterface>) => {
+      const item: MileageState = {
+        kind: 'mileage',
+        id: action.payload.editTarget,
+        description: action.payload.mileage.description,
+        date: action.payload.mileage.date,
+        route: action.payload.mileage.route,
+        distance: Number(action.payload.mileage.distance),
+        plate_no: action.payload.mileage.plate_no,
+      };
+      state.entries = state.entries.map((entry) => entry.id === action.payload.editTarget ? item : entry);
+    },
     removeEntry: (state, action: PayloadAction<Number>) => {
       state.entries = state.entries.filter((entry) => entry.id !== action.payload);
+    },
+    resetForm: (state) => {
+      state.maxId = 1;
+      state.entries = [];
     },
   },
 });
 
-export const { addEntry, addItem, removeEntry, addMileage } = formSlice.actions;
+export const { addEntry, addItem, editItem, editMileage, removeEntry, addMileage, resetForm } = formSlice.actions;
 
 export default formSlice.reducer;
