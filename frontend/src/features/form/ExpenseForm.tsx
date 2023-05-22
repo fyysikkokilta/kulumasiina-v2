@@ -3,6 +3,7 @@ import { Button, message, Modal, Row, Col, Space, Result, Divider, Form, FormIns
 import type { UploadFile } from 'antd/es/upload/interface';
 import type { RcFile, UploadProps } from 'antd/es/upload';
 import { PlusOutlined, DownOutlined } from '@ant-design/icons';
+import { Link } from 'react-router-dom';
 import imageCompression from 'browser-image-compression';
 import axios from 'axios';
 import type {
@@ -24,17 +25,8 @@ import {
   resetForm,
 } from './formSlice';
 
-const mileageReimbursementRate = 0.22;
+import { mileageReimbursementRate, EURFormat, KMFormat } from '../utils';
 
-const EUR = new Intl.NumberFormat("fi-FI", {
-  style: "currency",
-  currency: "EUR",
-});
-
-const KM = new Intl.NumberFormat("fi-FI", {
-  style: "unit",
-  unit: "kilometer",
-});
 
 
 interface MileageProps {
@@ -55,7 +47,7 @@ const Mileage = ({mileage, onEdit, onRemove}: MileageProps) => {
       <div className="separator">
         <span>
           <span className="date">{mileage.date}</span>
-          <span className="value">{KM.format(mileage.distance)} &rarr; {EUR.format(mileage.distance * mileageReimbursementRate)}</span>
+          <span className="value">{KMFormat.format(mileage.distance)} &rarr; {EURFormat.format(mileage.distance * mileageReimbursementRate)}</span>
           <span className="plate-no"># {mileage.plate_no.toUpperCase()}</span>
         </span>
         <div>
@@ -87,7 +79,7 @@ const Item = ({item, onEdit, onRemove}: ItemProps) => {
         <div className="separator">
           <span>
             <span className="date">{item.date}</span>
-            <span className="value">{EUR.format(item.value)}</span>
+            <span className="value">{EURFormat.format(item.value)}</span>
           </span>
           <div>
             <Button type="link" onClick={onEdit}>Edit</Button>
@@ -461,7 +453,7 @@ export function ExpenseForm() {
                 >
                 Add a mileage
               </Button>
-              <span className="total"><strong>Total:</strong> {EUR.format(total)}</span>
+              <span className="total"><strong>Total:</strong> {EURFormat.format(total)}</span>
               <Button
                 type="primary"
                 htmlType="submit"
