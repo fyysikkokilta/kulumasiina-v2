@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { Button, Modal, Row, Col, Space, Result, Divider, Form, FormInstance, Input, InputNumber, Upload, DatePicker } from 'antd';
+import { Button, message, Modal, Row, Col, Space, Result, Divider, Form, FormInstance, Input, InputNumber, Upload, DatePicker } from 'antd';
+import type { UploadFile } from 'antd/es/upload/interface';
+import type { RcFile, UploadProps } from 'antd/es/upload';
+import { PlusOutlined, DownOutlined } from '@ant-design/icons';
+import imageCompression from 'browser-image-compression';
+import axios from 'axios';
+import type {
+  UploadRequestOption
+} from 'rc-upload/lib/interface';
+
 import type { DatePickerProps } from 'antd/';
 import type { ItemState, MileageState, addItemInterface } from './formSlice';
 import dayjs from 'dayjs';
@@ -103,14 +112,81 @@ interface ModalInterface {
   onCancel: () => void;
 }
 
+const getBase64 = (file: RcFile): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
+
 
 const ItemModal = (props: ModalInterface) => {
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState('');
+  const [previewTitle, setPreviewTitle] = useState('');
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+
+  const handlePreview = async (file: UploadFile) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj as RcFile);
+    }
+
+    setPreviewImage(file.url || (file.preview as string));
+    setPreviewOpen(true);
+    setPreviewTitle(file.name || file.url!.substring(file.url!.lastIndexOf('/') + 1));
+  };
+
+  const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => setFileList(newFileList);
+
+  const resetUpload = () => {
+    setPreviewOpen(false);
+    setPreviewImage('');
+    setPreviewTitle('');
+    setFileList([]);
+  };
+  const beforeUpload = (file: RcFile) => {
+    // check pdf size is under 4MB
+    if (file.size > 4 * 1024 * 1024) {
+      if (file.type === 'application/pdf') {
+        message.error('PDF needs to be under 4MB!', 5);
+        return Upload.LIST_IGNORE;
+      }
+      // compress too large image files
+      const options = {
+        maxSizeMB: 4,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      };
+      return imageCompression(file, options);
+    };
+    return true;
+  };
+  const upload = (options: UploadRequestOption) => {
+    const { onSuccess, onError, file, action} = options;
+    const formData = new FormData();
+    formData.append('file', file);
+    axios.post(action, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }).then((response) => {
+      console.log(response);
+      if (onSuccess){
+        onSuccess(response.data);
+      }
+    }).catch((err) => {
+      if (onError) {
+        onError(err);
+      };
+    });
+  }
   return (
     <Modal
       title="Add an expense"
       open={props.visible}
-      onOk={props.onOk}
-      onCancel={props.onCancel}
+      onOk={() => {props.onOk(); resetUpload();}}
+      onCancel={() => {props.onCancel(); resetUpload();}}
     >
       <Form
         labelCol={{span: 6}}
@@ -130,9 +206,25 @@ const ItemModal = (props: ModalInterface) => {
         </Form.Item>
         {/* TODO: Think about receipt handling later */}
         <Form.Item label="Receipt">
-          <Upload>
-            <Button>Upload</Button>
+          <Upload
+            action="/api/receipt/"
+            listType='picture-card'
+            fileList={fileList}
+            onPreview={handlePreview}
+            onChange={handleChange}
+            accept='image/*,.pdf'
+            beforeUpload={beforeUpload}
+            customRequest={upload}
+          >
+            <div>
+              {/* <PlusOutlined style={{}}/> */}
+              +<br/>
+              <div style={{ marginTop: 8 }}>Upload</div>
+            </div>
           </Upload>
+          <Modal open={previewOpen} title={previewTitle} footer={null} onCancel={() => setPreviewOpen(false)} width='80%'>
+            <img alt="example" style={{ width: '100%' }} src={previewImage} />
+          </Modal>
         </Form.Item>
       </Form>
     </Modal>
@@ -334,7 +426,7 @@ export function ExpenseForm() {
                 <Input placeholder="123456-789A"/>
               </Form.Item>
             ) : null}
-            {entries.length > 0 ? <Divider /> : null} 
+            {entries.length > 0 ? <Divider/> : null} 
             <div className="entries">
               {entries.map((entry) => {
                 if (entry.kind === "item") {

@@ -1,6 +1,8 @@
-from fastapi import Depends, FastAPI, HTTPException, File, UploadFile
+from fastapi import Depends, FastAPI, HTTPException, File, UploadFile, APIRouter
 from fastapi.responses import FileResponse
 from fastapi.security import HTTPAuthorizationCredentials
+from fastapi.middleware.cors import CORSMiddleware
+
 from typing import Annotated
 from sqlalchemy.orm import Session
 
@@ -11,7 +13,7 @@ from fastapi.security import HTTPBearer
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
-
+api_router = APIRouter(prefix='/api')
 
 def sanitise_filename(filename: str) -> str:
     keep = [' ', '.', '_', '-']
@@ -35,12 +37,12 @@ bearer_scheme = HTTPBearer()
 AuthorToken = Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)]
 
 
-@app.get('/')
+@api_router.get('/')
 def hello():
     return {'msg': 'hello'}
 
 
-@app.post('/entry/')
+@api_router.post('/entry/')
 def create_entry(
     entry: schemas.EntryCreate,
     db: Session = Depends(get_db)
@@ -48,7 +50,7 @@ def create_entry(
     return crud.create_entry_full(entry=entry, db=db)
 
 
-# @app.get('/mileage/{mileage_id}')
+# @api_router.get('/mileage/{mileage_id}')
 # def get_mileage_by_id(mileage_id: int, db: Session = Depends(get_db)) -> schemas.Mileage:
 #     db_mileage = crud.get_mileage_by_id(id=mileage_id, db=db)
 #     if not db_mileage:
@@ -58,7 +60,7 @@ def create_entry(
 
 
 # # TODO: test
-# @app.post('/receipt/')
+# @api_router.post('/receipt/')
 # def create_receipt(
 #     author: AuthorToken,
 #     file: UploadFile = File(),
@@ -75,25 +77,30 @@ def create_entry(
 #         raise HTTPException(status_code=500, detail='Could not upload file!')
 
 
-@app.post('/receipt/')
+@api_router.post('/receipt/')
 def create_receipt(
     file: UploadFile = File(),
     db: Session = Depends(get_db)
 ) -> int:
     # try:
+    print('Got a receipt.')
     filename = file.filename
     if filename:
         filename = sanitise_filename(filename)
+    print('Creating a schema.')
     receipt = schemas.ReceiptCreate(
         filename=filename,
         data=file.file.read(),
     )
-    return crud.create_receipt(receipt=receipt, db=db).id
+    print('Doing DB stuff.')
+    out = crud.create_receipt(receipt=receipt, db=db).id
+    print('all done.')
+    return out
     # except:
     #     raise HTTPException(status_code=500, detail='Could not upload file!')
 
 # # TODO: implement
-# @app.get('/receipt/{filename}')
+# @api_router.get('/receipt/{filename}')
 # def get_receipt(filename: str, db: Session = Depends(get_db)) -> FileResponse:
 #     pass
 
@@ -101,10 +108,12 @@ def create_receipt(
 
 
 # # TODO: replace w/ JWT with expiration time
-# @app.get('/author_token/')
+# @api_router.get('/author_token/')
 # def generate_author_token() -> str:
 #     return uuid.uuid4().hex
 
 
-# @app.get('/receipt/{filename}')
+# @api_router.get('/receipt/{filename}')
 # def get_file(filename: str, db: Session = Depends(get_db)) ->
+
+app.include_router(api_router)

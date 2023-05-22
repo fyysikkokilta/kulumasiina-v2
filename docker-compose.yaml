@@ -1,19 +1,12 @@
-version: '3'
+version: '3.8'
 services:
   server:
-    image: nginx:alpine
+    build:
+      context: .
+      dockerfile: ./Dockerfile.server
     ports:
       - "8024:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - build:/usr/share/nginx/html
-    depends_on:
-      - web-builder
-  web-builder:
+  api:
     build:
-      context: ./frontend
-      dockerfile: ./Dockerfile
-    volumes:
-      - build:/build
-volumes:
-  build:
+      context: .
+      dockerfile: ./Dockerfile.api
