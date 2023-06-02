@@ -211,6 +211,7 @@ export const ItemModal = (props: ExpenseModalProps) => {
     });
   }
   console.log('FILE LIST:', props.fileList);
+  console.log('FORM VALUES:', props.form.getFieldsValue());
   return (
     <Modal
       title="Add an expense"

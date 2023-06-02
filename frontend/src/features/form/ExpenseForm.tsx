@@ -70,7 +70,6 @@ const SuccessConfirm = ({onConfirm}:SuccessConfirmProps) => (
 export function ExpenseForm() {
   const [modal, setModal] = useState<null | "expense" | "mileage">(null);
   const [editTarget, setEditTarget] = useState<null | number>(null);
-  // const [defaultFiles, setDefaultFiles] = useState<UploadFile[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const dispatch = useAppDispatch();
@@ -113,7 +112,13 @@ export function ExpenseForm() {
     }
     const values = expenseForm.getFieldsValue();
     console.log('receipts array:', values.receipts);
-    const fileIds = values.receipts.fileList.map((file: UploadFile) => Number(file.response));
+    const fileIds = (
+      values.receipts.fileList
+      .filter((file: UploadFile) => file.status === 'done')
+      .map((file: UploadFile) => Number(file.response))
+    );
+    // const fileIds = values.receipts.fileList.map((file: UploadFile) => Number(file.response));
+
     // Update local file mapping
     values.receipts.fileList.forEach((file: UploadFile) => {
       if (files[Number(file.response)] === undefined) {
@@ -129,9 +134,9 @@ export function ExpenseForm() {
       dispatch(addItem(modValues));
     } else {
       dispatch(editItem({item: modValues, editTarget: editTarget}));
-      setEditTarget(null);
     }
     setModal(null);
+    setEditTarget(null);
     expenseForm.resetFields();
   };
   const handleOkMileage = (editTarget: null | number) => async () => {
@@ -149,17 +154,19 @@ export function ExpenseForm() {
       dispatch(addMileage(modValues));
     } else {
       dispatch(editMileage({mileage: modValues, editTarget: editTarget}));
-      setEditTarget(null);
     }
+    setEditTarget(null);
     setModal(null);
     mileageForm.resetFields();
   };
   const handleCancelExpense = () => {
     setModal(null);
+    setEditTarget(null);
     expenseForm.resetFields();
   };
   const handleCancelMileage = () => {
     setModal(null);
+    setEditTarget(null);
     mileageForm.resetFields();
   };
 
@@ -171,7 +178,10 @@ export function ExpenseForm() {
       const vals = {
         ...modifiedEntry,
         value: String(entry.value),
-        receipts: undefined,
+        receipts: {
+          fileList: entry.receipts.map((fileId) => files[fileId]),
+          file: undefined,
+        },
       };
       console.log(vals);
       setExpenseFileList(entry.receipts.map((fileId) => files[fileId]));
@@ -195,6 +205,9 @@ export function ExpenseForm() {
     setSubmitting(true);
     setTimeout(() => {
       mainForm.resetFields();
+      expenseForm.resetFields();
+      mileageForm.resetFields();
+      setExpenseFileList([]);
       dispatch(resetForm());
       setSubmitting(false);
       setSuccess(true);

@@ -76,11 +76,6 @@ export const Item: React.FC<ItemProps> = ({
           </div>
         </div>
         <p className="description">{item.description}</p>
-        {/* <div className="receipts">
-          <div className='fakeReceipt' />
-          <div className='fakeReceipt' />
-          <div className='fakeReceipt' />
-        </div> */}
         <Upload
           listType='picture-card'
           fileList={ownFiles}

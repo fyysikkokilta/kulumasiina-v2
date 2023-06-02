@@ -33,11 +33,11 @@ export interface FormState {
 const initialState: FormState = {
   maxId: 1,
   files: {
-    1: {
+    0: {
       uid: '-1',
       name: 'image.png',
       status: 'done',
-      response: '1',
+      response: '0',
       url: 'https://www.fyysikkokilta.fi/wp-content/uploads/2019/03/cropped-fii_2-1-32x32.png',
     }
   },
@@ -48,7 +48,7 @@ const initialState: FormState = {
       description: 'Got some apples from the store. Used in an envent.',
       date: '2023-01-01',
       value: 123.4,
-      receipts: [1],
+      receipts: [0],
     },
     {
       kind: 'mileage',
