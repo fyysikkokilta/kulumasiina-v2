@@ -65,11 +65,11 @@ p.route {
 
 
 .expenseCard > div{
-    box-shadow: #00000033 0 1px 3px;
-    border-radius: 16px;
+    /* box-shadow: #00000033 0 1px 3px; */
+    border-radius: 6px;
     padding-top: 16px;
     padding-right: 16px;
-    border: 1px solid #fff;
+    border: 1px solid #d9d9d9;
     padding-bottom: 8px;
 }
 

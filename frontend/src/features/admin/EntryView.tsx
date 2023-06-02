@@ -113,7 +113,7 @@ export function AdminEntryView() {
     });
     return (
         <>
-            <Typography.Title level={2}>Admin Entry View</Typography.Title>
+            <Typography.Title level={3}>Submissions</Typography.Title>
             <Table 
                 dataSource={sumEnties}
                 columns={columns}

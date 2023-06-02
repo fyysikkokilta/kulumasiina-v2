@@ -1,6 +1,8 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState, AppThunk } from '../../app/store';
 import { fetchCount } from '../counter/counterAPI';
+import { UploadFile } from 'antd/lib/upload/interface';
+import { Upload } from 'antd';
 
 
 export interface ItemState {
@@ -9,6 +11,7 @@ export interface ItemState {
   description: string;
   date: string;
   value: number;
+  receipts: Array<number>;
 };
 
 export interface MileageState {
@@ -21,14 +24,23 @@ export interface MileageState {
   plate_no: string;
 }
 
-
 export interface FormState {
   maxId: number;
   entries: Array<ItemState | MileageState>;
+  files: {[key: number]: UploadFile};
 }
 
 const initialState: FormState = {
   maxId: 1,
+  files: {
+    1: {
+      uid: '-1',
+      name: 'image.png',
+      status: 'done',
+      response: '1',
+      url: 'https://www.fyysikkokilta.fi/wp-content/uploads/2019/03/cropped-fii_2-1-32x32.png',
+    }
+  },
   entries: [
     {
       kind: 'item',
@@ -36,6 +48,7 @@ const initialState: FormState = {
       description: 'Got some apples from the store. Used in an envent.',
       date: '2023-01-01',
       value: 123.4,
+      receipts: [1],
     },
     {
       kind: 'mileage',
@@ -52,7 +65,8 @@ const initialState: FormState = {
 export interface addItemInterface {
   description: string;
   date: string;
-  value: number;
+  value: string;
+  receipts: Array<number>;
 }
 
 interface editItemInterface {
@@ -69,14 +83,22 @@ export interface addMileageInterface {
   description: string;
   date: string;
   route: string;
-  distance: number;
+  distance: string;
   plate_no: string;
+}
+
+export interface addFileInterface {
+  id: number;
+  file: UploadFile;
 }
 
 export const formSlice = createSlice({
   name: 'form',
   initialState,
   reducers: {
+    addFile: (state, action: PayloadAction<addFileInterface>) => {
+      state.files[action.payload.id] = action.payload.file;
+    },
     addEntry: (state, action: PayloadAction<ItemState | MileageState>) => {
       state.entries.push(action.payload);
     },
@@ -86,7 +108,8 @@ export const formSlice = createSlice({
         id: state.maxId + 1,
         description: action.payload.description,
         date: action.payload.date,
-        value: Number(action.payload.value),
+        value: Number(action.payload.value.replace(',', '.')),
+        receipts: action.payload.receipts,
       };
       state.maxId = item.id;
       state.entries.push(item);
@@ -97,7 +120,8 @@ export const formSlice = createSlice({
         id: action.payload.editTarget,
         description: action.payload.item.description,
         date: action.payload.item.date,
-        value: Number(action.payload.item.value),
+        value: Number(action.payload.item.value.replace(',', '.')),
+        receipts: action.payload.item.receipts,
       };
       state.entries = state.entries.map((entry) => entry.id === action.payload.editTarget ? item : entry);
     },
@@ -108,7 +132,7 @@ export const formSlice = createSlice({
         description: action.payload.description,
         date: action.payload.date,
         route: action.payload.route,
-        distance: Number(action.payload.distance),
+        distance: Number(action.payload.distance.replace(',', '.')),
         plate_no: action.payload.plate_no,
       };
       state.maxId = item.id;
@@ -121,7 +145,7 @@ export const formSlice = createSlice({
         description: action.payload.mileage.description,
         date: action.payload.mileage.date,
         route: action.payload.mileage.route,
-        distance: Number(action.payload.mileage.distance),
+        distance: Number(action.payload.mileage.distance.replace(',', '.')),
         plate_no: action.payload.mileage.plate_no,
       };
       state.entries = state.entries.map((entry) => entry.id === action.payload.editTarget ? item : entry);
@@ -136,6 +160,6 @@ export const formSlice = createSlice({
   },
 });
 
-export const { addEntry, addItem, editItem, editMileage, removeEntry, addMileage, resetForm } = formSlice.actions;
+export const { addEntry, addItem, editItem, editMileage, removeEntry, addMileage, resetForm, addFile } = formSlice.actions;
 
 export default formSlice.reducer;
