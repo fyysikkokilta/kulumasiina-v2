@@ -1,5 +1,5 @@
-import axios from 'axios';
-import { ItemState, MileageState } from './formSlice';
+import axios from "axios";
+import { ItemState, MileageState } from "./formSlice";
 
 export interface postInterface {
   name: string;
@@ -12,6 +12,6 @@ export interface postInterface {
 }
 
 export const postForm = async (payload: postInterface) => {
-  const response = await axios.post('/api/entry', payload);
-  return response.data
+  const response = await axios.post("/api/entry", payload);
+  return response.data;
 };

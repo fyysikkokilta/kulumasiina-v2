@@ -1,5 +1,5 @@
-import type { ColProps } from 'antd';
+import type { ColProps } from "antd";
 
 export type ColPropsMap = {
-  [key: string]: ColProps
-}
+  [key: string]: ColProps;
+};

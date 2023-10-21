@@ -1,80 +1,80 @@
 .row {
-    display:flex;
-    justify-content: center;
+  display: flex;
+  justify-content: center;
 }
 
 .column {
-    width: 800px;
-    max-width: 80vw;
+  width: 800px;
+  max-width: 80vw;
 }
 
 .titleSpacer {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
 }
 
 .addButtons .ant-btn {
-    margin-right: 8px;
+  margin-right: 8px;
 }
 
 .addButtons .ant-btn:last-child {
-    margin-right: 0px;
+  margin-right: 0px;
 }
 
 .addButtons .total {
-    margin-left: 4px;
+  margin-left: 4px;
 }
 
-.expenseCard .date, .expenseCard .value {
-    margin-right: 1.5em;
+.expenseCard .date,
+.expenseCard .value {
+  margin-right: 1.5em;
 }
 
 .separator {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
 }
 
 .plate-no {
-    border: 1px solid;
-    border-radius: 3px;
-    padding: 0px 5px;
-    color: #888;
+  border: 1px solid;
+  border-radius: 3px;
+  padding: 0px 5px;
+  color: #888;
 }
 
 .date {
-    font-weight: bold;
+  font-weight: bold;
 }
 
 p.route {
-    margin-top: 0;
-    color: #333;
-    font-size: small;
+  margin-top: 0;
+  color: #333;
+  font-size: small;
 }
 
 .fakeReceipt {
-    width: 50px;
-    height: 50px;
-    background: #eee;
-    display: inline-block;
-    border-radius: 5px;
-    border: 1px solid #333;
-    margin-right: 1em;
+  width: 50px;
+  height: 50px;
+  background: #eee;
+  display: inline-block;
+  border-radius: 5px;
+  border: 1px solid #333;
+  margin-right: 1em;
 }
 
-
-.expenseCard > div{
-    /* box-shadow: #00000033 0 1px 3px; */
-    border-radius: 6px;
-    padding-top: 16px;
-    padding-right: 16px;
-    border: 1px solid #d9d9d9;
-    padding-bottom: 8px;
+.expenseCard > div {
+  /* box-shadow: #00000033 0 1px 3px; */
+  border-radius: 6px;
+  padding-top: 16px;
+  padding-right: 16px;
+  border: 1px solid #d9d9d9;
+  padding-bottom: 8px;
 }
 
 .expenseCard > div:has(button:hover) {
-    background: #f6f6f6;
-    box-shadow: none;
-    border: 1px solid #eaeaea;
+  background: #f6f6f6;
+  box-shadow: none;
+  border: 1px solid #eaeaea;
 }
