@@ -133,10 +133,6 @@ const getBase64 = (file: RcFile): Promise<string> =>
     reader.onerror = (error) => reject(error);
   });
 
-interface ItemModalInterface extends ExpenseModalProps {
-  onUpload?: (id: number, file: UploadFile) => void;
-}
-
 export const ItemModal = (props: ExpenseModalProps) => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
@@ -144,6 +140,8 @@ export const ItemModal = (props: ExpenseModalProps) => {
   // const [fileList, setFileList] = useState<UploadFile[]>();
 
   const handlePreview = async (file: UploadFile) => {
+    if (!file.url) return;
+
     if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj as RcFile);
     }
@@ -151,7 +149,7 @@ export const ItemModal = (props: ExpenseModalProps) => {
     setPreviewImage(file.url || (file.preview as string));
     setPreviewOpen(true);
     setPreviewTitle(
-      file.name || file.url!.substring(file.url!.lastIndexOf("/") + 1),
+      file.name || file.url.substring(file.url.lastIndexOf("/") + 1),
     );
   };
 

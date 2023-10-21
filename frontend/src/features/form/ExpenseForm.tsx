@@ -1,32 +1,10 @@
 import React, { useState } from "react";
-import {
-  Button,
-  message,
-  Modal,
-  Row,
-  Col,
-  Space,
-  Result,
-  Divider,
-  Form,
-  FormInstance,
-  Input,
-  InputNumber,
-  Upload,
-  DatePicker,
-} from "antd";
+import { Button, Result, Divider, Form, Input } from "antd";
 import type { UploadFile } from "antd/es/upload/interface";
-import type { RcFile, UploadProps } from "antd/es/upload";
-import { PlusOutlined, DownOutlined } from "@ant-design/icons";
-import { Link } from "react-router-dom";
-import imageCompression from "browser-image-compression";
-import axios from "axios";
 import { Mileage, Item } from "./EntryRow";
-import type { UploadRequestOption } from "rc-upload/lib/interface";
 import type { ColPropsMap } from "features/types";
 
-import type { Dayjs } from "dayjs";
-import type { ItemState, MileageState, addItemInterface } from "./formSlice";
+import type { ItemState, MileageState } from "./formSlice";
 import dayjs from "dayjs";
 
 import "./ExpenseForm.css";
@@ -38,7 +16,6 @@ import {
   editMileage,
   removeEntry,
   resetForm,
-  FormState,
   addFile,
 } from "./formSlice";
 
@@ -49,7 +26,7 @@ import {
   ItemModal,
 } from "./Modals";
 
-import { mileageReimbursementRate, EURFormat, KMFormat } from "features/utils";
+import { mileageReimbursementRate, EURFormat } from "features/utils";
 
 const spans: { [key: string]: ColPropsMap } = {
   main: {

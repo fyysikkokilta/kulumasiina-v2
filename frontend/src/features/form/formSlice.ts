@@ -1,8 +1,5 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { RootState, AppThunk } from "../../app/store";
-import { fetchCount } from "../counter/counterAPI";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { UploadFile } from "antd/lib/upload/interface";
-import { Upload } from "antd";
 
 export interface ItemState {
   kind: "item";
@@ -153,7 +150,7 @@ export const formSlice = createSlice({
         entry.id === action.payload.editTarget ? item : entry,
       );
     },
-    removeEntry: (state, action: PayloadAction<Number>) => {
+    removeEntry: (state, action: PayloadAction<number>) => {
       state.entries = state.entries.filter(
         (entry) => entry.id !== action.payload,
       );

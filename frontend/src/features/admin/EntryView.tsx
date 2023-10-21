@@ -1,36 +1,9 @@
-import React, { useState } from "react";
-import {
-  Typography,
-  Table,
-  Button,
-  message,
-  Modal,
-  Row,
-  Col,
-  Space,
-  Result,
-  Divider,
-  Form,
-  FormInstance,
-  Input,
-  InputNumber,
-  Upload,
-  DatePicker,
-} from "antd";
-import type { UploadFile } from "antd/es/upload/interface";
-import type { RcFile, UploadProps } from "antd/es/upload";
-import { PlusOutlined, DownOutlined } from "@ant-design/icons";
-import imageCompression from "browser-image-compression";
-import axios from "axios";
-import type { UploadRequestOption } from "rc-upload/lib/interface";
+import React from "react";
+import { Typography, Table } from "antd";
 import type { SubmissionState, MileageState, ItemState } from "./adminSlice";
 import type { ColumnsType } from "antd/es/table";
 
-import type { DatePickerProps } from "antd/";
-// import type { ItemState, MileageState, addItemInterface } from './adminSlice';
-import dayjs from "dayjs";
-
-import { useAppSelector, useAppDispatch } from "../../app/hooks";
+import { useAppSelector } from "../../app/hooks";
 
 import { mileageReimbursementRate, EURFormat, KMFormat } from "../utils";
 
