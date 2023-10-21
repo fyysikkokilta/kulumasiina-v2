@@ -1,13 +1,13 @@
 .main-column {
-    display: flex;
-    justify-items: stretch;
-    flex-direction: column;
+  display: flex;
+  justify-items: stretch;
+  flex-direction: column;
 }
 
 .main-column > * {
-    flex-shrink: 0;
+  flex-shrink: 0;
 }
 
 .main-column > .grower {
-    flex-grow: 1;
+  flex-grow: 1;
 }

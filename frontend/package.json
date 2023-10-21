@@ -15,7 +15,6 @@
     "antd": "^5.5.0",
     "axios": "^1.4.0",
     "browser-image-compression": "^2.0.2",
-    "eslint": "^8.41.0",
     "localforage": "^1.10.0",
     "match-sorter": "^6.3.1",
     "moment": "^2.29.4",
@@ -53,6 +52,10 @@
     ]
   },
   "devDependencies": {
-    "http-proxy-middleware": "^2.0.6"
+    "eslint": "^8.52.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "http-proxy-middleware": "^2.0.6",
+    "prettier": "^3.0.3"
   }
 }
