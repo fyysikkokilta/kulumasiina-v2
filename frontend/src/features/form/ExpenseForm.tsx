@@ -27,6 +27,7 @@ import {
 } from "./Modals";
 
 import { mileageReimbursementRate, EURFormat } from "features/utils";
+import { postForm, postInterface } from "./api";
 
 const spans: { [key: string]: ColPropsMap } = {
   main: {
@@ -75,7 +76,7 @@ export function ExpenseForm() {
   const [mainForm] = Form.useForm();
   const total = entries.reduce((acc, entry) => {
     if (entry.kind === "item") {
-      return acc + entry.value;
+      return acc + entry.value_cents / 100;
     } else {
       return acc + entry.distance * mileageReimbursementRate;
     }
@@ -168,7 +169,7 @@ export function ExpenseForm() {
     if (entry.kind === "item") {
       const vals = {
         ...modifiedEntry,
-        value: String(entry.value),
+        value: String(entry.value_cents / 100),
         receipts: {
           fileList: entry.receipts.map((fileId) => files[fileId]),
           file: undefined,
@@ -194,15 +195,26 @@ export function ExpenseForm() {
       return;
     }
     setSubmitting(true);
-    setTimeout(() => {
+    const formData = mainForm.getFieldsValue();
+    const items = entries.filter((e) => e.kind === "item");
+    const mileages = entries.filter((e) => e.kind === "mileage");
+    // const value_cents =
+    const data: postInterface = {
+      ...formData,
+      items: items,
+      mileages: mileages,
+    };
+    postForm(data).then((res) => {
+      console.log(res);
+
       mainForm.resetFields();
       expenseForm.resetFields();
       mileageForm.resetFields();
       setExpenseFileList([]);
       dispatch(resetForm());
       setSubmitting(false);
-      setSuccess(true);
-    }, 1000);
+    });
+    setSuccess(true);
   };
 
   console.log({ entries, total, needGovId, editTarget });

@@ -81,7 +81,9 @@ export const Item: React.FC<ItemProps> = ({
       <div className="separator">
         <span>
           <span className="date">{item.date}</span>
-          <span className="value">{EURFormat.format(item.value)}</span>
+          <span className="value">
+            {EURFormat.format(item.value_cents / 100)}
+          </span>
         </span>
         <div>
           <Button type="link" onClick={onEdit}>

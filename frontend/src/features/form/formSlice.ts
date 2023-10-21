@@ -6,7 +6,7 @@ export interface ItemState {
   id: number;
   description: string;
   date: string;
-  value: number;
+  value_cents: number;
   receipts: Array<number>;
 }
 
@@ -43,7 +43,7 @@ const initialState: FormState = {
       id: 0,
       description: "Got some apples from the store. Used in an envent.",
       date: "2023-01-01",
-      value: 123.4,
+      value_cents: 12340,
       receipts: [0],
     },
     {
@@ -104,7 +104,7 @@ export const formSlice = createSlice({
         id: state.maxId + 1,
         description: action.payload.description,
         date: action.payload.date,
-        value: Number(action.payload.value.replace(",", ".")),
+        value_cents: Number(action.payload.value.replace(",", ".")) * 100,
         receipts: action.payload.receipts,
       };
       state.maxId = item.id;
@@ -116,7 +116,7 @@ export const formSlice = createSlice({
         id: action.payload.editTarget,
         description: action.payload.item.description,
         date: action.payload.item.date,
-        value: Number(action.payload.item.value.replace(",", ".")),
+        value_cents: Number(action.payload.item.value.replace(",", ".")) * 100,
         receipts: action.payload.item.receipts,
       };
       state.entries = state.entries.map((entry) =>

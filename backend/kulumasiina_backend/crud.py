@@ -43,6 +43,7 @@ def create_entry_full(entry: schemas.EntryCreate, db: Session) -> schemas.Entry:
         **entry.dict() | dict(  # update keys from entry    
             items=items,
             mileages=mileages,
+            gov_id = entry.gov_id
         ),
     )
     db.add(db_entry)

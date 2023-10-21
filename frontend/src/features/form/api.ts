@@ -7,7 +7,7 @@ export interface postInterface {
   title: string;
   contact: string;
   govId: string | null;
-  itemms: Array<ItemState>;
+  items: Array<ItemState>;
   mileages: Array<MileageState>;
 }
 

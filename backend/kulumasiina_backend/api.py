@@ -13,6 +13,10 @@ from fastapi.security import HTTPBearer
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+# TODO: make more secure
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"])
+
 api_router = APIRouter(prefix='/api')
 
 def sanitise_filename(filename: str) -> str:
@@ -47,6 +51,7 @@ def create_entry(
     entry: schemas.EntryCreate,
     db: Session = Depends(get_db)
 ) -> schemas.Entry:
+    print(entry)
     return crud.create_entry_full(entry=entry, db=db)
 
 

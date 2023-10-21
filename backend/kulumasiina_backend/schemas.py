@@ -99,7 +99,7 @@ class Item(ItemCreate):
 
 
 class MileageCreate(BaseModel):
-    gov_id: str  # TODO: GDPR
+    # gov_id: str  # TODO: GDPR
     description: str
     date: date
     route: str
@@ -118,9 +118,11 @@ class _EntryBase(BaseModel):
     name: str
     iban: str
     title: str
+    gov_id: str
 
 
 class EntryCreate(_EntryBase):
+    gov_id: str
     items: list[ItemCreate]
     mileages: list[MileageCreate]
 
@@ -128,6 +130,7 @@ class EntryCreate(_EntryBase):
 class Entry(_EntryBase):
     id: int
     status: str
+    gov_id: str
     items: list[Item]
     mileages: list[Mileage]
 
