@@ -51,7 +51,7 @@ def create_entry(
     entry: schemas.EntryCreate,
     db: Session = Depends(get_db)
 ) -> schemas.Entry:
-    print(entry)
+    print("Creating entry")
     return crud.create_entry_full(entry=entry, db=db)
 
 

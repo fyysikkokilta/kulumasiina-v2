@@ -8,7 +8,7 @@ import type { ItemState, MileageState } from "./formSlice";
 import dayjs from "dayjs";
 
 import "./ExpenseForm.css";
-import { useAppSelector, useAppDispatch } from "app/hooks";
+import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import {
   addItem,
   addMileage,
@@ -26,7 +26,7 @@ import {
   ItemModal,
 } from "./Modals";
 
-import { mileageReimbursementRate, EURFormat } from "features/utils";
+import { mileageReimbursementRate, EURFormat } from "../utils";
 import { postForm, postInterface } from "./api";
 
 const spans: { [key: string]: ColPropsMap } = {
@@ -197,7 +197,14 @@ export function ExpenseForm() {
     setSubmitting(true);
     const formData = mainForm.getFieldsValue();
     const items = entries.filter((e) => e.kind === "item");
-    const mileages = entries.filter((e) => e.kind === "mileage");
+    const mileages = entries
+      .filter((e) => e.kind === "mileage")
+      .map((m) => {
+        return {
+          ...m,
+          gov_id: formData.gov_id,
+        };
+      });
     // const value_cents =
     const data: postInterface = {
       ...formData,

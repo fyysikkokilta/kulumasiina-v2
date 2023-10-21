@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, Form, Upload } from "antd";
 import type { ColProps } from "antd";
-import { EURFormat, KMFormat, mileageReimbursementRate } from "features/utils";
+import { EURFormat, KMFormat, mileageReimbursementRate } from "../utils";
 import type { ItemState, MileageState, FormState } from "./formSlice";
 
 interface MileageProps {

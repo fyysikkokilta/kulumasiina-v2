@@ -20,7 +20,7 @@ from sqlalchemy.orm import Session
 def _get_receipts(ids: list[int], db: Session) -> list[models.Receipt]:
     return (
         db.query(models.Receipt)
-        .where(models.Receipt.item_id.in_(ids))
+        .where(models.Receipt.id.in_(ids))
         .all()
     )
 
@@ -43,7 +43,6 @@ def create_entry_full(entry: schemas.EntryCreate, db: Session) -> schemas.Entry:
         **entry.dict() | dict(  # update keys from entry    
             items=items,
             mileages=mileages,
-            gov_id = entry.gov_id
         ),
     )
     db.add(db_entry)

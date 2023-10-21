@@ -82,7 +82,6 @@ export interface addMileageInterface {
   distance: string;
   plate_no: string;
 }
-
 export interface addFileInterface {
   id: number;
   file: UploadFile;

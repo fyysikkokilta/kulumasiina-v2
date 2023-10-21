@@ -14,6 +14,7 @@ import { Dayjs } from "dayjs";
 import axios from "axios";
 import type { UploadRequestOption } from "rc-upload/lib/interface";
 import imageCompression from "browser-image-compression";
+import { api } from "./api";
 
 type ModalProps = {
   visible: boolean;
@@ -181,9 +182,10 @@ export const ItemModal = (props: ExpenseModalProps) => {
   };
   const upload = (options: UploadRequestOption) => {
     const { onSuccess, onError, file, action } = options;
+    console.log(options);
     const formData = new FormData();
     formData.append("file", file);
-    axios
+    api
       .post(action, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -191,6 +193,7 @@ export const ItemModal = (props: ExpenseModalProps) => {
       })
       .then((response) => {
         if (onSuccess) {
+          console.log(response.data);
           onSuccess(response.data);
         }
       })
@@ -261,7 +264,7 @@ export const ItemModal = (props: ExpenseModalProps) => {
         </Form.Item>
         <Form.Item name="receipts" label="Receipt">
           <Upload
-            action="/api/receipt/"
+            action="/receipt"
             listType="picture-card"
             fileList={props.fileList}
             onPreview={handlePreview}
