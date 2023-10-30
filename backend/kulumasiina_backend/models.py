@@ -95,5 +95,5 @@ class Entry(Base):
     # gov_id : Mapped[str]
     # TODO: status enum tms?
     status: Mapped[str] = mapped_column(default='submitted')
-    items: Mapped[list[Item]] = relationship(lazy="immediate")
-    mileages: Mapped[list[Mileage]] = relationship(lazy="immediate")
+    items: Mapped[list[Item]] = relationship(lazy="immediate", cascade="all, delete-orphan")
+    mileages: Mapped[list[Mileage]] = relationship(lazy="immediate", cascade="all, delete-orphan")

@@ -134,16 +134,16 @@ async def get_reciept(reciept_id,background_tasks: BackgroundTasks, db: Session 
     return Response(buffer.getvalue())
 
 
-@api_router.delete("/items/{item_id}")
-async def del_item(item_id, db: Session = Depends(get_db)):
-    return crud.delete_item(item_id, db)
+@api_router.delete("/entry/{entry_id}")
+async def del_item(entry_id, db: Session = Depends(get_db)):
+    return crud.delete_entry(entry_id, db)
 
-@api_router.post("/approve/{item_id}")
-async def approve_item(item_id, db: Session = Depends(get_db)):
+@api_router.post("/approve/{entry_id}")
+async def approve_entry(entry_id, db: Session = Depends(get_db)):
     pass # TODO
 
-@api_router.post("/deny/{item_id}")
-async def approve_item(item_id, db: Session = Depends(get_db)):
+@api_router.post("/deny/{entry_id}")
+async def approve_entry(entry_id, db: Session = Depends(get_db)):
     pass # TODO
 
 # @api_router.get('/receipt/{filename}')

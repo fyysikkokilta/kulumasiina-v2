@@ -106,5 +106,5 @@ def create_receipt(receipt: schemas.ReceiptCreate, db: Session) -> schemas.Recei
 def get_reciept_data(id, db: Session):
     return db.query(models.Receipt.data).filter(models.Receipt.id == id).first()[0]
 
-def delete_item(id, db: Session):
-    return db.query(models.Item).filter(models.Item.id == id).delete()
+def delete_entry(id, db: Session):
+    return db.query(models.Entry).filter(models.Entry.id == id).delete()
