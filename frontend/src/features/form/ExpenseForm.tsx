@@ -188,7 +188,6 @@ export function ExpenseForm() {
     }
   };
   const handleSubmit = async () => {
-    // TODO: actually submit the form
     try {
       await mainForm.validateFields();
     } catch (err) {

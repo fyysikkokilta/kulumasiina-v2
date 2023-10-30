@@ -11,10 +11,9 @@ import {
 import type { RcFile, UploadProps } from "antd/es/upload";
 import type { UploadFile, UploadChangeParam } from "antd/es/upload/interface";
 import { Dayjs } from "dayjs";
-import axios from "axios";
 import type { UploadRequestOption } from "rc-upload/lib/interface";
 import imageCompression from "browser-image-compression";
-import { api } from "./api";
+import { api } from "../utils";
 
 type ModalProps = {
   visible: boolean;

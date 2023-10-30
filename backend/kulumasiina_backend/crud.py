@@ -54,6 +54,10 @@ def create_entry_full(entry: schemas.EntryCreate, db: Session) -> schemas.Entry:
 def get_entries(db: Session) -> list[models.Entry]:
     return db.query(models.Entry).all()
 
+def get_item_reciepts(item_id: int, db: Session):
+    reciepts = db.query(models.Receipt.filename,models.Receipt.item_id, models.Receipt.id).where(models.Receipt.item_id == item_id).all()
+    return reciepts
+
 def get_entry_by_id(id: int, db: Session) -> models.Entry | None:
     return db.query(models.Entry).filter(models.Entry.id == id).first()
 
@@ -99,3 +103,8 @@ def create_receipt(receipt: schemas.ReceiptCreate, db: Session) -> schemas.Recei
     db.refresh(db_receipt)
     return schemas.ReceiptResponse.from_orm(db_receipt)
 
+def get_reciept_data(id, db: Session):
+    return db.query(models.Receipt.data).filter(models.Receipt.id == id).first()[0]
+
+def delete_item(id, db: Session):
+    return db.query(models.Item).filter(models.Item.id == id).delete()

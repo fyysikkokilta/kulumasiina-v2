@@ -71,7 +71,7 @@ class Receipt(Base):
     __tablename__ = 'receipt'
     item_id: Mapped[int | None] = mapped_column(ForeignKey('item.id'))
     filename: Mapped[str]
-    data: Mapped[bytes]
+    data: Mapped[bytes] = mapped_column(deferred=True)
 
 
 class Item(Base):
@@ -80,7 +80,7 @@ class Item(Base):
     description: Mapped[str]
     date: Mapped[date]
     value_cents: Mapped[int]
-    receipts: Mapped[list[Receipt]] = relationship()
+    receipts: Mapped[list[Receipt]] = relationship(lazy='immediate')
 
     # @property
     # def receipt_ids(self) -> list[int]:
@@ -95,5 +95,5 @@ class Entry(Base):
     # gov_id : Mapped[str]
     # TODO: status enum tms?
     status: Mapped[str] = mapped_column(default='submitted')
-    items: Mapped[list[Item]] = relationship()
-    mileages: Mapped[list[Mileage]] = relationship()
+    items: Mapped[list[Item]] = relationship(lazy="immediate")
+    mileages: Mapped[list[Mileage]] = relationship(lazy="immediate")

@@ -1,3 +1,5 @@
+import axios from "axios";
+
 export const mileageReimbursementRate = 0.22;
 
 export const EURFormat = new Intl.NumberFormat("fi-FI", {
@@ -8,4 +10,10 @@ export const EURFormat = new Intl.NumberFormat("fi-FI", {
 export const KMFormat = new Intl.NumberFormat("fi-FI", {
   style: "unit",
   unit: "kilometer",
+});
+export const apiURL = `${
+  import.meta.env.DEV ? "http://localhost:8025" : "joku dev osote (korvaa)"
+}/api`;
+export const api = axios.create({
+  baseURL: apiURL,
 });

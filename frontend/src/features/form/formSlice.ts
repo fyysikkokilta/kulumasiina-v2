@@ -28,34 +28,8 @@ export interface FormState {
 
 const initialState: FormState = {
   maxId: 1,
-  files: {
-    0: {
-      uid: "-1",
-      name: "image.png",
-      status: "done",
-      response: "0",
-      url: "https://www.fyysikkokilta.fi/wp-content/uploads/2019/03/cropped-fii_2-1-32x32.png",
-    },
-  },
-  entries: [
-    {
-      kind: "item",
-      id: 0,
-      description: "Got some apples from the store. Used in an envent.",
-      date: "2023-01-01",
-      value_cents: 12340,
-      receipts: [0],
-    },
-    {
-      kind: "mileage",
-      id: 1,
-      description: "Logistics for the event.",
-      date: "2023-01-02",
-      route: "home - guild room - event location - guild room - home",
-      distance: 84,
-      plate_no: "ABC-123",
-    },
-  ],
+  files: {},
+  entries: [],
 };
 
 export interface addItemInterface {

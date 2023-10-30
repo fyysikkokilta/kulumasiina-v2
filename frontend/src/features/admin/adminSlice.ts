@@ -1,11 +1,15 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 export interface ItemState {
   id: number;
   description: string;
   date: string;
-  value: number;
-  receipts: Array<number>;
+  value_cents: number;
+  receipts: Array<RecieptState>;
+}
+export interface RecieptState {
+  id: number;
+  filename: string;
 }
 
 export interface MileageState {
@@ -28,7 +32,7 @@ export interface SubmissionState {
 }
 
 const initialState: Array<SubmissionState> = [
-  {
+  /*  {
     id: 1,
     submissionDate: "2022-05-02",
     name: "First Last",
@@ -101,15 +105,26 @@ const initialState: Array<SubmissionState> = [
         distance: 25,
       },
     ],
-  },
+  }, */
 ];
 
 export const adminSlice = createSlice({
   name: "admin",
   initialState,
-  reducers: {},
+  reducers: {
+    addSubmission: (state, action: PayloadAction<SubmissionState>) => {
+      state.push(action.payload);
+    },
+    addSubmissions: (state, action: PayloadAction<SubmissionState[]>) => {
+      state.push(...action.payload);
+    },
+    clearSubmissions: (state) => {
+      while (state.shift() !== undefined) {}
+    },
+  },
 });
 
-// export const { } = formSlice.actions;
+export const { addSubmission, addSubmissions, clearSubmissions } =
+  adminSlice.actions;
 
 export default adminSlice.reducer;
