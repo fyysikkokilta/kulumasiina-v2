@@ -126,7 +126,7 @@ def get_reciept_for_item(item_id, db: Session = Depends(get_db)):
 # def generate_author_token() -> str:
 #     return uuid.uuid4().hex
 
-@api_router.get("/reciept/{reciept_id}")
+@api_router.get("/receipt/{reciept_id}")
 async def get_reciept(reciept_id,background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     buffer = io.BytesIO()  # BytesIO stream containing the pdf data
     background_tasks.add_task(buffer.close)
