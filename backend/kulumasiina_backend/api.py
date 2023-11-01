@@ -15,7 +15,7 @@ from fastapi_sso.sso.google import GoogleSSO, OpenID
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
-sso = GoogleSSO(scope=[""],allow_insecure_http=True) # TODO Make secure
+# sso = GoogleSSO(scope=[""],allow_insecure_http=True) # TODO Make secure
 
 # TODO: make more secure
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"])
@@ -135,16 +135,17 @@ async def get_reciept(reciept_id,background_tasks: BackgroundTasks, db: Session 
 
 
 @api_router.delete("/entry/{entry_id}")
-async def del_item(entry_id, db: Session = Depends(get_db)):
+def del_entry(entry_id, db: Session = Depends(get_db)):
     return crud.delete_entry(entry_id, db)
 
 @api_router.post("/approve/{entry_id}")
-async def approve_entry(entry_id, db: Session = Depends(get_db)):
-    pass # TODO
+def approve_entry(entry_id, db: Session = Depends(get_db)):
+    return crud.approve_entry(entry_id, db)
 
 @api_router.post("/deny/{entry_id}")
-async def approve_entry(entry_id, db: Session = Depends(get_db)):
-    pass # TODO
+def deny_entry(entry_id, db: Session = Depends(get_db)):
+    return crud.deny_entry(entry_id, db)
+    
 
 # @api_router.get('/receipt/{filename}')
 # def get_file(filename: str, db: Session = Depends(get_db)) ->

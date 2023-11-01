@@ -108,3 +108,11 @@ def get_reciept_data(id, db: Session):
 
 def delete_entry(id, db: Session):
     return db.query(models.Entry).filter(models.Entry.id == id).delete()
+
+def approve_entry(id, db: Session):
+    db.query(models.Entry).filter(models.Entry.id == id).update({models.Entry.status: "approved"})
+    db.commit()
+
+def deny_entry(id, db: Session):
+    db.query(models.Entry).filter(models.Entry.id == id).update({models.Entry.status: "denied"})
+    db.commit()
