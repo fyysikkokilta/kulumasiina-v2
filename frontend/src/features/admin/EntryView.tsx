@@ -6,14 +6,25 @@ import {
   type ItemState,
   addSubmissions,
   clearSubmissions,
+  startLoading,
+  stopLoading,
 } from "./adminSlice";
 import type { ColumnsType } from "antd/es/table";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 
 import { mileageReimbursementRate, EURFormat, KMFormat } from "../utils";
-import { getEntries } from "./api";
+import { approveEntry, denyEntry, getEntries } from "./api";
 import { Receipt } from "./Receipt";
 import ButtonGroup from "antd/es/button/button-group";
+import { AppDispatch } from "app/store";
+const loadItems = (dispatch: AppDispatch) => {
+  getEntries().then((entries) => {
+    dispatch(clearSubmissions());
+
+    dispatch(addSubmissions(entries));
+    dispatch(stopLoading());
+  });
+};
 
 const calculateSum = (submission: SubmissionState) => {
   const mileageSum = submission.mileages.reduce((acc, item) => {
@@ -58,6 +69,7 @@ interface expandedRowTable {
   key: React.Key;
   rendered: JSX.Element;
   type: string;
+  description: string;
   index: number;
 }
 
@@ -83,7 +95,7 @@ const renderItem = (item: ItemState) => {
   return (
     <Typography.Text>
       Item: <strong>{item.date}</strong>{" "}
-      {EURFormat.format(item.value_cents / 100)} {item.description}{" "}
+      {EURFormat.format(item.value_cents / 100)}
     </Typography.Text>
   );
 };
@@ -96,6 +108,7 @@ const expandedRowRender = (record: tableSubmission) => {
         rendered: renderMileage(mileage),
         type: "mileage",
         index: i,
+        description: mileage.description,
       };
     })
     .concat(
@@ -104,8 +117,10 @@ const expandedRowRender = (record: tableSubmission) => {
         rendered: renderItem(item),
         type: "item",
         index: i,
+        description: item.description,
       })),
     );
+  const dispatch = useAppDispatch();
   return (
     <>
       <Table
@@ -115,25 +130,50 @@ const expandedRowRender = (record: tableSubmission) => {
           expandedRowRender: (a) => {
             return (
               <>
-                <Typography.Title>Reciepts:</Typography.Title>
-                {record.items[a.index].receipts.map((r) => {
-                  return <Receipt reciept={r} />;
-                })}
+                <Typography.Title level={4}>Description: </Typography.Title>
+                <Typography.Text>{a.description}</Typography.Text>
+                {a.type === "mileage" ? (
+                  <> </>
+                ) : (
+                  <>
+                    {" "}
+                    <Typography.Title level={4}>Reciepts:</Typography.Title>
+                    {record.items[a.index].receipts.map((r) => {
+                      return <Receipt key={r.id} reciept={r} />;
+                    })}
+                  </>
+                )}
               </>
             );
           },
-          rowExpandable: (r) => r.type === "item",
         }}
         pagination={false}
         showHeader={false}
       />
       <br></br>
+      <h4>Status: {record.status}</h4>
+
       <Space>
-        <Button type="primary">Accept</Button>
-        <Button type="primary" danger>
-          Deny
-        </Button>
+        {record.status === "submitted" && (
+          <>
+            <Button
+              onClick={() =>
+                approveEntry(record.id).then(() => loadItems(dispatch))
+              }
+            >
+              Accept
+            </Button>
+            <Button
+              onClick={() =>
+                denyEntry(record.id).then(() => loadItems(dispatch))
+              }
+            >
+              Deny
+            </Button>
+          </>
+        )}
         <Button>Mark as paid</Button>
+        <Button danger>Remove</Button>
       </Space>
     </>
   );
@@ -143,14 +183,11 @@ export function AdminEntryView() {
   const dispatch = useAppDispatch();
   useEffect(() => {
     // dispatch(clearSubmissions());
-
-    getEntries().then((entries) => {
-      dispatch(clearSubmissions());
-
-      dispatch(addSubmissions(entries));
-    });
+    loadItems(dispatch);
   }, []);
-  const adminEntries = useAppSelector((state) => state.admin);
+  const adminEntries = useAppSelector((state) => state.admin.submissions);
+  const loading = useAppSelector((state) => state.admin.loading);
+
   const sumEnties: Array<tableSubmission> = adminEntries.map((entry) => {
     return {
       ...entry,
@@ -167,6 +204,7 @@ export function AdminEntryView() {
         expandable={{
           expandedRowRender: expandedRowRender,
         }}
+        loading={loading}
       />
     </>
   );

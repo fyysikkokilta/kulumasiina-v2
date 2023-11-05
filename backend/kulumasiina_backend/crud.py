@@ -116,3 +116,7 @@ def approve_entry(id, db: Session):
 def deny_entry(id, db: Session):
     db.query(models.Entry).filter(models.Entry.id == id).update({models.Entry.status: "denied"})
     db.commit()
+
+def reset_entry_status(id, db: Session):
+    db.query(models.Entry).filter(models.Entry.id == id).update({models.Entry.status: "submitted"})
+    db.commit()
