@@ -84,8 +84,9 @@ export function ExpenseForm() {
   const needGovId = entries.some((entry) => entry.kind === "mileage");
 
   const defaultFiles: UploadFile[] = [];
-  if (editTarget !== null && entries[editTarget].kind === "item") {
-    const target = entries[editTarget] as ItemState;
+  console.log("Edit target " + editTarget)
+  if (editTarget !== null && entries.find(e=> e.id === editTarget)?.kind === "item") {
+    const target = entries.find(e=> e.id === editTarget) as ItemState;
     defaultFiles.push(...target.receipts.map((fileId) => files[fileId]));
   }
   const showExpense = () => {
@@ -164,8 +165,10 @@ export function ExpenseForm() {
 
   const handleEdit = (entry: ItemState | MileageState) => {
     const modifiedEntry = { ...entry, date: dayjs(entry.date) };
-    setEditTarget(modifiedEntry.id);
+    const index = entries.map(e => e.id).indexOf(modifiedEntry.id);
+    setEditTarget(entry.id);
     // const entry = entries.find((e) => e.id === id);
+    entry = entries[index];
     if (entry.kind === "item") {
       const vals = {
         ...modifiedEntry,

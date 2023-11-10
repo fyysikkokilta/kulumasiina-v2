@@ -5,6 +5,7 @@ import { AdminEntryView } from "./features/admin/EntryView";
 import { Row, Col, Typography, Divider, ColProps } from "antd";
 import "./App.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { LoginCallback } from "./features/login/LoginRedirect";
 
 const Header = () => {
   return (
@@ -108,6 +109,11 @@ const router = createBrowserRouter([
       </Container>
     ),
   },
+  {path:
+    "/login/callback",
+    element: <LoginCallback />,
+    
+  }
 ]);
 
 function App() {
