@@ -1,24 +1,33 @@
+from datetime import timedelta, datetime
 import io
-from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, File, Response, UploadFile, APIRouter
-from fastapi.responses import FileResponse
+import os
+
+from fastapi import BackgroundTasks, Cookie, Depends, FastAPI, HTTPException, File, Request, Response, UploadFile, APIRouter
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.security import HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 
-from typing import Annotated
+from typing import Annotated, Optional, Union
 from sqlalchemy.orm import Session
 
 from kulumasiina_backend import crud, models, schemas
 from kulumasiina_backend.db import SessionLocal, engine
 from fastapi.security import HTTPBearer
 from fastapi_sso.sso.google import GoogleSSO, OpenID
+from dotenv import load_dotenv
+
+from jose import JWTError, jwt
+load_dotenv()
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
-# sso = GoogleSSO(scope=[""],allow_insecure_http=True) # TODO Make secure
+sso = GoogleSSO(client_id=os.getenv("OAUTH_CLIENT_ID"), client_secret=os.getenv("OAUTH_CLIENT_SECRET"), 
+                scope=["email"], 
+                redirect_uri="http://localhost:5173/login/callback",allow_insecure_http=True) # TODO Make secure
 
 # TODO: make more secure
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173"], allow_methods=["*"], allow_credentials=True)
 
 api_router = APIRouter(prefix='/api')
 
@@ -40,13 +49,18 @@ def get_db():
 
 bearer_scheme = HTTPBearer()
 
-# TODO: implement JWT
-AuthorToken = Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)]
 
+def get_user(token: Optional[str] = Cookie(default=None)):
+    try:
+        print(os.getenv("RAHASTONHOITAJA_EMAIL"))
+        return jwt.decode(token, key=os.getenv("JWT_SECRET"), subject=os.getenv("RAHASTONHOITAJA_EMAIL"))
+    except Exception as e:
+        print(e)
+        raise HTTPException(401, "Invalid auth")
 
-@api_router.get('/')
-def hello():
-    return {'msg': 'hello'}
+def create_access_token(username: bool, expires_delta: timedelta):
+    data = {"sub": username, "exp": datetime.utcnow() + expires_delta}
+    return jwt.encode(data, os.getenv("JWT_SECRET"))
 
 
 @api_router.post('/entry/')
@@ -113,21 +127,16 @@ def create_receipt(
 #     pass
 
 @api_router.get("/entries")
-def get_entry(db: Session = Depends(get_db)):
+def get_entry(db: Session = Depends(get_db), user = Depends(get_user)):
     return crud.get_entries(db)
 
 @api_router.get("/items/{item_id}/reciepts")
-def get_reciept_for_item(item_id, db: Session = Depends(get_db)):
+def get_reciept_for_item(item_id, db: Session = Depends(get_db), user = Depends(get_user)):
     data = crud.get_item_reciepts(item_id, db)
     return data
 
-# # TODO: replace w/ JWT with expiration time
-# @api_router.get('/author_token/')
-# def generate_author_token() -> str:
-#     return uuid.uuid4().hex
-
 @api_router.get("/receipt/{reciept_id}")
-async def get_reciept(reciept_id,background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+async def get_reciept(reciept_id,background_tasks: BackgroundTasks, db: Session = Depends(get_db), user = Depends(get_user)):
     buffer = io.BytesIO()  # BytesIO stream containing the pdf data
     background_tasks.add_task(buffer.close)
     buffer.write( crud.get_reciept_data(reciept_id, db))
@@ -135,17 +144,29 @@ async def get_reciept(reciept_id,background_tasks: BackgroundTasks, db: Session 
 
 
 @api_router.delete("/entry/{entry_id}")
-def del_entry(entry_id, db: Session = Depends(get_db)):
+def del_entry(entry_id, db: Session = Depends(get_db), user = Depends(get_user)):
     return crud.delete_entry(entry_id, db)
 
 @api_router.post("/approve/{entry_id}")
-def approve_entry(entry_id, db: Session = Depends(get_db)):
+def approve_entry(entry_id, db: Session = Depends(get_db), user = Depends(get_user)):
     return crud.approve_entry(entry_id, db)
 
 @api_router.post("/deny/{entry_id}")
-def deny_entry(entry_id, db: Session = Depends(get_db)):
+def deny_entry(entry_id, db: Session = Depends(get_db), user = Depends(get_user)):
     return crud.deny_entry(entry_id, db)
     
+
+@api_router.get("/login/google")
+async def google_redirect():
+    with sso:
+        return await sso.get_login_redirect()
+@api_router.get("/login/google/callback")
+async def google_callback(request: Request, response: Response):
+    with sso:
+        user = await sso.verify_and_process(request)
+    response.set_cookie("token", create_access_token(user.email, timedelta(minutes=30)), httponly=True, samesite="none")
+    return {"success": True}
+
 
 # @api_router.get('/receipt/{filename}')
 # def get_file(filename: str, db: Session = Depends(get_db)) ->
