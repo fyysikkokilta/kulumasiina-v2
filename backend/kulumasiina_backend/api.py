@@ -165,9 +165,13 @@ async def google_callback(request: Request, response: Response):
     with sso:
         user = await sso.verify_and_process(request)
     response.set_cookie("token", create_access_token(user.email, timedelta(minutes=30)), httponly=True, samesite="none")
+    return {"success": True, "username": user.email}
+
+@api_router.get("/logout")
+async def logout(response: Response):
+    response.delete_cookie("token")
     return {"success": True}
-
-
+    
 # @api_router.get('/receipt/{filename}')
 # def get_file(filename: str, db: Session = Depends(get_db)) ->
 

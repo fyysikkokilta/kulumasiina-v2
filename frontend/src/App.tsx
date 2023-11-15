@@ -2,12 +2,17 @@ import React from "react";
 import { PropsWithChildren } from "react";
 import { ExpenseForm } from "./features/form/ExpenseForm";
 import { AdminEntryView } from "./features/admin/EntryView";
-import { Row, Col, Typography, Divider, ColProps } from "antd";
+import { Row, Col, Typography, Divider, ColProps, Button, Space } from "antd";
 import "./App.css";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, useNavigate } from "react-router-dom";
 import { LoginCallback } from "./features/login/LoginRedirect";
+import { Login } from "./features/login/Login";
+import { LoginBtn } from "./features/login/HeaderLoginBtn";
+
 
 const Header = () => {
+  const navigate = useNavigate()
+
   return (
     <div
       style={{
@@ -18,8 +23,13 @@ const Header = () => {
     >
       <Typography.Title level={1}>FK-Expenses</Typography.Title>
       <div>
-        <Typography.Text>FI </Typography.Text>/
-        <Typography.Text strong> EN</Typography.Text>
+        <Space>
+          <div>
+            <Typography.Text>FI </Typography.Text>/
+            <Typography.Text strong> EN</Typography.Text>
+          </div>
+          <LoginBtn />
+        </Space>
       </div>
     </div>
   );
@@ -108,6 +118,11 @@ const router = createBrowserRouter([
         <AdminEntryView />
       </Container>
     ),
+  },
+  {path:
+    "/login",
+    element: (<Container widths={widths.narrow}><Login /> </Container>),
+    
   },
   {path:
     "/login/callback",
