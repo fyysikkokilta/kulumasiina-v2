@@ -33,7 +33,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "vite dev"
+    "start": "vite dev",
+    "build": "vite build"
   },
   "eslintConfig": {
     "extends": [

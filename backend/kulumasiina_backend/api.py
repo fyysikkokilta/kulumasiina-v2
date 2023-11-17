@@ -21,10 +21,12 @@ load_dotenv()
 
 models.Base.metadata.create_all(bind=engine)
 
+
+
 app = FastAPI()
 sso = GoogleSSO(client_id=os.getenv("OAUTH_CLIENT_ID"), client_secret=os.getenv("OAUTH_CLIENT_SECRET"), 
                 scope=["email"], 
-                redirect_uri="http://localhost:5173/login/callback",allow_insecure_http=True) # TODO Make secure
+                redirect_uri=os.getenv("OAUTH_REDIR_URL"),allow_insecure_http=bool(os.getenv("ALLOW_INSECURE_OAUTH"))) # TODO Make secure
 
 # TODO: make more secure
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173"], allow_methods=["*"], allow_credentials=True)
@@ -157,7 +159,7 @@ def deny_entry(entry_id, db: Session = Depends(get_db), user = Depends(get_user)
     
 
 @api_router.get("/login/google")
-async def google_redirect():
+async def google_redirect(request: Request):
     with sso:
         return await sso.get_login_redirect()
 @api_router.get("/login/google/callback")

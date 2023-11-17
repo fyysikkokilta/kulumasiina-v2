@@ -12,7 +12,7 @@ export const KMFormat = new Intl.NumberFormat("fi-FI", {
   unit: "kilometer",
 });
 export const apiURL = `${
-  import.meta.env.DEV ? "http://localhost:8025" : "joku dev osote (korvaa)"
+  import.meta.env.DEV ? "http://localhost:8025" : ""
 }/api`;
 export const api = axios.create({
   baseURL: apiURL,
