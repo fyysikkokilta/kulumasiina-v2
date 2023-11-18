@@ -23,3 +23,7 @@ export const resetEntry = async (id: number) => {
 export const deleteEntry = async (id: number) => {
   await api.delete(`/entry/${id}`);
 };
+
+export const payEntry = async (id: number) => {
+  await api.post(`/pay/${id}`);
+};

@@ -107,7 +107,8 @@ def get_reciept_data(id, db: Session):
     return db.query(models.Receipt.data).filter(models.Receipt.id == id).first()[0]
 
 def delete_entry(id, db: Session):
-    return db.query(models.Entry).filter(models.Entry.id == id).delete()
+    db.query(models.Entry).filter(models.Entry.id == id).delete()
+    db.commit()
 
 def approve_entry(id, db: Session):
     db.query(models.Entry).filter(models.Entry.id == id).update({models.Entry.status: "approved"})
@@ -115,6 +116,10 @@ def approve_entry(id, db: Session):
 
 def deny_entry(id, db: Session):
     db.query(models.Entry).filter(models.Entry.id == id).update({models.Entry.status: "denied"})
+    db.commit()
+
+def pay_entry(id, db: Session):
+    db.query(models.Entry).filter(models.Entry.id == id).update({models.Entry.status: "paid"})
     db.commit()
 
 def reset_entry_status(id, db: Session):

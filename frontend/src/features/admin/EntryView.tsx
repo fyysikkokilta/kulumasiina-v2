@@ -13,7 +13,14 @@ import type { ColumnsType } from "antd/es/table";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 
 import { mileageReimbursementRate, EURFormat, KMFormat } from "../utils";
-import { approveEntry, denyEntry, getEntries } from "./api";
+import {
+  approveEntry,
+  deleteEntry,
+  denyEntry,
+  getEntries,
+  payEntry,
+  resetEntry,
+} from "./api";
 import { Receipt } from "./Receipt";
 import ButtonGroup from "antd/es/button/button-group";
 import { AppDispatch } from "app/store";
@@ -62,6 +69,11 @@ const columns: ColumnsType<tableSubmission> = [
     title: "Submission title",
     dataIndex: "title",
     key: "title",
+  },
+  {
+    title: "Status",
+    dataIndex: "status",
+    key: "status",
   },
 ];
 
@@ -172,8 +184,28 @@ const expandedRowRender = (record: tableSubmission) => {
             </Button>
           </>
         )}
-        <Button>Mark as paid</Button>
-        <Button danger>Remove</Button>
+        <Button
+          onClick={() => payEntry(record.id).then(() => loadItems(dispatch))}
+        >
+          Mark as paid
+        </Button>
+        {record.status !== "submitted" && (
+          <>
+            <Button
+              onClick={() =>
+                resetEntry(record.id).then(() => loadItems(dispatch))
+              }
+            >
+              Reset
+            </Button>
+          </>
+        )}
+        <Button
+          danger
+          onClick={() => deleteEntry(record.id).then(() => loadItems(dispatch))}
+        >
+          Remove
+        </Button>
       </Space>
     </>
   );
