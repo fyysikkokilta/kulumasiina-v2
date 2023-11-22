@@ -12,7 +12,7 @@ export const LoginCallback = ( ) =>  {
         api.get(`/login/google/callback?${searchParamas.toString()}`).then((res) => {
             dispatch(logIn(res.data.username));
             navigate("/admin");
-        }).catch(() => console.log("Login failed"))
+        }).catch(() => navigate("/login"))
     });
     return (<>
     <h2>Logging you in, please wait</h2>

@@ -54,7 +54,6 @@ bearer_scheme = HTTPBearer()
 
 def get_user(token: Optional[str] = Cookie(default=None)):
     try:
-        print(os.getenv("RAHASTONHOITAJA_EMAIL"))
         return jwt.decode(token, key=os.getenv("JWT_SECRET"), subject=os.getenv("RAHASTONHOITAJA_EMAIL"))
     except Exception as e:
         print(e)
@@ -173,6 +172,8 @@ async def google_redirect(request: Request):
 async def google_callback(request: Request, response: Response):
     with sso:
         user = await sso.verify_and_process(request)
+    if user.email != os.getenv("RAHASTONHOITAJA_EMAIL"):
+        raise HTTPException(401, "Invalid auth")
     response.set_cookie("token", create_access_token(user.email, timedelta(minutes=30)), httponly=True, samesite="none")
     return {"success": True, "username": user.email}
 

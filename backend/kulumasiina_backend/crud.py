@@ -107,8 +107,11 @@ def get_reciept_data(id, db: Session):
     return db.query(models.Receipt.data).filter(models.Receipt.id == id).first()[0]
 
 def delete_entry(id, db: Session):
-    db.query(models.Entry).filter(models.Entry.id == id).delete()
+    to_del = db.query(models.Entry).filter(models.Entry.id == id).first()
+    db.delete(to_del)
     db.commit()
+    
+    # db.commit()
 
 def approve_entry(id, db: Session):
     db.query(models.Entry).filter(models.Entry.id == id).update({models.Entry.status: "approved"})
