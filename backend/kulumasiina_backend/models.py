@@ -92,6 +92,7 @@ class Entry(Base):
     iban: Mapped[str]
     title: Mapped[str]
     approval_date: Mapped[str | None] = mapped_column(default=None)
+    meeting_number: Mapped[str | None] = mapped_column(default=None)
     # gov_id : Mapped[str]
     # TODO: status enum tms?
     status: Mapped[str] = mapped_column(default='submitted')

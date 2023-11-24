@@ -9,8 +9,15 @@ export const getReceipt = async (id: string) => {
   (await api.get(`/receipt/${id}`)).data;
 };
 
-export const approveEntry = async (id: number, approvalDate: string) => {
-  await api.post(`/approve/${id}`, { date: approvalDate });
+export const approveEntry = async (
+  id: number,
+  approvalDate: string,
+  meeting_num: string,
+) => {
+  await api.post(`/approve/${id}`, {
+    date: approvalDate,
+    meeting_no: meeting_num,
+  });
 };
 export const denyEntry = async (id: number) => {
   await api.post(`/deny/${id}`);

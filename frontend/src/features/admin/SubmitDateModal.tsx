@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal, Form, DatePicker, Button } from "antd";
+import { Modal, Form, DatePicker, Button, Input } from "antd";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { hideDateModal, showDateModal } from "./adminSlice";
 import { useSelector } from "react-redux";
@@ -9,25 +9,16 @@ import { loadItems } from "./EntryView";
 export const SubmitDateModal: React.FC<{ entry_id: number }> = ({
   entry_id,
 }) => {
-  const [visible, setVisible] = useState(false);
   const dispatch = useAppDispatch();
   const show = useAppSelector((state) => state.admin.dateModal);
   const handleSubmit = (values: any) => {
-    approveEntry(entry_id, values.date.toISOString())
+    approveEntry(entry_id, values.date.toISOString(), values.meeting_num)
       .then(() => loadItems(dispatch))
       .then(() => dispatch(hideDateModal()));
   };
   return (
     <>
-      <Modal
-        title="Submit Date"
-        footer={[
-          <Button key="cancel" onClick={() => dispatch(hideDateModal())}>
-            Cancel
-          </Button>,
-        ]}
-        open={show}
-      >
+      <Modal title="Submit Date" open={show} footer={[]}>
         <Form onFinish={handleSubmit}>
           <Form.Item
             name="date"
@@ -36,9 +27,21 @@ export const SubmitDateModal: React.FC<{ entry_id: number }> = ({
           >
             <DatePicker />
           </Form.Item>
+          <Form.Item
+            name="meeting_num"
+            label="Meeting num."
+            rules={[
+              { required: true, message: "Please write the meeting number" },
+            ]}
+          >
+            <Input type="text" />
+          </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit">
               Submit
+            </Button>
+            <Button key="cancel" onClick={() => dispatch(hideDateModal())}>
+              Cancel
             </Button>
           </Form.Item>
         </Form>

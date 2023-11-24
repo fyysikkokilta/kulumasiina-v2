@@ -204,6 +204,7 @@ def del_entry(entry_id, db: Session = Depends(get_db), user=Depends(get_user)):
 
 class ApproveBody(BaseModel):
     date: str
+    meeting_no: str
 
 @api_router.post("/approve/{entry_id}")
 async def approve_entry(data: ApproveBody, entry_id: int, db: Session = Depends(get_db), user=Depends(get_user)):
@@ -211,7 +212,7 @@ async def approve_entry(data: ApproveBody, entry_id: int, db: Session = Depends(
     print(entry_id)
     print(data.date)
     
-    return crud.approve_entry(entry_id, data.date, db)
+    return crud.approve_entry(entry_id, data.date, data.meeting_no, db)
 
 
 @api_router.post("/deny/{entry_id}")
