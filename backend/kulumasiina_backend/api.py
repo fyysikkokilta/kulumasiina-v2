@@ -36,6 +36,8 @@ if "RAHASTONHOITAJA_EMAIL" not in os.environ:
     raise Exception("RAHASTONHOITAJA_EMAIL not set. Please set it in .env")
 if "OAUTH_ALLOW_INSECURE_HTTP" not in os.environ:
     raise Exception("OAUTH_ALLOW_INSECURE_HTTP not set. Please set it in .env")
+if "JWT_EXPIRY_MINUTES" not in os.environ:
+    raise Exception("JWT_EXPIRY_MINUTES not set. Please set it in .env")
 
 sso = GoogleSSO(client_id=os.environ["OAUTH_CLIENT_ID"], client_secret=os.environ["OAUTH_CLIENT_SECRET"],
                 scope=["email"],
@@ -195,7 +197,7 @@ async def google_callback(request: Request, response: Response):
             raise HTTPException(401, "Invalid auth")
     if user.email != os.getenv("RAHASTONHOITAJA_EMAIL"):
         raise HTTPException(401, "Invalid auth")
-    response.set_cookie("token", create_access_token(user.email, timedelta(minutes=30)), httponly=True, samesite="none")
+    response.set_cookie("token", create_access_token(user.email, timedelta(minutes=int(os.environ["JWT_EXPIRY_MINUTES"]))), httponly=True, samesite="none")
     return {"success": True, "username": user.email}
 
 @api_router.get("/logout")
