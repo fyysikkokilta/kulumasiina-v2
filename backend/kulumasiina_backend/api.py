@@ -24,9 +24,20 @@ models.Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI()
-sso = GoogleSSO(client_id=os.getenv("OAUTH_CLIENT_ID"), client_secret=os.getenv("OAUTH_CLIENT_SECRET"), 
-                scope=["email"], 
-                redirect_uri=os.getenv("OAUTH_REDIR_URL"),allow_insecure_http=bool(os.getenv("ALLOW_INSECURE_OAUTH"))) # TODO Make secure
+if "OAUTH_CLIENT_ID" not in os.environ:
+    raise Exception("OAUTH_CLIENT_ID not set. Please set it in .env")
+if "OAUTH_CLIENT_SECRET" not in os.environ:
+    raise Exception("OAUTH_CLIENT_SECRET not set. Please set it in .env")
+if "OAUTH_REDIR_URL" not in os.environ:
+    raise Exception("OAUTH_REDIR_URL not set. Please set it in .env")
+if "JWT_SECRET" not in os.environ:
+    raise Exception("JWT_SECRET not set. Please set it in .env")
+if "RAHASTONHOITAJA_EMAIL" not in os.environ:
+    raise Exception("RAHASTONHOITAJA_EMAIL not set. Please set it in .env")
+
+sso = GoogleSSO(client_id=os.environ["OAUTH_CLIENT_ID"], client_secret=os.environ["OAUTH_CLIENT_SECRET"],
+                scope=["email"],
+                redirect_uri=os.environ["OAUTH_REDIR_URL"],allow_insecure_http=bool(os.environ["ALLOW_INSECURE_HTTP_OAUTH"])) # TODO Make secure
 
 # TODO: make more secure
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173"], allow_methods=["*"], allow_credentials=True)
@@ -54,14 +65,14 @@ bearer_scheme = HTTPBearer()
 
 def get_user(token: Optional[str] = Cookie(default=None)):
     try:
-        return jwt.decode(token, key=os.getenv("JWT_SECRET"), subject=os.getenv("RAHASTONHOITAJA_EMAIL"))
+        return jwt.decode(token, key=os.environ["JWT_SECRET"], subject=os.environ["RAHASTONHOITAJA_EMAIL"])
     except Exception as e:
         print(e)
         raise HTTPException(401, "Invalid auth")
 
 def create_access_token(username: bool, expires_delta: timedelta):
     data = {"sub": username, "exp": datetime.utcnow() + expires_delta}
-    return jwt.encode(data, os.getenv("JWT_SECRET"))
+    return jwt.encode(data, os.environ["JWT_SECRET"])
 
 
 @api_router.post('/entry/')
@@ -172,7 +183,7 @@ async def google_redirect(request: Request):
 async def google_callback(request: Request, response: Response):
     with sso:
         user = await sso.verify_and_process(request)
-    if user.email != os.getenv("RAHASTONHOITAJA_EMAIL"):
+    if user.email != os.environ["RAHASTONHOITAJA_EMAIL"]:
         raise HTTPException(401, "Invalid auth")
     response.set_cookie("token", create_access_token(user.email, timedelta(minutes=30)), httponly=True, samesite="none")
     return {"success": True, "username": user.email}
@@ -181,7 +192,7 @@ async def google_callback(request: Request, response: Response):
 async def logout(response: Response):
     response.delete_cookie("token")
     return {"success": True}
-    
+
 # @api_router.get('/receipt/{filename}')
 # def get_file(filename: str, db: Session = Depends(get_db)) ->
 
