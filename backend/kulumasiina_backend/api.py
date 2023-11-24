@@ -38,13 +38,18 @@ if "OAUTH_ALLOW_INSECURE_HTTP" not in os.environ:
     raise Exception("OAUTH_ALLOW_INSECURE_HTTP not set. Please set it in .env")
 if "JWT_EXPIRY_MINUTES" not in os.environ:
     raise Exception("JWT_EXPIRY_MINUTES not set. Please set it in .env")
+if "CORS_ALLOWED_ORIGINS" not in os.environ:
+    raise Exception("CORS_ALLOWED_ORIGINS not set. Please set it in .env")
 
 sso = GoogleSSO(client_id=os.environ["OAUTH_CLIENT_ID"], client_secret=os.environ["OAUTH_CLIENT_SECRET"],
                 scope=["email"],
                 redirect_uri=os.environ["OAUTH_REDIR_URL"],allow_insecure_http=bool(os.environ["OAUTH_ALLOW_INSECURE_HTTP"]))
 
+origins = [
+    origin for origin in os.environ["CORS_ALLOWED_ORIGINS"].split(" ")
+]
 # TODO: make more secure
-app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173"], allow_methods=["*"], allow_credentials=True)
+app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["*"], allow_credentials=True)
 
 api_router = APIRouter(prefix='/api')
 
