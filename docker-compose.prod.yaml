@@ -12,6 +12,9 @@ services:
       context: .
       dockerfile: ./Dockerfile.api
     restart: always
+    volumes:
+      - ./db-data:/backend/db-data/
+    env_file: .env
 
 # Limit logging to 20MB per container
 logging:
