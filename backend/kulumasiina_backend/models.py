@@ -1,8 +1,7 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, LargeBinary, Date
-from sqlalchemy.orm import relationship, declared_attr, mapped_column, Mapped, DeclarativeBase
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship, mapped_column, Mapped, DeclarativeBase
 from datetime import date
 
-from sqlalchemy.orm import as_declarative
 
 # @as_declarative()
 # class Base():

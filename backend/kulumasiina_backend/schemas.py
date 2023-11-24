@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from datetime import date
 
 # def id_decorator(Base: BaseModel) -> BaseModel:
