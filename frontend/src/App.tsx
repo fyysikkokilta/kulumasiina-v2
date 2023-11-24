@@ -1,17 +1,24 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { PropsWithChildren } from "react";
 import { ExpenseForm } from "./features/form/ExpenseForm";
 import { AdminEntryView } from "./features/admin/EntryView";
 import { Row, Col, Typography, Divider, ColProps, Button, Space } from "antd";
 import "./App.css";
-import { createBrowserRouter, RouterProvider, useNavigate } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  useNavigate,
+} from "react-router-dom";
 import { LoginCallback } from "./features/login/LoginRedirect";
 import { Login } from "./features/login/Login";
 import { LoginBtn } from "./features/login/HeaderLoginBtn";
-
+import { useDispatch } from "react-redux";
+import { useAppDispatch } from "./app/hooks";
+import { api } from "./features/utils";
+import { logIn } from "./features/login/loginSlice";
 
 const Header = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   return (
     <div
@@ -119,19 +126,25 @@ const router = createBrowserRouter([
       </Container>
     ),
   },
-  {path:
-    "/login",
-    element: (<Container widths={widths.narrow}><Login /> </Container>),
-    
+  {
+    path: "/login",
+    element: (
+      <Container widths={widths.narrow}>
+        <Login />{" "}
+      </Container>
+    ),
   },
-  {path:
-    "/login/callback",
-    element: <LoginCallback />,
-    
-  }
+  { path: "/login/callback", element: <LoginCallback /> },
 ]);
 
 function App() {
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    api
+      .get("/userdata")
+      .then((r) => dispatch(logIn(r.data.email)))
+      .catch(() => console.log("Not logged in"));
+  }, []);
   return (
     <div className="App">
       <RouterProvider router={router} />

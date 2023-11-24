@@ -177,6 +177,11 @@ def reset_entry(entry_id, db: Session = Depends(get_db), user = Depends(get_user
 def reset_entry(entry_id, db: Session = Depends(get_db), user = Depends(get_user)):
     return crud.pay_entry(entry_id, db)
 
+
+@api_router.get("/userdata")
+def reset_entry(user = Depends(get_user)):
+    return {"email": user["sub"]}
+
 @api_router.get("/login/google")
 async def google_redirect(request: Request):
     with sso:
@@ -184,8 +189,11 @@ async def google_redirect(request: Request):
 @api_router.get("/login/google/callback")
 async def google_callback(request: Request, response: Response):
     with sso:
-        user = await sso.verify_and_process(request)
-    if user.email != os.environ["RAHASTONHOITAJA_EMAIL"]:
+        try:
+            user = await sso.verify_and_process(request)
+        except:
+            raise HTTPException(401, "Invalid auth")
+    if user.email != os.getenv("RAHASTONHOITAJA_EMAIL"):
         raise HTTPException(401, "Invalid auth")
     response.set_cookie("token", create_access_token(user.email, timedelta(minutes=30)), httponly=True, samesite="none")
     return {"success": True, "username": user.email}
