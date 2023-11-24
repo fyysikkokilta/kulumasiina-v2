@@ -113,8 +113,8 @@ def delete_entry(id, db: Session):
     
     # db.commit()
 
-def approve_entry(id, db: Session):
-    db.query(models.Entry).filter(models.Entry.id == id).update({models.Entry.status: "approved"})
+def approve_entry(id, approval_date: str, db: Session):
+    db.query(models.Entry).filter(models.Entry.id == id).update({models.Entry.status: "approved", models.Entry.approval_date: approval_date})
     db.commit()
 
 def deny_entry(id, db: Session):

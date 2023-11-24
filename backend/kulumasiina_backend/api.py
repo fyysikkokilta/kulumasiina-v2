@@ -17,6 +17,7 @@ from fastapi import (
 from fastapi.middleware.cors import CORSMiddleware
 
 from typing import Optional
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from kulumasiina_backend import crud, models, schemas
@@ -201,10 +202,16 @@ async def get_reciept(
 def del_entry(entry_id, db: Session = Depends(get_db), user=Depends(get_user)):
     return crud.delete_entry(entry_id, db)
 
+class ApproveBody(BaseModel):
+    date: str
 
 @api_router.post("/approve/{entry_id}")
-def approve_entry(entry_id, db: Session = Depends(get_db), user=Depends(get_user)):
-    return crud.approve_entry(entry_id, db)
+async def approve_entry(data: ApproveBody, entry_id: int, db: Session = Depends(get_db), user=Depends(get_user)):
+    # Get request body
+    print(entry_id)
+    print(data.date)
+    
+    return crud.approve_entry(entry_id, data.date, db)
 
 
 @api_router.post("/deny/{entry_id}")

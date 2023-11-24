@@ -33,9 +33,16 @@ export interface SubmissionState {
 export interface AdminState {
   submissions: Array<SubmissionState>;
   loading: boolean;
+  dateModal: boolean;
+  selected: number;
 }
 
-const initialState: AdminState = { submissions: [], loading: false };
+const initialState: AdminState = {
+  submissions: [],
+  loading: false,
+  dateModal: false,
+  selected: 0,
+};
 
 export const adminSlice = createSlice({
   name: "admin",
@@ -56,6 +63,13 @@ export const adminSlice = createSlice({
     stopLoading: (state) => {
       state.loading = false;
     },
+    showDateModal: (state, action: PayloadAction<number>) => {
+      state.dateModal = true;
+      state.selected = action.payload;
+    },
+    hideDateModal: (state) => {
+      state.dateModal = false;
+    },
   },
 });
 
@@ -65,6 +79,8 @@ export const {
   clearSubmissions,
   startLoading,
   stopLoading,
+  showDateModal,
+  hideDateModal,
 } = adminSlice.actions;
 
 export default adminSlice.reducer;

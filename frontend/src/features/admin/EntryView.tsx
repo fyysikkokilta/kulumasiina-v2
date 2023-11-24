@@ -8,6 +8,7 @@ import {
   clearSubmissions,
   startLoading,
   stopLoading,
+  showDateModal,
 } from "./adminSlice";
 import type { ColumnsType } from "antd/es/table";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
@@ -24,7 +25,8 @@ import {
 import { Receipt } from "./Receipt";
 import ButtonGroup from "antd/es/button/button-group";
 import { AppDispatch } from "app/store";
-const loadItems = (dispatch: AppDispatch) => {
+import SubmitDateModal from "./SubmitDateModal";
+export const loadItems = (dispatch: AppDispatch) => {
   getEntries().then((entries) => {
     dispatch(clearSubmissions());
 
@@ -168,11 +170,7 @@ const expandedRowRender = (record: tableSubmission) => {
       <Space>
         {record.status === "submitted" && (
           <>
-            <Button
-              onClick={() =>
-                approveEntry(record.id).then(() => loadItems(dispatch))
-              }
-            >
+            <Button onClick={() => dispatch(showDateModal(record.id))}>
               Accept
             </Button>
             <Button
@@ -227,8 +225,10 @@ export function AdminEntryView() {
       total: calculateSum(entry),
     };
   });
+  const selected = useAppSelector((state) => state.admin.selected);
   return (
     <>
+      <SubmitDateModal entry_id={selected} />
       <Typography.Title level={3}>Submissions</Typography.Title>
       <Table
         dataSource={sumEnties}
