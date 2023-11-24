@@ -50,6 +50,16 @@ if "JWT_EXPIRY_MINUTES" not in os.environ:
 if "CORS_ALLOWED_ORIGINS" not in os.environ:
     raise Exception("CORS_ALLOWED_ORIGINS not set. Please set it in .env")
 
+HOSTER_OVER_HTTP = os.environ["OAUTH_REDIR_URL"].startswith("http://")
+if HOSTER_OVER_HTTP and not bool(int(os.environ["OAUTH_ALLOW_INSECURE_HTTP"])):
+    raise Exception(
+        "OAUTH_REDIR_URL is over http, but OAUTH_ALLOW_INSECURE_HTTP is not set to 1. Please set it in .env"
+    )
+if not HOSTER_OVER_HTTP and bool(int(os.environ["OAUTH_ALLOW_INSECURE_HTTP"])):
+    raise Exception(
+        "OAUTH_REDIR_URL is over https, but OAUTH_ALLOW_INSECURE_HTTP is set to 1. Please fix .env"
+    )
+
 sso = GoogleSSO(
     client_id=os.environ["OAUTH_CLIENT_ID"],
     client_secret=os.environ["OAUTH_CLIENT_SECRET"],
@@ -234,13 +244,16 @@ async def google_callback(request: Request, response: Response):
     if user.email != os.getenv("RAHASTONHOITAJA_EMAIL"):
         print("Invalid auth")
         raise HTTPException(401, "Invalid auth")
+    assert HOSTER_OVER_HTTP is True
     response.set_cookie(
         "token",
         create_access_token(
             user.email, timedelta(minutes=int(os.environ["JWT_EXPIRY_MINUTES"]))
         ),
         httponly=True,
-        samesite="none",
+        samesite="strict",  # The auth cookies are not used outside the domain
+        path="/",
+        secure=False if HOSTER_OVER_HTTP else True,
     )
     return {"success": True, "username": user.email}
 
