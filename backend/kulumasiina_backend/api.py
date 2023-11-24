@@ -43,7 +43,7 @@ if "CORS_ALLOWED_ORIGINS" not in os.environ:
 
 sso = GoogleSSO(client_id=os.environ["OAUTH_CLIENT_ID"], client_secret=os.environ["OAUTH_CLIENT_SECRET"],
                 scope=["email"],
-                redirect_uri=os.environ["OAUTH_REDIR_URL"],allow_insecure_http=bool(os.environ["OAUTH_ALLOW_INSECURE_HTTP"]))
+                redirect_uri=os.environ["OAUTH_REDIR_URL"],allow_insecure_http=bool(int(os.environ["OAUTH_ALLOW_INSECURE_HTTP"])))
 
 origins = [
     origin for origin in os.environ["CORS_ALLOWED_ORIGINS"].split(" ")
