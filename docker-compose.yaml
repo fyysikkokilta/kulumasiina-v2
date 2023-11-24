@@ -10,7 +10,9 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile.api
+
     env_file:
       - ./.env
     volumes:
+      - ./backend:/backend
       - ./db-data:/backend/db-data
