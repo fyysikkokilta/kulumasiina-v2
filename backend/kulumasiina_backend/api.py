@@ -176,12 +176,12 @@ def reset_entry(entry_id, db: Session = Depends(get_db), user = Depends(get_user
     return crud.reset_entry_status(entry_id, db)
 
 @api_router.post("/pay/{entry_id}")
-def reset_entry(entry_id, db: Session = Depends(get_db), user = Depends(get_user)):
+def pay_entry(entry_id, db: Session = Depends(get_db), user = Depends(get_user)):
     return crud.pay_entry(entry_id, db)
 
 
 @api_router.get("/userdata")
-def reset_entry(user = Depends(get_user)):
+def user_data(user = Depends(get_user)):
     return {"email": user["sub"]}
 
 @api_router.get("/login/google")
