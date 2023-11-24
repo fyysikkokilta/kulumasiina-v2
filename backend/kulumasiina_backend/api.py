@@ -34,10 +34,12 @@ if "JWT_SECRET" not in os.environ:
     raise Exception("JWT_SECRET not set. Please set it in .env")
 if "RAHASTONHOITAJA_EMAIL" not in os.environ:
     raise Exception("RAHASTONHOITAJA_EMAIL not set. Please set it in .env")
+if "OAUTH_ALLOW_INSECURE_HTTP" not in os.environ:
+    raise Exception("OAUTH_ALLOW_INSECURE_HTTP not set. Please set it in .env")
 
 sso = GoogleSSO(client_id=os.environ["OAUTH_CLIENT_ID"], client_secret=os.environ["OAUTH_CLIENT_SECRET"],
                 scope=["email"],
-                redirect_uri=os.environ["OAUTH_REDIR_URL"],allow_insecure_http=bool(os.environ["ALLOW_INSECURE_HTTP_OAUTH"])) # TODO Make secure
+                redirect_uri=os.environ["OAUTH_REDIR_URL"],allow_insecure_http=bool(os.environ["OAUTH_ALLOW_INSECURE_HTTP"]))
 
 # TODO: make more secure
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173"], allow_methods=["*"], allow_credentials=True)
