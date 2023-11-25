@@ -1,21 +1,19 @@
 import React, { useEffect } from "react";
-import { Typography, Table, Button, Menu, Space } from "antd";
+import { Typography, Table, Button, Space } from "antd";
 import {
   type SubmissionState,
   type MileageState,
   type ItemState,
   addSubmissions,
   clearSubmissions,
-  startLoading,
   stopLoading,
   showDateModal,
 } from "./adminSlice";
 import type { ColumnsType } from "antd/es/table";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 
-import { mileageReimbursementRate, EURFormat, KMFormat, api } from "../utils";
+import { mileageReimbursementRate, EURFormat, KMFormat } from "../utils";
 import {
-  approveEntry,
   deleteEntry,
   denyEntry,
   getEntries,
@@ -23,7 +21,6 @@ import {
   resetEntry,
 } from "./api";
 import { Receipt } from "./Receipt";
-import ButtonGroup from "antd/es/button/button-group";
 import { AppDispatch } from "app/store";
 import SubmitDateModal from "./SubmitDateModal";
 export const loadItems = (dispatch: AppDispatch) => {

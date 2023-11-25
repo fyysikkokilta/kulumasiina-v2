@@ -54,8 +54,8 @@ export const adminSlice = createSlice({
     addSubmissions: (state, action: PayloadAction<SubmissionState[]>) => {
       state.submissions.push(...action.payload);
     },
-    clearSubmissions: (state) => {
-      while (state.submissions.shift() !== undefined) {}
+    clearSubmissions: (_state) => {
+      // while (state.submissions.shift() !== undefined) {}
     },
     startLoading: (state) => {
       state.loading = true;

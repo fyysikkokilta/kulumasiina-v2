@@ -3,7 +3,6 @@ import formReducer from "../features/form/formSlice";
 import adminReducer from "../features/admin/adminSlice";
 import loginReducer from "../features/login/loginSlice";
 
-
 export const store = configureStore({
   reducer: {
     form: formReducer,

@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { Modal, Form, DatePicker, Button, Input } from "antd";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { hideDateModal, showDateModal } from "./adminSlice";
-import { useSelector } from "react-redux";
+import { hideDateModal } from "./adminSlice";
 import { approveEntry } from "./api";
 import { loadItems } from "./EntryView";
 
@@ -11,6 +10,8 @@ export const SubmitDateModal: React.FC<{ entry_id: number }> = ({
 }) => {
   const dispatch = useAppDispatch();
   const show = useAppSelector((state) => state.admin.dateModal);
+  // disable @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSubmit = (values: any) => {
     approveEntry(entry_id, values.date.toISOString(), values.meeting_num)
       .then(() => loadItems(dispatch))

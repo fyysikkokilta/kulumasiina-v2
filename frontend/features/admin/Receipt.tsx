@@ -1,6 +1,5 @@
 import { Card, Image } from "antd";
 import { RecieptState } from "./adminSlice";
-import { useEffect } from "react";
 import { apiURL } from "../utils";
 import Link from "antd/es/typography/Link";
 

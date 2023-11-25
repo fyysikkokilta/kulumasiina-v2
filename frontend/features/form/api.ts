@@ -1,4 +1,3 @@
-import axios from "axios";
 import { ItemState, MileageState } from "./formSlice";
 import { api } from "../utils";
 export interface postInterface {
