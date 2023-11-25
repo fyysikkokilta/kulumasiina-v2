@@ -7,3 +7,7 @@ __pycache__
 *.egg-info
 venv
 .env
+/node_modules
+/frontend/dist
+.pdm-python
+.python-version

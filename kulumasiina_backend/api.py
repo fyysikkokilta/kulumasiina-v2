@@ -24,11 +24,9 @@ from kulumasiina_backend import crud, models, schemas
 from kulumasiina_backend.db import SessionLocal, engine
 from fastapi.security import HTTPBearer
 from fastapi_sso.sso.google import GoogleSSO
-from dotenv import load_dotenv
 
 from jose import jwt
 
-load_dotenv()
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -211,7 +209,7 @@ async def approve_entry(data: ApproveBody, entry_id: int, db: Session = Depends(
     # Get request body
     print(entry_id)
     print(data.date)
-    
+
     return crud.approve_entry(entry_id, data.date, data.meeting_no, db)
 
 

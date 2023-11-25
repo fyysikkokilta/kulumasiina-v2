@@ -1,4 +1,5 @@
-from kulumasiina_backend import models, schemas
+
+from . import models, schemas
 from sqlalchemy.orm import Session
 
 
@@ -40,7 +41,7 @@ def create_entry_full(entry: schemas.EntryCreate, db: Session) -> schemas.Entry:
         ) for item in entry.items
     ]
     db_entry = models.Entry(
-        **entry.dict() | dict(  # update keys from entry    
+        **entry.dict() | dict(  # update keys from entry
             items=items,
             mileages=mileages,
         ),
@@ -110,7 +111,7 @@ def delete_entry(id, db: Session):
     to_del = db.query(models.Entry).filter(models.Entry.id == id).first()
     db.delete(to_del)
     db.commit()
-    
+
     # db.commit()
 
 def approve_entry(id, approval_date: str, meeting_number: str, db: Session):
