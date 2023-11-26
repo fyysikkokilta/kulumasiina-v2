@@ -3,9 +3,14 @@ services:
   server:
     build:
       context: .
-      dockerfile: ./Dockerfile.server
+      dockerfile: ./Dockerfile.front.dev
     ports:
-      - "8024:80"
+      - "8024:8024"
+    environment:
+      - VITE_API_PROXY_TARGET=http://api:8025
+      - VITE_HOST=0.0.0.0
+    volumes:
+    - ./frontend:/src/frontend
   api:
     build:
       context: .
@@ -15,4 +20,4 @@ services:
       - ./.env
     volumes:
       - ./backend:/backend
-      - ./db-data:/backend/db-data
+      - ./db-data:/db-data

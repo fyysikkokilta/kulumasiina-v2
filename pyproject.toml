@@ -22,5 +22,5 @@ py-modules = ["kulumasiina_backend"]
 
 [tool.pdm.scripts]
 run-docker = "docker compose up --build"
-run.call = "kulumasiina_backend.__main__:run"
-run.env_file = ".env"
+dev.call = "kulumasiina_backend.__main__:run"
+dev.env_file = ".env"

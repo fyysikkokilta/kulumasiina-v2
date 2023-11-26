@@ -1,0 +1,12 @@
+FROM node:18 as builder
+
+WORKDIR /src
+COPY ./package.json ./package-lock.json ./
+RUN npm ci
+
+# COPY ./src/ ./public/ tsconfig.json ./
+COPY .eslintrc.js .prettierrc ./
+COPY ./frontend/ ./frontend
+#RUN npm run start
+CMD ["npm", "run", "start"]
+

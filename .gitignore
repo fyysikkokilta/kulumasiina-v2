@@ -11,3 +11,4 @@ venv
 /frontend/dist
 .pdm-python
 .python-version
+.venv

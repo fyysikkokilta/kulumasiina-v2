@@ -11,9 +11,8 @@ export const KMFormat = new Intl.NumberFormat("fi-FI", {
   style: "unit",
   unit: "kilometer",
 });
-export const apiURL = `${
-  import.meta.env.DEV ? "http://localhost:8025" : ""
-}/api`;
+
+export const apiURL = "/api";
 export const api = axios.create({
   baseURL: apiURL,
   withCredentials: true,
