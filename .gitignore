@@ -12,3 +12,4 @@ venv
 .pdm-python
 .python-version
 .venv
+db-data/
