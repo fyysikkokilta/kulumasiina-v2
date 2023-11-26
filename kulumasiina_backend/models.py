@@ -56,8 +56,8 @@ class Base(DeclarativeBase):
 
 
 class Mileage(Base):
-    __tablename__ = 'mileage'
-    entry_id = mapped_column(ForeignKey('entry.id'))
+    __tablename__ = "mileage"
+    entry_id = mapped_column(ForeignKey("entry.id"))
     gov_id: Mapped[str]  # TODO: GDPR
     date: Mapped[date]
     description: Mapped[str]
@@ -67,19 +67,19 @@ class Mileage(Base):
 
 
 class Receipt(Base):
-    __tablename__ = 'receipt'
-    item_id: Mapped[int | None] = mapped_column(ForeignKey('item.id'))
+    __tablename__ = "receipt"
+    item_id: Mapped[int | None] = mapped_column(ForeignKey("item.id"))
     filename: Mapped[str]
     data: Mapped[bytes] = mapped_column(deferred=True)
 
 
 class Item(Base):
-    __tablename__ = 'item'
-    entry_id: Mapped[int] = mapped_column(ForeignKey('entry.id'))
+    __tablename__ = "item"
+    entry_id: Mapped[int] = mapped_column(ForeignKey("entry.id"))
     description: Mapped[str]
     date: Mapped[date]
     value_cents: Mapped[int]
-    receipts: Mapped[list[Receipt]] = relationship(lazy='immediate')
+    receipts: Mapped[list[Receipt]] = relationship(lazy="immediate")
 
     # @property
     # def receipt_ids(self) -> list[int]:
@@ -87,14 +87,17 @@ class Item(Base):
 
 
 class Entry(Base):
-    __tablename__ = 'entry'
+    __tablename__ = "entry"
     name: Mapped[str]
     iban: Mapped[str]
     title: Mapped[str]
+    submission_date: Mapped[str]
     approval_date: Mapped[str | None] = mapped_column(default=None)
     meeting_number: Mapped[str | None] = mapped_column(default=None)
     # gov_id : Mapped[str]
     # TODO: status enum tms?
-    status: Mapped[str] = mapped_column(default='submitted')
+    status: Mapped[str] = mapped_column(default="submitted")
     items: Mapped[list[Item]] = relationship(lazy="immediate", cascade="all, delete")
-    mileages: Mapped[list[Mileage]] = relationship(lazy="immediate", cascade="all, delete")
+    mileages: Mapped[list[Mileage]] = relationship(
+        lazy="immediate", cascade="all, delete"
+    )

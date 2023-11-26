@@ -115,7 +115,8 @@ def create_entry(
     entry: schemas.EntryCreate, db: Session = Depends(get_db)
 ) -> schemas.Entry:
     print("Creating entry")
-    return crud.create_entry_full(entry=entry, db=db)
+    submission_date = datetime.now().isoformat(timespec="minutes")
+    return crud.create_entry_full(entry=entry, submission_date=submission_date, db=db)
 
 
 # @api_router.get('/mileage/{mileage_id}')
@@ -200,12 +201,19 @@ async def get_reciept(
 def del_entry(entry_id, db: Session = Depends(get_db), user=Depends(get_user)):
     return crud.delete_entry(entry_id, db)
 
+
 class ApproveBody(BaseModel):
     date: str
     meeting_no: str
 
+
 @api_router.post("/approve/{entry_id}")
-async def approve_entry(data: ApproveBody, entry_id: int, db: Session = Depends(get_db), user=Depends(get_user)):
+async def approve_entry(
+    data: ApproveBody,
+    entry_id: int,
+    db: Session = Depends(get_db),
+    user=Depends(get_user),
+):
     # Get request body
     print(entry_id)
     print(data.date)

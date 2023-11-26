@@ -1,85 +1,21 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date
-
-# def id_decorator(Base: BaseModel) -> BaseModel:
-#     class Wrapper(Base):
-#         id: int
-
-#     return Wrapper
-
-# class ReceiptBase(BaseModel):
-#     data: bytes
-
-
-# class ReceiptCreate(ReceiptBase):
-#     filename: str
-
-
-# class Receipt(ReceiptCreate):
-#     id: int
-#     filename: str
-
-
-# class MileageCreate(BaseModel):
-#     description: str
-#     date: date
-#     distance_km: int
-#     entry_id: int
-#     # todo: social security, plate number
-
-# class Mileage(MileageCreate):
-#     id: int
-
-#     class Config:
-#         orm_mode = True
-
-# class ItemCreate(BaseModel):
-#     entry_id: int
-#     description: str
-#     date: date
-#     value_cents: int
-
-
-# class Item(ItemCreate):
-#     id: int
-#     receipt_filenames: list[str]
-
-
-# class EntryCreate(BaseModel):
-#     name: str
-#     title: str
-#     iban: str
-
-# class Entry(EntryCreate):
-#     id: int
-#     state: str
-#     items: list[Item]
-#     mileages: list[Mileage]
-
-#     class Config:
-#         orm_mode = True
-
-
-
-# class ReceiptCreate(BaseModel):
-#     data: bytes
-#     filename: str
 
 
 class ReceiptResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     filename: str | None
-
-    class Config:
-        orm_mode = True
 
 
 class Receipt(ReceiptResponse):
     data: bytes
 
+
 class ReceiptCreate(BaseModel):
     filename: str | None
     data: bytes
+
 
 class ItemCreate(BaseModel):
     description: str
@@ -91,11 +27,9 @@ class ItemCreate(BaseModel):
 
 
 class Item(ItemCreate):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     receipts: list[ReceiptResponse]
-
-    class Config:
-        orm_mode = True
 
 
 class MileageCreate(BaseModel):
@@ -108,10 +42,9 @@ class MileageCreate(BaseModel):
 
 
 class Mileage(MileageCreate):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     gov_id: str  # TODO: GDPR
-    class Config:
-        orm_mode = True
 
 
 class _EntryBase(BaseModel):
@@ -126,10 +59,8 @@ class EntryCreate(_EntryBase):
 
 
 class Entry(_EntryBase):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     status: str
     items: list[Item]
     mileages: list[Mileage]
-
-    class Config:
-        orm_mode = True
