@@ -3,31 +3,7 @@ import fpdf  # pip3 intall fpdf
 from pathlib import Path
 import pypdf
 
-data = {
-    "name": "Matti Meikäläinen",
-    "IBAN": "FI12 3456 7890 1234 56",
-    "Pvm": "12.12.2020",
-    "reason": "Vuosimieskillan mutsimaksu 75% äitisi hinnasta.",
-    "parts": [
-        {
-            "selite": "kuitti",
-            "hinta": "123,00 €",
-            "liitteet": [
-                Path("./assets/nut/PXL_20231031_154134706.jpg").read_bytes(),
-                Path("./assets/nut/jaakkosi2.png").read_bytes(),
-            ],
-        },
-        {
-            "selite": "tosite maksusta",
-            "hinta": "25,00 €",
-            "liitteet": [
-                Path("./assets/nut/normalized_p31.gif").read_bytes(),
-                Path("./assets/nut/resume.pdf").read_bytes(),
-                Path("./assets/nut/Sikula 11.6.2020 Johtosääntö.pdf").read_bytes(),
-            ],
-        },
-    ],
-}
+
 from typing import TypedDict
 
 
@@ -50,7 +26,7 @@ def watermark(
     content: BytesIO,
 ) -> BytesIO:
     waterstamp_pdf = fpdf.FPDF(format="A4")
-    waterstamp_pdf.add_font("Lora", fname="./assets/Lora-Regular.ttf")
+    waterstamp_pdf.add_font("Lora", fname="./kulumasiina_backend/assets/Lora-Regular.ttf")
     waterstamp_pdf.add_page()
     waterstamp_pdf.set_font("Lora", size=20)
     waterstamp_pdf.cell(text=text)
@@ -73,12 +49,12 @@ def watermark(
 
 def generate_combined_pdf(data: FancyType) -> bytes:
     pdf = fpdf.FPDF(format="A4")  # pdf format
-    pdf.add_font("Lora", fname="./assets/Lora-Regular.ttf")
-    pdf.add_font("Sourcesanspro", fname="./assets/SourceSansPro-Regular.ttf")
-    pdf.add_font("Sourcesanspro", fname="./assets/SourceSansPro-Bold.ttf", style="B")
+    pdf.add_font("Lora", fname="./kulumasiina_backend/assets/Lora-Regular.ttf", uni=True)
+    pdf.add_font("Sourcesanspro", fname="./kulumasiina_backend/assets/SourceSansPro-Regular.ttf", uni=True)
+    pdf.add_font("Sourcesanspro", fname="./kulumasiina_backend/assets/SourceSansPro-Bold.ttf", style="B", uni=True)
     pdf.add_page()  # create new page
 
-    piipath = "./assets/fii_2.svg"
+    piipath = "./kulumasiina_backend/assets/fii_2.svg"
 
     # convert the "liitteet" to numbers and add them to list
     attachements = [liite for part in data["parts"] for liite in part["liitteet"]]
@@ -119,7 +95,7 @@ def generate_combined_pdf(data: FancyType) -> bytes:
             (
                 part["selite"],
                 ", ".join(part["liitteet"]),
-                part["hinta"],
+                str(part["hinta"]),
             )
         )
 

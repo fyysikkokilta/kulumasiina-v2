@@ -215,7 +215,6 @@ export function AdminEntryView() {
   const adminEntries = useAppSelector((state) => state.admin.submissions);
   const loading = useAppSelector((state) => state.admin.loading);
 
-  debugger;
   const sumEnties: Array<tableSubmission> = adminEntries.map((entry) => {
     return {
       ...entry,

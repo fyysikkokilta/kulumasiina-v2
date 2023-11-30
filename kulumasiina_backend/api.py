@@ -20,13 +20,14 @@ from typing import Optional
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from kulumasiina_backend import crud, models, schemas
+from kulumasiina_backend import crud, models, schemas, pdf_util
 from kulumasiina_backend.db import SessionLocal, engine
 from fastapi.security import HTTPBearer
 from fastapi_sso.sso.google import GoogleSSO
 
 from jose import jwt
 
+MILEAGE_REIMBURSEMENT_RATE = 0.22
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -145,7 +146,7 @@ def create_entry(
 #         raise HTTPException(status_code=500, detail='Could not upload file!')
 
 
-@api_router.post("/receipt/")
+@api_router.post("/receipt")
 def create_receipt(file: UploadFile = File(), db: Session = Depends(get_db)) -> int:
     # try:
     print("Got a receipt.")
@@ -195,6 +196,40 @@ async def get_reciept(
     background_tasks.add_task(buffer.close)
     buffer.write(crud.get_reciept_data(reciept_id, db))
     return Response(buffer.getvalue())
+
+@api_router.get("/entry/{entry_id}/pdf")
+async def get_entry_pdf(
+    entry_id,
+    db: Session = Depends(get_db),
+    user=Depends(get_user),
+):
+    parts = []
+    entry = crud.get_entry_by_id(entry_id, db)
+    for item in entry.items:
+        liitteet = []
+        for liite in item.receipts:
+            liitteet.append(liite.data) 
+        part = pdf_util.PartDict(hinta=item.value_cents / 100, selite=item.description, liitteet=liitteet)
+        parts.append(part)
+    for mileage in entry.mileages:
+        part = pdf_util.PartDict(
+            hinta=mileage.distance * MILEAGE_REIMBURSEMENT_RATE,
+            selite=mileage.description,
+            liitteet=[],
+        )
+        parts.append(part)
+    # Convert reciept to fancytype
+    data = pdf_util.FancyType(
+        name=entry.name,
+        IBAN=entry.iban,
+        Pvm=entry.submission_date,
+        reason=entry.title,
+        parts=parts
+    ) 
+    
+    pdf = pdf_util.generate_combined_pdf(data)
+
+    return Response(pdf)
 
 
 @api_router.delete("/entry/{entry_id}")
