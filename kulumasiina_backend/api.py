@@ -209,12 +209,12 @@ async def get_entry_pdf(
         liitteet = []
         for liite in item.receipts:
             liitteet.append(liite.data) 
-        part = pdf_util.PartDict(hinta=item.value_cents / 100, selite=item.description, liitteet=liitteet)
+        part = pdf_util.PartDict(hinta=str(item.value_cents / 100) + "e", selite=item.description, liitteet=liitteet)
         parts.append(part)
     for mileage in entry.mileages:
         part = pdf_util.PartDict(
-            hinta=mileage.distance * MILEAGE_REIMBURSEMENT_RATE,
-            selite=mileage.description,
+            hinta=str(mileage.distance * MILEAGE_REIMBURSEMENT_RATE) + "e",
+            selite=f"Mileage: {mileage.description}:\n{mileage.route} ({mileage.distance} km)\nPlate no: {mileage.plate_no}",
             liitteet=[],
         )
         parts.append(part)

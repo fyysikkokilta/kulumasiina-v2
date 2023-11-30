@@ -95,7 +95,7 @@ def generate_combined_pdf(data: FancyType) -> bytes:
             (
                 part["selite"],
                 ", ".join(part["liitteet"]),
-                str(part["hinta"]),
+                part["hinta"],
             )
         )
 
