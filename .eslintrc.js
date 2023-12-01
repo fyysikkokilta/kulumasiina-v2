@@ -35,6 +35,8 @@ module.exports = {
       1,
       { varsIgnorePattern: "^_", argsIgnorePattern: "^_" },
     ],
+    // Disable no-debugger during development
+    "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
   },
   ignorePatterns: ["frontend/dist/"],
 };
