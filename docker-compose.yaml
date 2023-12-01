@@ -3,7 +3,7 @@ services:
   server:
     build:
       context: .
-      dockerfile: ./Dockerfile.front.dev
+      dockerfile: ./docker/Dockerfile.front.dev
     ports:
       - "8024:8024"
     environment:
@@ -14,7 +14,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: ./Dockerfile.api
+      dockerfile: ./docker/Dockerfile.api
 
     env_file:
       - ./.env

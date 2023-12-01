@@ -3,7 +3,7 @@ services:
   server:
     build:
       context: .
-      dockerfile: ./Dockerfile.server
+      dockerfile: ./docker/Dockerfile.nginx.prod
     ports:
       - "8024:80"
     restart: always
@@ -16,10 +16,10 @@ services:
   api:
     build:
       context: .
-      dockerfile: ./Dockerfile.api
+      dockerfile: ./docker/Dockerfile.api
     restart: always
     volumes:
-      - ./db-data:/backend/db-data/
+      - ./db-data-prod:/db-data/
     env_file: .env
     # Limit logging to 20MB per container
     logging:
