@@ -16,7 +16,7 @@ from fastapi import (
 )
 from fastapi.middleware.cors import CORSMiddleware
 
-from typing import Optional
+from typing import Optional, TypedDict
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -26,6 +26,7 @@ from fastapi.security import HTTPBearer
 from fastapi_sso.sso.google import GoogleSSO
 
 from jose import jwt
+import httpx
 
 MILEAGE_REIMBURSEMENT_RATE = 0.22
 
@@ -41,8 +42,8 @@ if "OAUTH_REDIR_URL" not in os.environ:
     raise Exception("OAUTH_REDIR_URL not set. Please set it in .env")
 if "JWT_SECRET" not in os.environ:
     raise Exception("JWT_SECRET not set. Please set it in .env")
-if "RAHASTONHOITAJA_EMAIL" not in os.environ:
-    raise Exception("RAHASTONHOITAJA_EMAIL not set. Please set it in .env")
+if "ADMIN_EMAILS" not in os.environ:
+    raise Exception("ADMIN_EMAILS not set. Please set it in .env")
 if "OAUTH_ALLOW_INSECURE_HTTP" not in os.environ:
     raise Exception("OAUTH_ALLOW_INSECURE_HTTP not set. Please set it in .env")
 if "JWT_EXPIRY_MINUTES" not in os.environ:
@@ -59,6 +60,8 @@ if not HOSTER_OVER_HTTP and bool(int(os.environ["OAUTH_ALLOW_INSECURE_HTTP"])):
     raise Exception(
         "OAUTH_REDIR_URL is over https, but OAUTH_ALLOW_INSECURE_HTTP is set to 1. Please fix .env"
     )
+
+ADMINS = set(os.environ["ADMIN_EMAILS"].split(","))
 
 sso = GoogleSSO(
     client_id=os.environ["OAUTH_CLIENT_ID"],
@@ -94,19 +97,26 @@ def get_db():
 bearer_scheme = HTTPBearer()
 
 
-def get_user(token: Optional[str] = Cookie(default=None)):
+class JWTData(TypedDict):
+    sub: str  # Email
+
+
+def get_user(token: Optional[str] = Cookie(default=None)) -> JWTData:
+    if token is None:
+        raise HTTPException(401, "Invalid auth")
     try:
-        return jwt.decode(
-            token,
-            key=os.environ["JWT_SECRET"],
-            subject=os.environ["RAHASTONHOITAJA_EMAIL"],
+        return JWTData(
+            **jwt.decode(
+                token,
+                key=os.environ["JWT_SECRET"],
+            )
         )
     except Exception as e:
         print(e)
         raise HTTPException(401, "Invalid auth")
 
 
-def create_access_token(username: bool, expires_delta: timedelta):
+def create_access_token(username: str, expires_delta: timedelta):
     data = {"sub": username, "exp": datetime.utcnow() + expires_delta}
     return jwt.encode(data, os.environ["JWT_SECRET"])
 
@@ -117,6 +127,8 @@ def create_entry(
 ) -> schemas.Entry:
     print("Creating entry")
     submission_date = datetime.now().isoformat(timespec="minutes")
+    # TODO: Generate PDF here!
+
     return crud.create_entry_full(entry=entry, submission_date=submission_date, db=db)
 
 
@@ -197,6 +209,7 @@ async def get_reciept(
     buffer.write(crud.get_reciept_data(reciept_id, db))
     return Response(buffer.getvalue())
 
+
 @api_router.get("/entry/{entry_id}/pdf")
 async def get_entry_pdf(
     entry_id,
@@ -205,11 +218,18 @@ async def get_entry_pdf(
 ):
     parts = []
     entry = crud.get_entry_by_id(entry_id, db)
+    if entry is None:
+        raise HTTPException(404)
+
     for item in entry.items:
         liitteet = []
         for liite in item.receipts:
-            liitteet.append(liite.data) 
-        part = pdf_util.PartDict(hinta=str(item.value_cents / 100) + "e", selite=item.description, liitteet=liitteet)
+            liitteet.append(liite.data)
+        part = pdf_util.PartDict(
+            hinta=str(item.value_cents / 100) + "e",
+            selite=item.description,
+            liitteet=liitteet,
+        )
         parts.append(part)
     for mileage in entry.mileages:
         part = pdf_util.PartDict(
@@ -218,16 +238,16 @@ async def get_entry_pdf(
             liitteet=[],
         )
         parts.append(part)
-    # Convert reciept to fancytype
-    data = pdf_util.FancyType(
-        name=entry.name,
-        IBAN=entry.iban,
-        Pvm=entry.submission_date,
-        reason=entry.title,
-        parts=parts
-    ) 
-    
-    pdf = pdf_util.generate_combined_pdf(data)
+
+    pdf = pdf_util.generate_combined_pdf(
+        {
+            "name": entry.name,
+            "IBAN": entry.iban,
+            "Pvm": entry.submission_date,
+            "reason": entry.title,
+            "parts": parts,
+        }
+    )
 
     return Response(pdf)
 
@@ -252,22 +272,26 @@ async def approve_entry(
     # Get request body
     print(entry_id)
     print(data.date)
+    # TODO: Update PDF here
 
     return crud.approve_entry(entry_id, data.date, data.meeting_no, db)
 
 
 @api_router.post("/deny/{entry_id}")
 def deny_entry(entry_id, db: Session = Depends(get_db), user=Depends(get_user)):
+    # TODO: Update PDF here
     return crud.deny_entry(entry_id, db)
 
 
 @api_router.post("/reset/{entry_id}")
 def reset_entry(entry_id, db: Session = Depends(get_db), user=Depends(get_user)):
+    # TODO: Update PDF here
     return crud.reset_entry_status(entry_id, db)
 
 
 @api_router.post("/pay/{entry_id}")
 def pay_entry(entry_id, db: Session = Depends(get_db), user=Depends(get_user)):
+    # TODO: Update PDF here
     return crud.pay_entry(entry_id, db)
 
 
@@ -287,13 +311,18 @@ async def google_callback(request: Request, response: Response):
     with sso:
         try:
             user = await sso.verify_and_process(request)
+        except httpx.ConnectTimeout:
+            raise HTTPException(500, "Could not connect to Google")
         except Exception as e:
-            print(e)
-            raise HTTPException(401, "Invalid auth")
-    if user.email != os.getenv("RAHASTONHOITAJA_EMAIL"):
-        print("Invalid auth")
+            print(e, flush=True)
+            raise HTTPException(500, "Unknown auth error")
+    if user is None:
+        print("User is none")
         raise HTTPException(401, "Invalid auth")
-    assert HOSTER_OVER_HTTP is True
+    if user.email not in ADMINS:
+        print("User is not admin")
+        print(user)
+        raise HTTPException(401, "Invalid auth")
     response.set_cookie(
         "token",
         create_access_token(
