@@ -349,9 +349,12 @@ export function ExpenseForm() {
           <Button type="default" onClick={showExpense} htmlType="button">
             Add an expense
           </Button>
-          <Button type="default" onClick={showMileage} htmlType="button">
+          {/* Disable mileages for now since there's no clear
+              decision on how social security numbers are going to be handled.
+          */}
+          {/* <Button type="default" onClick={showMileage} htmlType="button">
             Add a mileage
-          </Button>
+          </Button> */}
           <span className="total">
             <strong>Total:</strong> {EURFormat.format(total)}
           </span>
