@@ -4,7 +4,7 @@ from pathlib import Path
 import pypdf
 
 
-from typing import TypedDict
+from typing import Literal, TypedDict
 
 
 class PartDict(TypedDict):
@@ -21,12 +21,29 @@ class FancyType(TypedDict):
     parts: list[PartDict]
 
 
+def is_file_acceptable(file: bytes) -> Literal["PDF", "PNG", "GIF", "JPG"] | None:
+    # Check format from magic bytes
+    # https://en.wikipedia.org/wiki/List_of_file_signatures
+    if file.startswith(b"%PDF"):
+        return "PDF"
+    elif file.startswith(b"\x89PNG"):
+        return "PNG"
+    elif file.startswith(b"\x47\x49\x46\x38"):
+        return "GIF"
+    elif file.startswith(b"\xff\xd8\xff"):
+        return "JPG"
+    else:
+        return None
+
+
 def watermark(
     text: str,
     content: BytesIO,
 ) -> BytesIO:
     waterstamp_pdf = fpdf.FPDF(format="A4")
-    waterstamp_pdf.add_font("Lora", fname="./kulumasiina_backend/assets/Lora-Regular.ttf")
+    waterstamp_pdf.add_font(
+        "Lora", fname="./kulumasiina_backend/assets/Lora-Regular.ttf"
+    )
     waterstamp_pdf.add_page()
     waterstamp_pdf.set_font("Lora", size=20)
     waterstamp_pdf.cell(text=text)
@@ -49,9 +66,20 @@ def watermark(
 
 def generate_combined_pdf(data: FancyType) -> bytes:
     pdf = fpdf.FPDF(format="A4")  # pdf format
-    pdf.add_font("Lora", fname="./kulumasiina_backend/assets/Lora-Regular.ttf", uni=True)
-    pdf.add_font("Sourcesanspro", fname="./kulumasiina_backend/assets/SourceSansPro-Regular.ttf", uni=True)
-    pdf.add_font("Sourcesanspro", fname="./kulumasiina_backend/assets/SourceSansPro-Bold.ttf", style="B", uni=True)
+    pdf.add_font(
+        "Lora", fname="./kulumasiina_backend/assets/Lora-Regular.ttf", uni=True
+    )
+    pdf.add_font(
+        "Sourcesanspro",
+        fname="./kulumasiina_backend/assets/SourceSansPro-Regular.ttf",
+        uni=True,
+    )
+    pdf.add_font(
+        "Sourcesanspro",
+        fname="./kulumasiina_backend/assets/SourceSansPro-Bold.ttf",
+        style="B",
+        uni=True,
+    )
     pdf.add_page()  # create new page
 
     piipath = "./kulumasiina_backend/assets/fii_2.svg"
@@ -130,16 +158,9 @@ def generate_combined_pdf(data: FancyType) -> bytes:
     for i, attachement in enumerate(attachements):
         # Check format from magic bytes
         # https://en.wikipedia.org/wiki/List_of_file_signatures
-        if attachement.startswith(b"%PDF"):
-            fileformat = "PDF"
-        elif attachement.startswith(b"\x89PNG"):
-            fileformat = "PNG"
-        elif attachement.startswith(b"\x47\x49\x46\x38"):
-            fileformat = "GIF"
-        elif attachement.startswith(b"\xff\xd8\xff"):
-            fileformat = "JPG"
-        else:
-            raise Exception("Unknown file format. Only JPG, PNG, GIF and PDF supported")
+        fileformat = is_file_acceptable(attachement)
+        if fileformat is None:
+            raise ValueError("File format not supported")
 
         # Create PDF if needed
 
@@ -156,6 +177,10 @@ def generate_combined_pdf(data: FancyType) -> bytes:
                 keep_aspect_ratio=True,
             )
             attachement = new_pdf.output()
+        elif fileformat == "PDF":
+            pass
+        else:
+            raise ValueError("File format not supported")
 
         old_pdf = attachement
         attachement = watermark(f"Liite {i+1}", BytesIO(attachement)).getvalue()
