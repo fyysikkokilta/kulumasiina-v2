@@ -160,22 +160,19 @@ def create_entry(
 
 @api_router.post("/receipt")
 def create_receipt(file: UploadFile = File(), db: Session = Depends(get_db)) -> int:
-    # try:
-    print("Got a receipt.")
     filename = file.filename
     if filename:
         filename = sanitise_filename(filename)
-    print("Creating a schema.")
     receipt = schemas.ReceiptCreate(
         filename=filename,
         data=file.file.read(),
     )
-    print("Doing DB stuff.")
-    out = crud.create_receipt(receipt=receipt, db=db).id
-    print("all done.")
-    return out
-    # except:
-    #     raise HTTPException(status_code=500, detail='Could not upload file!')
+    try:
+        receipt_id = crud.create_receipt(receipt=receipt, db=db).id
+    except crud.UnknownFileFormatError:
+        raise HTTPException(status_code=415, detail="Unsupported file format")
+
+    return receipt_id
 
 
 # # TODO: implement
