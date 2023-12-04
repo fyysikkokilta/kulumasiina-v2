@@ -13,7 +13,7 @@ export const SubmitDateModal: React.FC<{ entry_id: number }> = ({
   // disable @typescript-eslint/no-explicit-any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSubmit = (values: any) => {
-    approveEntry(entry_id, values.date.toISOString(), values.meeting_num)
+    approveEntry(entry_id, values.date.toISOString(), values.approvalNote)
       .then(() => loadItems(dispatch))
       .then(() => dispatch(hideDateModal()));
   };
@@ -29,10 +29,14 @@ export const SubmitDateModal: React.FC<{ entry_id: number }> = ({
             <DatePicker />
           </Form.Item>
           <Form.Item
-            name="meeting_num"
-            label="Meeting num."
+            name="approvalNote"
+            label="Approval note."
             rules={[
-              { required: true, message: "Please write the meeting number" },
+              {
+                required: true,
+                message:
+                  "Please write the meeting number or other identifier of the approval.",
+              },
             ]}
           >
             <Input type="text" />

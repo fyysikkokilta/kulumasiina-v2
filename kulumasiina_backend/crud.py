@@ -1,3 +1,5 @@
+from datetime import date, datetime
+from kulumasiina_backend.pdf_util import is_file_acceptable
 from . import models, schemas
 from sqlalchemy.orm import Session
 
@@ -22,9 +24,7 @@ def _get_receipts(ids: list[int], db: Session) -> list[models.Receipt]:
     return db.query(models.Receipt).where(models.Receipt.id.in_(ids)).all()
 
 
-def create_entry_full(
-    entry: schemas.EntryCreate, submission_date: str, db: Session
-) -> schemas.Entry:
+def create_entry_full(entry: schemas.EntryCreate, db: Session) -> schemas.Entry:
     mileages = [models.Mileage(**mileage.dict()) for mileage in entry.mileages]
     items = [
         models.Item(
@@ -39,7 +39,6 @@ def create_entry_full(
     db_entry = models.Entry(
         **entry.model_dump()
         | {
-            "submission_date": submission_date,
             "mileages": mileages,
             "items": items,
         },
@@ -72,9 +71,18 @@ def get_item_by_id(id: int, db: Session) -> schemas.Item | None:
     return schemas.Item.model_validate(db_item)
 
 
+class UnknownFileFormatError(Exception):
+    """Raised when the file format is not supported"""
+
+
 def create_receipt(
     receipt: schemas.ReceiptCreate, db: Session
 ) -> schemas.ReceiptResponse:
+    # Verify that the receipt file is acceptable
+    file_type = is_file_acceptable(receipt.data)
+    if file_type is None:
+        raise UnknownFileFormatError("File type not supported")
+
     db_receipt = models.Receipt(**receipt.dict())
     db.add(db_receipt)
     db.commit()
@@ -94,33 +102,51 @@ def delete_entry(id, db: Session):
     # db.commit()
 
 
-def approve_entry(id, approval_date: str, meeting_number: str, db: Session):
+def approve_entry(id: int, approval_date: date, approval_note: str, db: Session):
     db.query(models.Entry).filter(models.Entry.id == id).update(
         {
             models.Entry.status: "approved",
             models.Entry.approval_date: approval_date,
-            models.Entry.meeting_number: meeting_number,
+            models.Entry.approval_note: approval_note,
+            models.Entry.rejection_date: None,
+            models.Entry.paid_date: None,
         }
     )
     db.commit()
 
 
-def deny_entry(id, db: Session):
+def deny_entry(id: int, db: Session):
     db.query(models.Entry).filter(models.Entry.id == id).update(
-        {models.Entry.status: "denied"}
+        {
+            models.Entry.status: "denied",
+            models.Entry.approval_date: None,
+            models.Entry.approval_note: None,
+            models.Entry.rejection_date: date.today(),
+        }
     )
     db.commit()
 
 
-def pay_entry(id, db: Session):
+def pay_entry(id: int, date: datetime, db: Session):
     db.query(models.Entry).filter(models.Entry.id == id).update(
-        {models.Entry.status: "paid"}
+        {
+            models.Entry.status: "paid",
+            models.Entry.paid_date: date,
+            models.Entry.rejection_date: None,
+            # Keep approval date
+        }
     )
     db.commit()
 
 
-def reset_entry_status(id, db: Session):
+def reset_entry_status(id: int, db: Session):
     db.query(models.Entry).filter(models.Entry.id == id).update(
-        {models.Entry.status: "submitted"}
+        {
+            models.Entry.status: "submitted",
+            models.Entry.approval_date: None,
+            models.Entry.approval_note: None,
+            models.Entry.rejection_date: None,
+            models.Entry.paid_date: None,
+        }
     )
     db.commit()

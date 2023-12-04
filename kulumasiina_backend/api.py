@@ -1,4 +1,4 @@
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, date
 import io
 import os
 
@@ -126,10 +126,9 @@ def create_entry(
     entry: schemas.EntryCreate, db: Session = Depends(get_db)
 ) -> schemas.Entry:
     print("Creating entry")
-    submission_date = datetime.now().isoformat(timespec="minutes")
-    # TODO: Generate PDF here!
 
-    return crud.create_entry_full(entry=entry, submission_date=submission_date, db=db)
+    # TODO: Data validation that receipts are not reused if those already assigned to some other entry.
+    return crud.create_entry_full(entry=entry, db=db)
 
 
 # @api_router.get('/mileage/{mileage_id}')
@@ -138,24 +137,6 @@ def create_entry(
 #     if not db_mileage:
 #         raise HTTPException(status_code=404)
 #     return schemas.Mileage.from_orm(db_mileage)
-
-
-# # TODO: test
-# @api_router.post('/receipt/')
-# def create_receipt(
-#     author: AuthorToken,
-#     file: UploadFile = File(),
-#     db: Session = Depends(get_db)
-# ) -> int:
-#     try:
-#         receipt = schemas.ReceiptCreate(
-#             filename=file.filename,
-#             data=file.file.read(),
-#         )
-#         crud.create_receipt(receipt=receipt, db=db)
-#         return len(receipt.data)
-#     except:
-#         raise HTTPException(status_code=500, detail='Could not upload file!')
 
 
 @api_router.post("/receipt")
@@ -173,12 +154,6 @@ def create_receipt(file: UploadFile = File(), db: Session = Depends(get_db)) -> 
         raise HTTPException(status_code=415, detail="Unsupported file format")
 
     return receipt_id
-
-
-# # TODO: implement
-# @api_router.get('/receipt/{filename}')
-# def get_receipt(filename: str, db: Session = Depends(get_db)) -> FileResponse:
-#     pass
 
 
 @api_router.get("/entries")
@@ -222,31 +197,42 @@ async def get_entry_pdf(
         liitteet = []
         for liite in item.receipts:
             liitteet.append(liite.data)
-        part = pdf_util.PartDict(
+        part = pdf_util.Part(
             hinta=str(item.value_cents / 100) + "e",
             selite=item.description,
             liitteet=liitteet,
         )
         parts.append(part)
     for mileage in entry.mileages:
-        part = pdf_util.PartDict(
+        part = pdf_util.Part(
             hinta=str(mileage.distance * MILEAGE_REIMBURSEMENT_RATE) + "e",
             selite=f"Mileage: {mileage.description}:\n{mileage.route} ({mileage.distance} km)\nPlate no: {mileage.plate_no}",
             liitteet=[],
         )
         parts.append(part)
 
-    pdf = pdf_util.generate_combined_pdf(
-        {
-            "name": entry.name,
-            "IBAN": entry.iban,
-            "Pvm": entry.submission_date,
-            "reason": entry.title,
-            "parts": parts,
-        }
+    if entry.status not in {"approved", "paid", "submitted", "denied"}:
+        raise HTTPException(500, "Invalid status")
+
+    document_name, pdf = pdf_util.generate_combined_pdf(
+        status=entry.status,
+        entry_id=entry_id,
+        name=entry.name,
+        IBAN=entry.iban,
+        Pvm=entry.submission_date,
+        reason=entry.title,
+        parts=parts,
+        accepted_date=entry.approval_date,
+        accepted_note=entry.approval_note,
+        paid=entry.paid_date,
+        rejection_date=entry.rejection_date,
     )
 
-    return Response(pdf)
+    return Response(
+        pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={document_name}"},
+    )
 
 
 @api_router.delete("/entry/{entry_id}")
@@ -255,8 +241,8 @@ def del_entry(entry_id, db: Session = Depends(get_db), user=Depends(get_user)):
 
 
 class ApproveBody(BaseModel):
-    date: str
-    meeting_no: str
+    date: datetime
+    approval_note: str
 
 
 @api_router.post("/approve/{entry_id}")
@@ -271,7 +257,7 @@ async def approve_entry(
     print(data.date)
     # TODO: Update PDF here
 
-    return crud.approve_entry(entry_id, data.date, data.meeting_no, db)
+    return crud.approve_entry(entry_id, data.date.date(), data.approval_note, db)
 
 
 @api_router.post("/deny/{entry_id}")
@@ -286,10 +272,16 @@ def reset_entry(entry_id, db: Session = Depends(get_db), user=Depends(get_user))
     return crud.reset_entry_status(entry_id, db)
 
 
+class PayBody(BaseModel):
+    date: datetime
+
+
 @api_router.post("/pay/{entry_id}")
-def pay_entry(entry_id, db: Session = Depends(get_db), user=Depends(get_user)):
+def pay_entry(
+    entry_id: int, data: PayBody, db: Session = Depends(get_db), user=Depends(get_user)
+):
     # TODO: Update PDF here
-    return crud.pay_entry(entry_id, db)
+    return crud.pay_entry(entry_id, data.date, db)
 
 
 @api_router.get("/userdata")

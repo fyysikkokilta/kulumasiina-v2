@@ -34,6 +34,7 @@ export interface AdminState {
   submissions: Array<SubmissionState>;
   loading: boolean;
   dateModal: boolean;
+  confirmPaymentModal: boolean;
   selected: number;
 }
 
@@ -41,6 +42,7 @@ const initialState: AdminState = {
   submissions: [],
   loading: false,
   dateModal: false,
+  confirmPaymentModal: false,
   selected: 0,
 };
 
@@ -70,6 +72,13 @@ export const adminSlice = createSlice({
     hideDateModal: (state) => {
       state.dateModal = false;
     },
+    showConfirmPaymentModal: (state, action: PayloadAction<number>) => {
+      state.confirmPaymentModal = true;
+      state.selected = action.payload;
+    },
+    hideConfirmPaymentModal: (state) => {
+      state.confirmPaymentModal = false;
+    },
   },
 });
 
@@ -81,6 +90,8 @@ export const {
   stopLoading,
   showDateModal,
   hideDateModal,
+  showConfirmPaymentModal,
+  hideConfirmPaymentModal,
 } = adminSlice.actions;
 
 export default adminSlice.reducer;

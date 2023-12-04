@@ -8,6 +8,7 @@ import {
   clearSubmissions,
   stopLoading,
   showDateModal,
+  showConfirmPaymentModal,
 } from "./adminSlice";
 import type { ColumnsType } from "antd/es/table";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
@@ -23,6 +24,7 @@ import {
 import { Receipt } from "./Receipt";
 import { AppDispatch } from "app/store";
 import SubmitDateModal from "./SubmitDateModal";
+import { ConfirmPaymentModal } from "./ConfirmPaymentModal";
 export const loadItems = (dispatch: AppDispatch) => {
   getEntries().then((entries) => {
     dispatch(clearSubmissions());
@@ -184,9 +186,7 @@ const expandedRowRender = (record: tableSubmission) => {
             </Button>
           </>
         )}
-        <Button
-          onClick={() => payEntry(record.id).then(() => loadItems(dispatch))}
-        >
+        <Button onClick={() => dispatch(showConfirmPaymentModal(record.id))}>
           Mark as paid
         </Button>
         {record.status !== "submitted" && (
@@ -230,6 +230,7 @@ export function AdminEntryView() {
   const selected = useAppSelector((state) => state.admin.selected);
   return (
     <>
+      <ConfirmPaymentModal entry_id={selected} />
       <SubmitDateModal entry_id={selected} />
       <Typography.Title level={3}>Submissions</Typography.Title>
       <Table

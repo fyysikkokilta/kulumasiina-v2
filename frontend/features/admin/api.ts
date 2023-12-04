@@ -12,11 +12,11 @@ export const getReceipt = async (id: string) => {
 export const approveEntry = async (
   id: number,
   approvalDate: string,
-  meeting_num: string,
+  approvalNote: string,
 ) => {
   await api.post(`/approve/${id}`, {
     date: approvalDate,
-    meeting_no: meeting_num,
+    approval_note: approvalNote,
   });
 };
 export const denyEntry = async (id: number) => {
@@ -31,6 +31,8 @@ export const deleteEntry = async (id: number) => {
   await api.delete(`/entry/${id}`);
 };
 
-export const payEntry = async (id: number) => {
-  await api.post(`/pay/${id}`);
+export const payEntry = async (id: number, paidDate: string) => {
+  await api.post(`/pay/${id}`, {
+    date: paidDate,
+  });
 };

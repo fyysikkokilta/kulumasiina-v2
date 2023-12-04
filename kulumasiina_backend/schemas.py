@@ -1,3 +1,4 @@
+import datetime
 from pydantic import BaseModel, ConfigDict
 from datetime import date
 
@@ -32,6 +33,7 @@ class Item(ItemCreate):
     receipts: list[ReceiptResponse]
 
 
+# NOTE: This is not exposed to the frontend yet due to the data privacy concerns.
 class MileageCreate(BaseModel):
     gov_id: str  # TODO: GDPR
     description: str
@@ -64,3 +66,4 @@ class Entry(_EntryBase):
     status: str
     items: list[Item]
     mileages: list[Mileage]
+    submission_date: datetime.datetime

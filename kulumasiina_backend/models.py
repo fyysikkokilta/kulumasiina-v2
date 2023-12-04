@@ -1,6 +1,6 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, mapped_column, Mapped, DeclarativeBase
-from datetime import date
+from datetime import date, datetime
 
 
 # @as_declarative()
@@ -91,12 +91,20 @@ class Entry(Base):
     name: Mapped[str]
     iban: Mapped[str]
     title: Mapped[str]
-    submission_date: Mapped[str]
-    approval_date: Mapped[str | None] = mapped_column(default=None)
-    meeting_number: Mapped[str | None] = mapped_column(default=None)
+
+    submission_date: Mapped[datetime] = mapped_column(default=datetime.now)
+    approval_date: Mapped[datetime | None] = mapped_column(default=None)
+    paid_date: Mapped[datetime | None] = mapped_column(default=None)
+    rejection_date: Mapped[datetime | None] = mapped_column(default=None)
+
+    # Meeting number or other info identifying where the reimbursement was approved (signature/meeting)
+    approval_note: Mapped[str | None] = mapped_column(default=None)
+
     # gov_id : Mapped[str]
     # TODO: status enum tms?
-    status: Mapped[str] = mapped_column(default="submitted")
+    status: Mapped[str] = mapped_column(
+        default="submitted"
+    )  # "approved", "paid", "submitted", "denied"
     items: Mapped[list[Item]] = relationship(lazy="immediate", cascade="all, delete")
     mileages: Mapped[list[Mileage]] = relationship(
         lazy="immediate", cascade="all, delete"

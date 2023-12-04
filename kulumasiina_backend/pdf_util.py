@@ -1,24 +1,17 @@
+import datetime
 from io import BytesIO
 import fpdf  # pip3 intall fpdf
 from pathlib import Path
 import pypdf
-
+import pathvalidate
 
 from typing import Literal, TypedDict
 
 
-class PartDict(TypedDict):
+class Part(TypedDict):
     selite: str
     hinta: str
     liitteet: list[bytes]
-
-
-class FancyType(TypedDict):
-    name: str
-    IBAN: str
-    Pvm: str
-    reason: str
-    parts: list[PartDict]
 
 
 def is_file_acceptable(file: bytes) -> Literal["PDF", "PNG", "GIF", "JPG"] | None:
@@ -64,7 +57,19 @@ def watermark(
     return io
 
 
-def generate_combined_pdf(data: FancyType) -> bytes:
+def generate_combined_pdf(
+    entry_id: int,
+    status: Literal["approved", "paid", "submitted", "denied"],
+    name: str,
+    IBAN: str,
+    Pvm: datetime.datetime,
+    reason: str,
+    parts: list[Part],
+    accepted_note: str | None,
+    accepted_date: datetime.date | None,
+    paid: datetime.date | None,
+    rejection_date: datetime.date | None,
+) -> tuple[str, bytes]:
     pdf = fpdf.FPDF(format="A4")  # pdf format
     pdf.add_font(
         "Lora", fname="./kulumasiina_backend/assets/Lora-Regular.ttf", uni=True
@@ -85,9 +90,9 @@ def generate_combined_pdf(data: FancyType) -> bytes:
     piipath = "./kulumasiina_backend/assets/fii_2.svg"
 
     # convert the "liitteet" to numbers and add them to list
-    attachements = [liite for part in data["parts"] for liite in part["liitteet"]]
+    attachements = [liite for part in parts for liite in part["liitteet"]]
     i = 1
-    for part in data["parts"]:
+    for part in parts:
         liitteet = []
         for liite in part["liitteet"]:
             liitteet.append(str(i))
@@ -107,18 +112,52 @@ def generate_combined_pdf(data: FancyType) -> bytes:
     pdf.ln(20)
     pdf.set_font("Sourcesanspro", size=14)
 
-    pdf.cell(text="Nimi: " + data["name"])
+    pdf.cell(text="Nimi: " + name)
     pdf.ln(6)
-    pdf.cell(text="IBAN: " + data["IBAN"])
+    pdf.cell(text="IBAN: " + IBAN)
     pdf.ln(6)
-    pdf.cell(text="Päivämäärä: " + data["Pvm"])
-    pdf.ln(12)
-    pdf.cell(text="Maksun peruste: " + data["reason"])
+    date = Pvm.strftime("%d.%m.%Y")
+    pdf.cell(text=f"Päivämäärä: {date}")
+    pdf.ln(16)
+
+    nowstr = datetime.datetime.utcnow().strftime("%d.%m.%Y")
+    if status == "approved":
+        assert accepted_date is not None and accepted_note is not None
+        assert paid is None
+        accepted_datestr = accepted_date.strftime("%d.%m.%Y")
+        pdf.cell(text=f"Hyväksytty {accepted_datestr}, peruste: {accepted_note}")
+        pdf.ln(6)
+        nowstr = datetime.datetime.utcnow().strftime("%d.%m.%Y")
+        pdf.cell(text=f"Ei maksettu (as of {nowstr})")
+        pdf.ln(6)
+    elif status == "paid":
+        assert accepted_date is not None and accepted_note is not None
+        assert paid is not None
+        accepted_datestr = accepted_date.strftime("%d.%m.%Y")
+        paid_datestr = paid.strftime("%d.%m.%Y")
+        pdf.cell(text=f"Hyväksytty {accepted_datestr}, peruste: {accepted_note}")
+        pdf.ln(6)
+        pdf.cell(text=f"Maksettu {paid_datestr}")
+        pdf.ln(6)
+    elif status == "submitted":
+        assert accepted_date is None and accepted_note is None
+        assert paid is None
+        pdf.cell(text=f"Odottaa hyväksyntää (as of {nowstr})")
+        pdf.ln(6)
+    elif status == "denied":
+        assert accepted_date is None and accepted_note is None
+        assert paid is None
+        assert rejection_date is not None
+        pdf.cell(text=f"Hylätty ({rejection_date.strftime('%d.%m.%Y')})")
+        pdf.ln(6)
+
+    pdf.ln(16)
+    pdf.cell(text="Korvauksen peruste: " + reason)
     pdf.ln(20)
 
     # Generate table data from the data dict
     table_data: list[tuple[str, str, str]] = [("Selite", "Liitteet", "Hinta")]
-    for part in data["parts"]:
+    for part in parts:
         table_data.append(
             (
                 part["selite"],
@@ -188,6 +227,25 @@ def generate_combined_pdf(data: FancyType) -> bytes:
         writer.append(BytesIO(attachement))
         # pypdf_pdf.pages.extend(pypdf.PdfReader(attachement).pages)
 
+    sanitized_name = pathvalidate.sanitize_filename(name)
+    date = Pvm.strftime("%d-%m-%Y")
+    document_name = f"{sanitized_name}-{date}-{entry_id}.pdf"
+    now_pdf = datetime.datetime.utcnow().strftime("D\072%Y%m%d%H%M%S")
+    # Set the document title
+    writer.add_metadata(
+        {
+            "/Author": "Martin",
+            "/Producer": "Fyysikkokilta ry - Kulumasiina",
+            "/Title": document_name,
+            "/Subject": reason,
+            # "/Keywords": "",
+            "/CreationDate": now_pdf,
+            "/ModDate": now_pdf,
+            "/Creator": "Fyysikkokilta ry - Kulumasiina",
+            # "/CustomField": "CustomField",
+        }
+    )
+
     io = BytesIO()
     status, _io = writer.write(io)
-    return io.getvalue()
+    return document_name, io.getvalue()
