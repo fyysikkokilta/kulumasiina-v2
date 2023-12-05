@@ -8,8 +8,6 @@ Kulukorvauslomake Fyysikkokillalle.
 
 
 ## Joonan TODO
-- [] PDF dokumenttiin merkintä hyväksymisestä ja maksamispäivämäärä
-  - Hyväksymiselle tekstikenttä, mikä kokous / milloin allekirjoitettu
 - Admin puoli redirect loginiin jos ei ole kirjautunut
 - Admin puolen modal/popup x:n painallus ei sulje modalia
 - Luotu PDF hajoaa jos vaakatasossa oleva kuva
@@ -18,10 +16,11 @@ Kulukorvauslomake Fyysikkokillalle.
 - Poistosta "arkistoi", jolloin status ei enää muutettavissa.
 - Arkistoidut `entry`t pystyy poistamaan vain erillisellä dialogilla
   - Myöhemmin ihmettelyä voiko `receipt` poistaa, jos `entry` on arkistoitu ja siitä on tallennettu PDF.
-- PDF dokumentille nimi.
-  `Etunimi_Sukunimi-[dd]-[mm]-[yyyy]-[entry id].pdf`
 - Admin puolelta ajoista `T` pois, muuten ISO 8601
-- IBAN validointi frontendissä
+
+## Muuta TODO
+- Front muista admin `hyväksytty` kentän tekstin ja päivämäärän
+- IBAN validaatio backendissä
 
 
 ## Nice to have
