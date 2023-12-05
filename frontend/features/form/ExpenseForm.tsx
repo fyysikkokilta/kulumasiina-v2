@@ -28,7 +28,7 @@ import {
 
 import { mileageReimbursementRate, EURFormat } from "../utils";
 import { postForm, postInterface } from "./api";
-
+import { isValidIBAN } from "ibantools";
 const spans: { [key: string]: ColPropsMap } = {
   main: {
     label: {
@@ -270,6 +270,13 @@ export function ExpenseForm() {
             {
               required: true,
               message: "Please give your bank account number!",
+              validator: (rule, value, callback) => {
+                if (isValidIBAN(value.replace(/\s/g, ""))) {
+                  callback();
+                } else {
+                  callback("Please give a valid IBAN!");
+                }
+              },
             },
           ]}
         >
