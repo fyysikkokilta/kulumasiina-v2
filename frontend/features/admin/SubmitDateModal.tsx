@@ -1,7 +1,7 @@
 import React from "react";
 import { Modal, Form, DatePicker, Button, Input } from "antd";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { hideDateModal } from "./adminSlice";
+import { hideDateModal as hideApproveModal } from "./adminSlice";
 import { approveEntry } from "./api";
 import { loadItems } from "./EntryView";
 
@@ -15,11 +15,16 @@ export const SubmitDateModal: React.FC<{ entry_id: number }> = ({
   const handleSubmit = (values: any) => {
     approveEntry(entry_id, values.date.toISOString(), values.approvalNote)
       .then(() => loadItems(dispatch))
-      .then(() => dispatch(hideDateModal()));
+      .then(() => dispatch(hideApproveModal()));
   };
   return (
     <>
-      <Modal title="Submit Date" open={show} footer={[]}>
+      <Modal
+        title="Submit Date"
+        open={show}
+        footer={[]}
+        onCancel={() => dispatch(hideApproveModal())}
+      >
         <Form onFinish={handleSubmit}>
           <Form.Item
             name="date"
@@ -45,7 +50,7 @@ export const SubmitDateModal: React.FC<{ entry_id: number }> = ({
             <Button type="primary" htmlType="submit">
               Submit
             </Button>
-            <Button key="cancel" onClick={() => dispatch(hideDateModal())}>
+            <Button key="cancel" onClick={() => dispatch(hideApproveModal())}>
               Cancel
             </Button>
           </Form.Item>

@@ -20,7 +20,12 @@ export const ConfirmPaymentModal: React.FC<{ entry_id: number }> = ({
   const now = dayjs();
   return (
     <>
-      <Modal title="Confirm payment" open={show} footer={[]}>
+      <Modal
+        title="Confirm payment"
+        open={show}
+        footer={[]}
+        onCancel={() => dispatch(hideConfirmPaymentModal())}
+      >
         <Form onFinish={handleSubmit} initialValues={{ date: now }}>
           {/* TODO: For some reason the default value is not considered valid here! */}
           <Form.Item

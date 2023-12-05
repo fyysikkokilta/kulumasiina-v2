@@ -9,7 +9,6 @@ Kulukorvauslomake Fyysikkokillalle.
 
 ## Joonan TODO
 - Admin puoli redirect loginiin jos ei ole kirjautunut
-- Admin puolen modal/popup x:n painallus ei sulje modalia
 - Luotu PDF hajoaa jos vaakatasossa oleva kuva
   - Uploadin tulee epäonnistua mikäli tiedosto invalidi backendissä (punaiset framet liitteen previewssä)
 - Nimen & korvausstatuksen perusteella filtteröinti admin puolelle
