@@ -51,14 +51,27 @@ interface tableSubmission extends SubmissionState {
 
 const columns: ColumnsType<tableSubmission> = [
   {
+    title: "Entry id",
+    dataIndex: "id",
+    key: "id",
+    defaultSortOrder: "descend",
+    sorter: (a, b) => a.id - b.id,
+  },
+  {
     title: "Submission date",
     dataIndex: "submission_date",
     key: "submissionDate",
+    render: (value) => new Date(value).toLocaleDateString(),
   },
   {
     title: "Name",
     dataIndex: "name",
     key: "name",
+    // Allow filtering by name. Substring match.
+    // filters: [],
+    // filterMode: "tree",
+    // filterSearch: (value: string, record) => record.name.includes(value),
+    // onFilter: (value: string, record) => record.name.includes(value),
   },
   {
     title: "Claimed expense",
@@ -75,6 +88,26 @@ const columns: ColumnsType<tableSubmission> = [
     title: "Status",
     dataIndex: "status",
     key: "status",
+    // Allow filtering by status. "submitted", "paid", "approved", "denied"
+    filters: [
+      {
+        text: "Submitted",
+        value: "submitted",
+      },
+      {
+        text: "Paid",
+        value: "paid",
+      },
+      {
+        text: "Approved",
+        value: "approved",
+      },
+      {
+        text: "Denied",
+        value: "denied",
+      },
+    ],
+    onFilter: (value, record) => record.status === value,
   },
 ];
 
