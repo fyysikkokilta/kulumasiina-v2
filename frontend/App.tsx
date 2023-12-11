@@ -133,10 +133,7 @@ const router = createBrowserRouter([
 function App() {
   const dispatch = useAppDispatch();
   useEffect(() => {
-    api
-      .get("/userdata")
-      .then((r) => dispatch(logIn(r.data.email)))
-      .catch(() => console.log("Not logged in"));
+    api.get("/userdata").then((r) => dispatch(logIn(r.data.email)));
   }, []);
   return (
     <div className="App">
