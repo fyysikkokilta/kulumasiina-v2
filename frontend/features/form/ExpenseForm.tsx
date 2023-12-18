@@ -292,9 +292,10 @@ export function ExpenseForm() {
             },
           ]}
         >
-          <Input
+          <Input.TextArea
             placeholder="<event> expenses and mileages"
             autoComplete="off"
+            rows={1}
           />
         </Form.Item>
         {needGovId ? (
