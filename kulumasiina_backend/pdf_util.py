@@ -152,7 +152,7 @@ def generate_combined_pdf(
         pdf.ln(6)
 
     pdf.ln(16)
-    pdf.cell(text="Korvauksen peruste: " + reason)
+    pdf.multi_cell(w=0, h=6, align="L", text="Korvauksen peruste: " + reason)
     pdf.ln(20)
 
     # Generate table data from the data dict
