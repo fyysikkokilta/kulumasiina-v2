@@ -49,67 +49,87 @@ interface tableSubmission extends SubmissionState {
   total: number;
 }
 
-const columns: ColumnsType<tableSubmission> = [
-  {
-    title: "Entry id",
-    dataIndex: "id",
-    key: "id",
-    defaultSortOrder: "descend",
-    sorter: (a, b) => a.id - b.id,
-  },
-  {
-    title: "Submission date",
-    dataIndex: "submission_date",
-    key: "submissionDate",
-    render: (value) => new Date(value).toLocaleDateString(),
-  },
-  {
-    title: "Name",
-    dataIndex: "name",
-    key: "name",
-    // Allow filtering by name. Substring match.
-    // filters: [],
-    // filterMode: "tree",
-    // filterSearch: (value: string, record) => record.name.includes(value),
-    // onFilter: (value: string, record) => record.name.includes(value),
-  },
-  {
-    title: "Claimed expense",
-    dataIndex: "total",
-    key: "total",
-    render: (value) => EURFormat.format(value),
-  },
-  {
-    title: "Submission title",
-    dataIndex: "title",
-    key: "title",
-  },
-  {
-    title: "Status",
-    dataIndex: "status",
-    key: "status",
-    // Allow filtering by status. "submitted", "paid", "approved", "denied"
-    filters: [
-      {
-        text: "Submitted",
-        value: "submitted",
-      },
-      {
-        text: "Paid",
-        value: "paid",
-      },
-      {
-        text: "Approved",
-        value: "approved",
-      },
-      {
-        text: "Denied",
-        value: "denied",
-      },
-    ],
-    onFilter: (value, record) => record.status === value,
-  },
-];
+const columns = (entries: tableSubmission[]): ColumnsType<tableSubmission> => {
+  const normalizedNames = entries
+    .map((entry) => entry.name)
+    .map((name) =>
+      name
+        .toLocaleLowerCase()
+        .split(" ")
+        .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+        .join(" "),
+    );
+
+  const uniqueNames = normalizedNames.filter(
+    (name1, index) =>
+      normalizedNames.findIndex((name2) => name1 === name2) === index,
+  );
+  return [
+    {
+      title: "Entry id",
+      dataIndex: "id",
+      key: "id",
+      defaultSortOrder: "descend",
+      sorter: (a, b) => a.id - b.id,
+    },
+    {
+      // Would be nice to be able to filter with date range also, but antd doesn't support it.
+      title: "Submission date",
+      dataIndex: "submission_date",
+      key: "submissionDate",
+      render: (value) => new Date(value).toLocaleDateString(),
+    },
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+      // Allow filtering by name. Substring match.
+      filters: uniqueNames
+        .map((name) => {
+          return { text: name, value: name.toLocaleLowerCase() };
+        })
+        .sort((a, b) => a.text.localeCompare(b.text, "fi")),
+      filterSearch: true,
+      onFilter: (value, record) => record.name.toLocaleLowerCase() === value,
+    },
+    {
+      title: "Claimed expense",
+      dataIndex: "total",
+      key: "total",
+      render: (value) => EURFormat.format(value),
+    },
+    {
+      title: "Submission title",
+      dataIndex: "title",
+      key: "title",
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      // Allow filtering by status. "submitted", "paid", "approved", "denied"
+      filters: [
+        {
+          text: "Submitted",
+          value: "submitted",
+        },
+        {
+          text: "Paid",
+          value: "paid",
+        },
+        {
+          text: "Approved",
+          value: "approved",
+        },
+        {
+          text: "Denied",
+          value: "denied",
+        },
+      ],
+      onFilter: (value, record) => record.status === value,
+    },
+  ];
+};
 
 interface expandedRowTable {
   key: React.Key;
@@ -268,7 +288,7 @@ export function AdminEntryView() {
       <Typography.Title level={3}>Submissions</Typography.Title>
       <Table
         dataSource={sumEnties}
-        columns={columns}
+        columns={columns(sumEnties)}
         expandable={{
           expandedRowRender: expandedRowRender,
         }}
