@@ -4,7 +4,11 @@ import { ExpenseForm } from "./features/form/ExpenseForm";
 import { AdminEntryView } from "./features/admin/EntryView";
 import { Row, Col, Typography, Divider, ColProps, Space } from "antd";
 import "./App.css";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  redirect,
+} from "react-router-dom";
 import { LoginCallback } from "./features/login/LoginRedirect";
 import { Login } from "./features/login/Login";
 import { LoginBtn } from "./features/login/HeaderLoginBtn";
@@ -118,6 +122,14 @@ const router = createBrowserRouter([
         <AdminEntryView />
       </Container>
     ),
+    loader: () => {
+      return api.get("/userdata").catch((e) => {
+        if (e?.response?.status !== 200) {
+          return redirect("/");
+        }
+        return null;
+      });
+    },
   },
   {
     path: "/login",
