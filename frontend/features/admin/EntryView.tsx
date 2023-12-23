@@ -237,9 +237,11 @@ const expandedRowRender = (record: tableSubmission) => {
             </Button>
           </>
         )}
-        <Button onClick={() => dispatch(showConfirmPaymentModal(record.id))}>
-          Mark as paid
-        </Button>
+        {record.status === "approved" && (
+          <Button onClick={() => dispatch(showConfirmPaymentModal(record.id))}>
+            Mark as paid
+          </Button>
+        )}
         {record.status !== "submitted" && (
           <>
             <Button
