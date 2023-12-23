@@ -201,9 +201,9 @@ const expandedRowRender = (record: tableSubmission) => {
                 ) : (
                   <>
                     {" "}
-                    <Typography.Title level={4}>Reciepts:</Typography.Title>
+                    <Typography.Title level={4}>Receipts:</Typography.Title>
                     {record.items[a.index].receipts.map((r) => {
-                      return <Receipt key={r.id} reciept={r} />;
+                      return <Receipt key={r.id} receipt={r} />;
                     })}
                   </>
                 )}

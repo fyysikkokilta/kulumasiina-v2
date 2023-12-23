@@ -1,22 +1,22 @@
 import { Card, Image } from "antd";
-import { RecieptState } from "./adminSlice";
+import { ReceiptState } from "./adminSlice";
 import { apiURL } from "../utils";
 import Link from "antd/es/typography/Link";
 
-export const Receipt = (props: { reciept: RecieptState }) => {
+export const Receipt = (props: { receipt: ReceiptState }) => {
   return (
     <>
       <Card>
-        {props.reciept.filename.split(".")[1] !== "pdf" ? (
-          <RenderImage id={props.reciept.id} />
+        {props.receipt.filename.split(".")[1] !== "pdf" ? (
+          <RenderImage id={props.receipt.id} />
         ) : (
           <>
             <Link
-              href={`${apiURL}/receipt/${props.reciept.id}`}
+              href={`${apiURL}/receipt/${props.receipt.id}`}
               target="_blank"
               rel="noopener noreferrer"
             >
-              {props.reciept.filename}
+              {props.receipt.filename}
             </Link>
           </>
         )}

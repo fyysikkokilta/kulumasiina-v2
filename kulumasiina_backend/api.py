@@ -161,24 +161,24 @@ def get_entry(db: Session = Depends(get_db), user=Depends(get_user)):
     return crud.get_entries(db)
 
 
-@api_router.get("/items/{item_id}/reciepts")
-def get_reciept_for_item(
+@api_router.get("/items/{item_id}/receipts")
+def get_receipt_for_item(
     item_id, db: Session = Depends(get_db), user=Depends(get_user)
 ):
-    data = crud.get_item_reciepts(item_id, db)
+    data = crud.get_item_receipts(item_id, db)
     return data
 
 
-@api_router.get("/receipt/{reciept_id}")
-async def get_reciept(
-    reciept_id,
+@api_router.get("/receipt/{receipt_id}")
+async def get_receipt(
+    receipt_id,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     user=Depends(get_user),
 ):
     buffer = io.BytesIO()  # BytesIO stream containing the pdf data
     background_tasks.add_task(buffer.close)
-    buffer.write(crud.get_reciept_data(reciept_id, db))
+    buffer.write(crud.get_receipt_data(receipt_id, db))
     return Response(buffer.getvalue())
 
 

@@ -53,13 +53,13 @@ def get_entries(db: Session) -> list[models.Entry]:
     return db.query(models.Entry).all()
 
 
-def get_item_reciepts(item_id: int, db: Session):
-    reciepts = (
+def get_item_receipts(item_id: int, db: Session):
+    receipts = (
         db.query(models.Receipt.filename, models.Receipt.item_id, models.Receipt.id)
         .where(models.Receipt.item_id == item_id)
         .all()
     )
-    return reciepts
+    return receipts
 
 
 def get_entry_by_id(id: int, db: Session) -> models.Entry | None:
@@ -90,7 +90,7 @@ def create_receipt(
     return schemas.ReceiptResponse.model_validate(db_receipt)
 
 
-def get_reciept_data(id, db: Session):
+def get_receipt_data(id, db: Session):
     return db.query(models.Receipt.data).filter(models.Receipt.id == id).first()[0]
 
 

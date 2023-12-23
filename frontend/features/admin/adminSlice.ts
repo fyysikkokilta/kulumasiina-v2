@@ -5,9 +5,9 @@ export interface ItemState {
   description: string;
   date: string;
   value_cents: number;
-  receipts: Array<RecieptState>;
+  receipts: Array<ReceiptState>;
 }
-export interface RecieptState {
+export interface ReceiptState {
   id: number;
   filename: string;
 }
