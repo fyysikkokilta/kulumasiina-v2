@@ -4,8 +4,7 @@ import {
   type SubmissionState,
   type MileageState,
   type ItemState,
-  addSubmissions,
-  clearSubmissions,
+  loadSubmissions,
   stopLoading,
   showDateModal,
   showConfirmPaymentModal,
@@ -25,11 +24,10 @@ import { Receipt } from "./Receipt";
 import { AppDispatch } from "app/store";
 import SubmitDateModal from "./SubmitDateModal";
 import { ConfirmPaymentModal } from "./ConfirmPaymentModal";
+import { useLoaderData } from "react-router-dom";
 export const loadItems = (dispatch: AppDispatch) => {
   getEntries().then((entries) => {
-    dispatch(clearSubmissions());
-
-    dispatch(addSubmissions(entries));
+    dispatch(loadSubmissions(entries));
     dispatch(stopLoading());
   });
 };
@@ -266,9 +264,10 @@ const expandedRowRender = (record: tableSubmission) => {
 
 export function AdminEntryView() {
   const dispatch = useAppDispatch();
+  const entries = useLoaderData() as SubmissionState[];
   useEffect(() => {
-    // dispatch(clearSubmissions());
-    loadItems(dispatch);
+    dispatch(loadSubmissions(entries));
+    dispatch(stopLoading());
   }, []);
   const adminEntries = useAppSelector((state) => state.admin.submissions);
   const loading = useAppSelector((state) => state.admin.loading);

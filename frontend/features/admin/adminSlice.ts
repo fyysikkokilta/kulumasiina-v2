@@ -53,11 +53,11 @@ export const adminSlice = createSlice({
     addSubmission: (state, action: PayloadAction<SubmissionState>) => {
       state.submissions.push(action.payload);
     },
-    addSubmissions: (state, action: PayloadAction<SubmissionState[]>) => {
-      state.submissions.push(...action.payload);
+    loadSubmissions: (state, action: PayloadAction<SubmissionState[]>) => {
+      state.submissions = action.payload;
     },
     clearSubmissions: (state) => {
-      state.submissions.length = 0;
+      state.submissions = [];
     },
     startLoading: (state) => {
       state.loading = true;
@@ -84,7 +84,7 @@ export const adminSlice = createSlice({
 
 export const {
   addSubmission,
-  addSubmissions,
+  loadSubmissions,
   clearSubmissions,
   startLoading,
   stopLoading,

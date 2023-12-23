@@ -123,12 +123,15 @@ const router = createBrowserRouter([
       </Container>
     ),
     loader: () => {
-      return api.get("/userdata").catch((e) => {
-        if (e?.response?.status !== 200) {
-          return redirect("/");
-        }
-        return null;
-      });
+      return api
+        .get("/entries")
+        .then((r) => r.data)
+        .catch((e) => {
+          if (e?.response?.status !== 200) {
+            return redirect("/");
+          }
+          return null;
+        });
     },
   },
   {
