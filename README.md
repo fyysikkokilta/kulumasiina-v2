@@ -2,41 +2,37 @@
 
 Kulukorvauslomake Fyysikkokillalle.
 
+## Dev setup
+1. Install Node, npm, python 3 and pdm
+2. Run `pdm install` and `npm install` on root folder
+3. Start the program by running `pdm dev` and `npm start`
+
 ## Paths
 
 - GET `/` - Index page the actual form
+- GET `/login` - Google SSO login page
+- GET `/admin` - Admin page for handling expense compensations
 
 
-## Joonan TODO
-- Luotu PDF hajoaa jos vaakatasossa oleva kuva
-  - Uploadin tulee epäonnistua mikäli tiedosto invalidi backendissä (punaiset framet liitteen previewssä)
+## High prio TODO
 - Poistosta "arkistoi", jolloin status ei enää muutettavissa.
 - Arkistoidut `entry`t pystyy poistamaan vain erillisellä dialogilla
   - Myöhemmin ihmettelyä voiko `receipt` poistaa, jos `entry` on arkistoitu ja siitä on tallennettu PDF.
-- Admin puolelta ajoista `T` pois, muuten ISO 8601
+- CSV exportaus: https://support.procountor.fi/hc/fi/articles/360000256417-Laskuaineiston-siirtotiedosto
 
 ## Muuta TODO
 - Front muista admin `hyväksytty` kentän tekstin ja päivämäärän
 - IBAN validaatio backendissä
+- Filtteröinti lähetyspäivän mukaan date rangena (ei suoraan tuettu käytetyssä fronttikirjastossa)
 
 
 ## Nice to have
 - [ ] Postgres db
 - [ ] Vanhojen kuittien/korvausten arkistointi -> Zip pdf lataus (Uusi tila "arkistoitu" näille)
-- [ ] Filtteröinti rahisnäkymään
 - [ ] Login token refreshaus
 - [ ] Migraatiotuki
 - [ ] CI/CD (not gonna happen :D)
 - Make receipt table TTL (1d) and generate PDFs on the fly
   - Add the PDF to the `entry` table
 
-- Do not allow sending receipt without date
-- Do not allow sending receipt without amount
-- Do not allow sending receipt without description
-- Do not allow sending receipt without receipt image/pdf
-
-- If entries request gives 401 (expired token or no token) -> redirect to login page
 - Enable travel reimbursement once social security number storage guidelines are set
-- reject invalid receipt files
-
-- show id/number in admin list view
