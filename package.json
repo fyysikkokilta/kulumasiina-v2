@@ -15,7 +15,7 @@
     "@types/react-dom": "^18.0.11",
     "@vitejs/plugin-react-swc": "^3.4.0",
     "antd": "^5.5.0",
-    "axios": "^1.4.0",
+    "axios": "^1.6.0",
     "browser-image-compression": "^2.0.2",
     "dayjs": "^1.11.10",
     "ibantools": "^4.3.7",
