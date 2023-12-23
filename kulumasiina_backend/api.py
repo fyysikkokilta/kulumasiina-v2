@@ -20,7 +20,7 @@ from typing import Optional, TypedDict
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from kulumasiina_backend import crud, models, schemas, pdf_util
+from kulumasiina_backend import crud, models, schemas, pdf_util, csv_util
 from kulumasiina_backend.db import SessionLocal, engine
 from fastapi.security import HTTPBearer
 from fastapi_sso.sso.google import GoogleSSO
@@ -234,6 +234,52 @@ async def get_entry_pdf(
         headers={"Content-Disposition": f"attachment; filename={document_name}"},
     )
 
+@api_router.get("/entry/{entry_id}/csv")
+async def get_entry_csv(
+    entry_id,
+    db: Session = Depends(get_db),
+    user=Depends(get_user),
+):
+    entry = crud.get_entry_by_id(entry_id, db)
+    if entry is None:
+        raise HTTPException(404)
+
+    if entry.status not in {"approved", "paid"}:
+        raise HTTPException(500, "Invalid status")
+
+    parts = []
+
+    #TODO: Procountor doesn't accept importing expense compensations and mileage compensations in the same csv file.
+    #Adding them in the same compensation should probably be prevented
+    for item in entry.items:
+        parts.append(csv_util.Row(
+            yksikkohinta=str(item.value_cents / 100),
+            selite=item.description,
+            maara=1,
+            liitteet=[],
+        ))
+    for mileage in entry.mileages:
+        parts.append(csv_util.Row(
+            yksikkohinta=MILEAGE_REIMBURSEMENT_RATE,
+            selite=f"Mileage: {mileage.description}:\n{mileage.route} ({mileage.distance} km)\nPlate no: {mileage.plate_no}",
+            maara=mileage.distance,
+            liitteet=[],
+        ))
+
+    document_name, csv = csv_util.generate_csv(
+        entry_id=entry_id,
+        name=entry.name,
+        IBAN=entry.iban,
+        Pvm=entry.submission_date,
+        rows=parts,
+    )
+
+    return Response(
+        csv,
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={document_name}"},
+    )
+
 def assert_status_in(entry_id, statuses, db):
     entry = crud.get_entry_by_id(entry_id, db)
     if entry is None:
@@ -248,7 +294,6 @@ def assert_archived(entry_id, db):
         raise HTTPException(404)
     if not entry.archived:
         raise HTTPException(400, "Entry not archived")
-
 
 @api_router.delete("/entry/{entry_id}")
 def del_entry(entry_id, db: Session = Depends(get_db), user=Depends(get_user)):
