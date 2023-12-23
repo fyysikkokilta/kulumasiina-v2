@@ -10,7 +10,6 @@ Kulukorvauslomake Fyysikkokillalle.
 ## Joonan TODO
 - Luotu PDF hajoaa jos vaakatasossa oleva kuva
   - Uploadin tulee epäonnistua mikäli tiedosto invalidi backendissä (punaiset framet liitteen previewssä)
-- Nimen & korvausstatuksen perusteella filtteröinti admin puolelle
 - Poistosta "arkistoi", jolloin status ei enää muutettavissa.
 - Arkistoidut `entry`t pystyy poistamaan vain erillisellä dialogilla
   - Myöhemmin ihmettelyä voiko `receipt` poistaa, jos `entry` on arkistoitu ja siitä on tallennettu PDF.
