@@ -28,6 +28,7 @@ def test_entry_only():
     data = schemas.EntryCreate(
         name='Test user',
         iban='tilinro',
+        contact='@testuser',
         title='Vappujuttuja',
         items=[],
         mileages=[],
@@ -60,6 +61,7 @@ def test_bad_request():
         json={
             'name': 'nimi',
             'title': 'titteli',
+            'contact': 'yhteystieto',
             'iban': 'tilinro',
         },
     )

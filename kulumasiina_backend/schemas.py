@@ -51,6 +51,7 @@ class Mileage(MileageCreate):
 
 class _EntryBase(BaseModel):
     name: str
+    contact: str
     iban: str
     title: str
 

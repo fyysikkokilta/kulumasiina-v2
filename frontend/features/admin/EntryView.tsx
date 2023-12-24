@@ -216,6 +216,7 @@ const expandedRowRender = (record: tableSubmission) => {
       />
       <br></br>
       <h4>Status: {record.status}</h4>
+      <h4>Contact info: {record.contact}</h4>
       <Button onClick={() => window.open(`/api/entry/${record.id}/pdf`)}>
         Download pdf
       </Button>

@@ -91,6 +91,7 @@ class Entry(Base):
     name: Mapped[str]
     iban: Mapped[str]
     title: Mapped[str]
+    contact: Mapped[str]
 
     submission_date: Mapped[datetime] = mapped_column(default=datetime.now)
     approval_date: Mapped[datetime | None] = mapped_column(default=None)

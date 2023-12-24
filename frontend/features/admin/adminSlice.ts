@@ -26,6 +26,7 @@ export interface SubmissionState {
   submissionDate: string;
   name: string;
   title: string;
+  contact: string;
   status: string;
   items: Array<ItemState>;
   mileages: Array<MileageState>;
