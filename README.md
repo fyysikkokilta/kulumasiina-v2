@@ -15,6 +15,7 @@ Kulukorvauslomake Fyysikkokillalle.
 
 
 ## High prio TODO
+- SEURAAVASSA DEPLOYSSA `ALTER TABLE entry ADD contact VARCHAR NOT NULL DEFAULT ''` tai vastaava komento kantaan tai systeemi hajoaa.
 - Poistosta "arkistoi", jolloin status ei enää muutettavissa.
 - Arkistoidut `entry`t pystyy poistamaan vain erillisellä dialogilla
   - Myöhemmin ihmettelyä voiko `receipt` poistaa, jos `entry` on arkistoitu ja siitä on tallennettu PDF.
