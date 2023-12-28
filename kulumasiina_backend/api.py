@@ -247,31 +247,30 @@ async def get_entry_csv(
     if entry.status not in {"approved", "paid"}:
         raise HTTPException(500, "Invalid status")
 
-    parts = []
+    rows = []
 
-    #TODO: Procountor doesn't accept importing expense compensations and mileage compensations in the same csv file.
-    #Adding them in the same compensation should probably be prevented
     for item in entry.items:
-        parts.append(csv_util.Row(
+        rows.append(csv_util.Row(
             yksikkohinta=str(item.value_cents / 100),
             selite=item.description,
             maara=1,
-            liitteet=[],
+            matkalasku=False,
         ))
     for mileage in entry.mileages:
-        parts.append(csv_util.Row(
+        rows.append(csv_util.Row(
             yksikkohinta=MILEAGE_REIMBURSEMENT_RATE,
-            selite=f"Mileage: {mileage.description}:\n{mileage.route} ({mileage.distance} km)\nPlate no: {mileage.plate_no}",
+            selite=f"Kilometrikorvaus: {mileage.description}",
             maara=mileage.distance,
-            liitteet=[],
+            matkalasku=True,
         ))
 
     document_name, csv = csv_util.generate_csv(
         entry_id=entry_id,
         name=entry.name,
         IBAN=entry.iban,
+        HETU=entry.gov_id,
         Pvm=entry.submission_date,
-        rows=parts,
+        rows=rows,
     )
 
     return Response(

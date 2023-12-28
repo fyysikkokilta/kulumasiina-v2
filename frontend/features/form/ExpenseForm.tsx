@@ -202,14 +202,7 @@ export function ExpenseForm() {
     setSubmitting(true);
     const formData = mainForm.getFieldsValue();
     const items = entries.filter((e) => e.kind === "item");
-    const mileages = entries
-      .filter((e) => e.kind === "mileage")
-      .map((m) => {
-        return {
-          ...m,
-          gov_id: formData.gov_id,
-        };
-      });
+    const mileages = entries.filter((e) => e.kind === "mileage");
     // const value_cents =
     const data: postInterface = {
       ...formData,
