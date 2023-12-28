@@ -37,7 +37,6 @@ class ItemUpdate(BaseModel):
 
 # NOTE: This is not exposed to the frontend yet due to the data privacy concerns.
 class MileageCreate(BaseModel):
-    gov_id: str  # TODO: GDPR
     description: str
     date: date
     route: str
@@ -48,7 +47,6 @@ class MileageCreate(BaseModel):
 class Mileage(MileageCreate):
     model_config = ConfigDict(from_attributes=True)
     id: int
-    gov_id: str  # TODO: GDPR
 
 
 class _EntryBase(BaseModel):
@@ -56,6 +54,7 @@ class _EntryBase(BaseModel):
     contact: str
     iban: str
     title: str
+    gov_id: str | None  # TODO: GDPR
 
 
 class EntryCreate(_EntryBase):

@@ -58,7 +58,6 @@ class Base(DeclarativeBase):
 class Mileage(Base):
     __tablename__ = "mileage"
     entry_id = mapped_column(ForeignKey("entry.id"))
-    gov_id: Mapped[str]  # TODO: GDPR
     date: Mapped[date]
     description: Mapped[str]
     route: Mapped[str]
@@ -103,7 +102,7 @@ class Entry(Base):
 
     archived: Mapped[bool] = mapped_column(default=False)
 
-    # gov_id : Mapped[str]
+    gov_id: Mapped[str | None] = mapped_column(default=None) # TODO: GDPR
     # TODO: status enum tms?
     status: Mapped[str] = mapped_column(
         default="submitted"
