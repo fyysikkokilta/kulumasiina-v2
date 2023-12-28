@@ -28,8 +28,6 @@ from fastapi_sso.sso.google import GoogleSSO
 from jose import jwt
 import httpx
 
-MILEAGE_REIMBURSEMENT_RATE = 0.22
-
 models.Base.metadata.create_all(bind=engine)
 
 
@@ -205,7 +203,7 @@ async def get_entry_pdf(
         parts.append(part)
     for mileage in entry.mileages:
         part = pdf_util.Part(
-            hinta=str(mileage.distance * MILEAGE_REIMBURSEMENT_RATE) + "e",
+            hinta=str(mileage.distance * float(os.environ("MILEAGE_REIMBURSEMENT_RATE"))) + "e",
             selite=f"Mileage: {mileage.description}:\n{mileage.route} ({mileage.distance} km)\nPlate no: {mileage.plate_no}",
             liitteet=[],
         )
@@ -258,7 +256,7 @@ async def get_entry_csv(
         ))
     for mileage in entry.mileages:
         rows.append(csv_util.Row(
-            yksikkohinta=MILEAGE_REIMBURSEMENT_RATE,
+            yksikkohinta=float(os.environ("MILEAGE_REIMBURSEMENT_RATE")),
             selite=f"Kilometrikorvaus: {mileage.description}",
             maara=mileage.distance,
             matkalasku=True,
