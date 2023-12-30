@@ -1,8 +1,8 @@
 import React from "react";
-import { Modal, Form, DatePicker, Button, Input } from "antd";
+import { Modal, Form, DatePicker, Button } from "antd";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { hideConfirmPaymentModal } from "./adminSlice";
-import { approveEntry, payEntry } from "./api";
+import { payEntry } from "./api";
 import { loadItems } from "./EntryView";
 import dayjs, { Dayjs } from "dayjs";
 export const ConfirmPaymentModal: React.FC<{ entry_id: number }> = ({
