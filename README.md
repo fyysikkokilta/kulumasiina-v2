@@ -15,7 +15,7 @@ Kulukorvauslomake Fyysikkokillalle.
 
 
 ## High prio TODO
-- SEURAAVASSA DEPLOYSSA `contact VARCHAR NOT NULL DEFAULT ''` ja `archived BOOLEAN NOT NULL DEFAULT false` sarakkeiden `entry`-tauluun lisäys tai vastaava komento kantaan tai systeemi hajoaa.
+- SEURAAVASSA DEPLOYSSA `contact VARCHAR NOT NULL DEFAULT ''` ja `archived BOOLEAN NOT NULL DEFAULT false` sarakkeiden lisäys `entry`-tauluun tai systeemi hajoaa.
 - Voiko `receipt` poistaa, jos `entry` on arkistoitu ja siitä on tallennettu PDF?.
 - CSV exportaus: https://support.procountor.fi/hc/fi/articles/360000256417-Laskuaineiston-siirtotiedosto
 
