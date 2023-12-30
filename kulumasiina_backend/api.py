@@ -234,9 +234,25 @@ async def get_entry_pdf(
         headers={"Content-Disposition": f"attachment; filename={document_name}"},
     )
 
+def assert_status_in(entry_id, statuses, db):
+    entry = crud.get_entry_by_id(entry_id, db)
+    if entry is None:
+        raise HTTPException(404)
+    if entry.status not in statuses:
+        raise HTTPException(400, "Entry has wrong status for current operation")
+    
+    
+def assert_archived(entry_id, db):
+    entry = crud.get_entry_by_id(entry_id, db)
+    if entry is None:
+        raise HTTPException(404)
+    if not entry.archived:
+        raise HTTPException(400, "Entry not archived")
+
 
 @api_router.delete("/entry/{entry_id}")
 def del_entry(entry_id, db: Session = Depends(get_db), user=Depends(get_user)):
+    assert_archived(entry_id, db)
     return crud.delete_entry(entry_id, db)
 
 
@@ -252,23 +268,19 @@ async def approve_entry(
     db: Session = Depends(get_db),
     user=Depends(get_user),
 ):
-    # Get request body
-    print(entry_id)
-    print(data.date)
-    # TODO: Update PDF here
-
+    assert_status_in(entry_id, ["submitted"], db)
     return crud.approve_entry(entry_id, data.date.date(), data.approval_note, db)
 
 
 @api_router.post("/deny/{entry_id}")
 def deny_entry(entry_id, db: Session = Depends(get_db), user=Depends(get_user)):
-    # TODO: Update PDF here
+    assert_status_in(entry_id, ["submitted"], db)
     return crud.deny_entry(entry_id, db)
 
 
 @api_router.post("/reset/{entry_id}")
 def reset_entry(entry_id, db: Session = Depends(get_db), user=Depends(get_user)):
-    # TODO: Update PDF here
+    assert_status_in(entry_id, ["approved", "denied", "paid"], db)
     return crud.reset_entry_status(entry_id, db)
 
 
@@ -280,13 +292,14 @@ class PayBody(BaseModel):
 def pay_entry(
     entry_id: int, data: PayBody, db: Session = Depends(get_db), user=Depends(get_user)
 ):
-    # TODO: Update PDF here
+    assert_status_in(entry_id, ["approved"], db)
     return crud.pay_entry(entry_id, data.date, db)
 
 @api_router.post("/archive/{entry_id}")
 def archive_entry(
     entry_id: int, db: Session = Depends(get_db), user=Depends(get_user)
 ):
+    assert_status_in(entry_id, ["denied", "paid"], db)
     return crud.archive_entry(entry_id, db)
 
 
