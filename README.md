@@ -15,10 +15,8 @@ Kulukorvauslomake Fyysikkokillalle.
 
 
 ## High prio TODO
-- SEURAAVASSA DEPLOYSSA `ALTER TABLE entry ADD contact VARCHAR NOT NULL DEFAULT ''` tai vastaava komento kantaan tai systeemi hajoaa.
-- Poistosta "arkistoi", jolloin status ei enää muutettavissa.
-- Arkistoidut `entry`t pystyy poistamaan vain erillisellä dialogilla
-  - Myöhemmin ihmettelyä voiko `receipt` poistaa, jos `entry` on arkistoitu ja siitä on tallennettu PDF.
+- SEURAAVASSA DEPLOYSSA `contact VARCHAR NOT NULL DEFAULT ''` ja `archived BOOLEAN NOT NULL DEFAULT false` sarakkeiden `entry`-tauluun lisäys tai vastaava komento kantaan tai systeemi hajoaa.
+- Voiko `receipt` poistaa, jos `entry` on arkistoitu ja siitä on tallennettu PDF?.
 - CSV exportaus: https://support.procountor.fi/hc/fi/articles/360000256417-Laskuaineiston-siirtotiedosto
 
 ## Muuta TODO
@@ -29,7 +27,7 @@ Kulukorvauslomake Fyysikkokillalle.
 
 ## Nice to have
 - [ ] Postgres db
-- [ ] Vanhojen kuittien/korvausten arkistointi -> Zip pdf lataus (Uusi tila "arkistoitu" näille)
+- [ ] Vanhojen kuittien/korvausten arkistointi -> Zip pdf lataus
 - [ ] Login token refreshaus
 - [ ] Migraatiotuki
 - [ ] CI/CD (not gonna happen :D)
