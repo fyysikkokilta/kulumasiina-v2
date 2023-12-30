@@ -242,12 +242,11 @@ const expandedRowRender = (record: tableSubmission) => {
         <Button onClick={() => window.open(`/api/entry/${record.id}/pdf`)}>
           Download pdf
         </Button>
-        {record.status === "paid" ||
-          (record.status === "approved" && (
-            <Button onClick={() => window.open(`/api/entry/${record.id}/csv`)}>
-              Download csv
-            </Button>
-          ))}
+        {(record.status === "paid" || record.status === "approved") && (
+          <Button onClick={() => window.open(`/api/entry/${record.id}/csv`)}>
+            Download csv
+          </Button>
+        )}
       </Space>
       <br />
       <br />
