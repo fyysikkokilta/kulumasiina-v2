@@ -8,23 +8,19 @@ import {
   stopLoading,
   showDateModal,
   showConfirmPaymentModal,
+  showRemoveItemModal,
 } from "./adminSlice";
 import type { ColumnsType } from "antd/es/table";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 
 import { mileageReimbursementRate, EURFormat, KMFormat } from "../utils";
-import {
-  deleteEntry,
-  denyEntry,
-  getEntries,
-  payEntry,
-  resetEntry,
-} from "./api";
+import { archiveEntry, denyEntry, getEntries, resetEntry } from "./api";
 import { Receipt } from "./Receipt";
 import { AppDispatch } from "app/store";
 import SubmitDateModal from "./SubmitDateModal";
 import { ConfirmPaymentModal } from "./ConfirmPaymentModal";
 import { useLoaderData } from "react-router-dom";
+import RemoveItemModal from "./RemoveItemModal";
 export const loadItems = (dispatch: AppDispatch) => {
   getEntries().then((entries) => {
     dispatch(loadSubmissions(entries));
@@ -125,6 +121,25 @@ const columns = (entries: tableSubmission[]): ColumnsType<tableSubmission> => {
         },
       ],
       onFilter: (value, record) => record.status === value,
+    },
+    {
+      title: "Archived",
+      dataIndex: "archived",
+      key: "archived",
+      render: (value) => (value ? "yes" : "no"),
+      // Allow filtering by archived status.
+      filters: [
+        {
+          text: "Archived",
+          value: true,
+        },
+        {
+          text: "Not archived",
+          value: false,
+        },
+      ],
+      onFilter: (value, record) => record.archived === value,
+      defaultFilteredValue: ["false"],
     },
   ];
 };
@@ -243,7 +258,7 @@ const expandedRowRender = (record: tableSubmission) => {
             Mark as paid
           </Button>
         )}
-        {record.status !== "submitted" && (
+        {record.status !== "submitted" && !record.archived && (
           <>
             <Button
               onClick={() =>
@@ -254,12 +269,25 @@ const expandedRowRender = (record: tableSubmission) => {
             </Button>
           </>
         )}
-        <Button
-          danger
-          onClick={() => deleteEntry(record.id).then(() => loadItems(dispatch))}
-        >
-          Remove
-        </Button>
+        {(record.status === "paid" || record.status === "denied") &&
+          !record.archived && (
+            <Button
+              danger
+              onClick={() =>
+                archiveEntry(record.id).then(() => loadItems(dispatch))
+              }
+            >
+              Archive
+            </Button>
+          )}
+        {record.archived && (
+          <Button
+            danger
+            onClick={() => dispatch(showRemoveItemModal(record.id))}
+          >
+            Remove
+          </Button>
+        )}
       </Space>
     </>
   );
@@ -287,6 +315,7 @@ export function AdminEntryView() {
     <>
       <ConfirmPaymentModal entry_id={selected} />
       <SubmitDateModal entry_id={selected} />
+      <RemoveItemModal entry_id={selected} />
       <Typography.Title level={3}>Submissions</Typography.Title>
       <Table
         dataSource={sumEnties}

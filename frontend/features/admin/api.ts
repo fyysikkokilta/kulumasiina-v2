@@ -36,3 +36,7 @@ export const payEntry = async (id: number, paidDate: string) => {
     date: paidDate,
   });
 };
+
+export const archiveEntry = async (id: number) => {
+  await api.post(`/archive/${id}`);
+};

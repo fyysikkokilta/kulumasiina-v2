@@ -28,6 +28,7 @@ export interface SubmissionState {
   title: string;
   contact: string;
   status: string;
+  archived: boolean;
   items: Array<ItemState>;
   mileages: Array<MileageState>;
 }
@@ -36,6 +37,7 @@ export interface AdminState {
   loading: boolean;
   dateModal: boolean;
   confirmPaymentModal: boolean;
+  removeItemModal: boolean;
   selected: number;
 }
 
@@ -44,6 +46,7 @@ const initialState: AdminState = {
   loading: false,
   dateModal: false,
   confirmPaymentModal: false,
+  removeItemModal: false,
   selected: 0,
 };
 
@@ -80,6 +83,13 @@ export const adminSlice = createSlice({
     hideConfirmPaymentModal: (state) => {
       state.confirmPaymentModal = false;
     },
+    showRemoveItemModal: (state, action: PayloadAction<number>) => {
+      state.removeItemModal = true;
+      state.selected = action.payload;
+    },
+    hideRemoveItemModal: (state) => {
+      state.removeItemModal = false;
+    },
   },
 });
 
@@ -93,6 +103,8 @@ export const {
   hideDateModal,
   showConfirmPaymentModal,
   hideConfirmPaymentModal,
+  showRemoveItemModal,
+  hideRemoveItemModal,
 } = adminSlice.actions;
 
 export default adminSlice.reducer;

@@ -127,10 +127,10 @@ const router = createBrowserRouter([
         .get("/entries")
         .then((r) => r.data)
         .catch((e) => {
-          if (e?.response?.status !== 200) {
+          if (e?.response?.status === 401) {
             return redirect("/");
           }
-          return null;
+          return [];
         });
     },
   },

@@ -101,6 +101,8 @@ class Entry(Base):
     # Meeting number or other info identifying where the reimbursement was approved (signature/meeting)
     approval_note: Mapped[str | None] = mapped_column(default=None)
 
+    archived: Mapped[bool] = mapped_column(default=False)
+
     # gov_id : Mapped[str]
     # TODO: status enum tms?
     status: Mapped[str] = mapped_column(

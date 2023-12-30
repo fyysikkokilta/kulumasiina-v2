@@ -283,6 +283,12 @@ def pay_entry(
     # TODO: Update PDF here
     return crud.pay_entry(entry_id, data.date, db)
 
+@api_router.post("/archive/{entry_id}")
+def archive_entry(
+    entry_id: int, db: Session = Depends(get_db), user=Depends(get_user)
+):
+    return crud.archive_entry(entry_id, db)
+
 
 @api_router.get("/userdata")
 def user_data(user=Depends(get_user)):

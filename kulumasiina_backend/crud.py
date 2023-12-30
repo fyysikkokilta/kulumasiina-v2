@@ -138,6 +138,14 @@ def pay_entry(id: int, date: datetime, db: Session):
     )
     db.commit()
 
+def archive_entry(id: int, db: Session):
+    db.query(models.Entry).filter(models.Entry.id == id).update(
+        {
+            models.Entry.archived: True,
+        }
+    )
+    db.commit()
+
 
 def reset_entry_status(id: int, db: Session):
     db.query(models.Entry).filter(models.Entry.id == id).update(
