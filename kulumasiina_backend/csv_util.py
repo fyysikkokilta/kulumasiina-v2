@@ -34,20 +34,22 @@ def generate_csv(
 
   f = StringIO()
 
-  writer = csv.writer(f)
+  writer = csv.writer(f, delimiter=";")
 
   #Info about the CSV form is found here https://support.procountor.fi/hc/fi/articles/360000256417-Laskuaineiston-siirtotiedosto
 
   #Expenses
   if hasExpenses(rows):
-    writer.writerow(["K", "EUR", "", IBAN, "", "Tilisiirto", name, "", 0, "t", "t", 0, Pvm.strftime("%d.%m.%Y"), "", Pvm.strftime("%d.%m.%Y"), "", "", "", "", "", "", "", "", "", "", 6, "", "", "t", "", "", "", "", "liite.pdf"])
+    #Indeksi 34 on liitetiedoston nimi
+    writer.writerow(["K", "EUR", "", IBAN, "", "Tilisiirto", name, "", 0, "t", "t", 0, Pvm.strftime("%d.%m.%Y"), "", Pvm.strftime("%d.%m.%Y"), "", "", "", "", "", "", "", "", "", "", 6, "", "", "t"])
     for row in filter(isExpense, rows):
       #TYHJÄ, tuotteen kuvaus, tuotteen koodi, määrä (1 tai kilometrien määrä), yksikkö	(kpl tai km), yksikköhinta euroissa,	rivin alennusprosentti, rivin ALV, rivikommentti, TYHJÄ, TYHJÄ, TYHJÄ, TYHJÄ, kirjanpitotili
       writer.writerow(["", row["selite"], "", row["maara"], "kpl", row["yksikkohinta"], 0, 0])
   
   #Mileages
   if hasMileages(rows):
-    writer.writerow(["M", "EUR", "", IBAN, HETU, "Tilisiirto", name, "", 0, "t", "t", 0, Pvm.strftime("%d.%m.%Y"), "", Pvm.strftime("%d.%m.%Y"), "", "", "", "", "", "", "", "", "", "", 6, "", "", "t", "", "", "", "", "liite.pdf"])
+    #Indeksi 34 on liitetiedoston nimi
+    writer.writerow(["M", "EUR", "", IBAN, HETU, "Tilisiirto", name, "", 0, "t", "t", 0, Pvm.strftime("%d.%m.%Y"), "", Pvm.strftime("%d.%m.%Y"), "", "", "", "", "", "", "", "", "", "", 6, "", "", "t"])
     for row in filter(isMileage, rows):
       #TYHJÄ, tuotteen kuvaus, tuotteen koodi, määrä (1 tai kilometrien määrä), yksikkö	(kpl tai km), yksikköhinta euroissa,	rivin alennusprosentti, rivin ALV, rivikommentti, TYHJÄ, TYHJÄ, TYHJÄ, TYHJÄ, kirjanpitotili
       writer.writerow(["", row["selite"], os.environ("MILEAGE_PROCOUNTOR_PRODUCT_ID"), row["maara"], "km", row["yksikkohinta"], 0, 0])

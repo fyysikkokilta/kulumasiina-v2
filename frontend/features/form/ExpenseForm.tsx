@@ -206,6 +206,7 @@ export function ExpenseForm() {
     // const value_cents =
     const data: postInterface = {
       ...formData,
+      gov_id: needGovId ? formData.gov_id : null,
       items: items,
       mileages: mileages,
     };
