@@ -23,6 +23,7 @@ Kulukorvauslomake Fyysikkokillalle.
 - Front muista admin `hyväksytty` kentän tekstin ja päivämäärän
 - IBAN validaatio backendissä
 - Filtteröinti lähetyspäivän mukaan date rangena (ei suoraan tuettu käytetyssä fronttikirjastossa)
+- Lomakkeen editointimahdollisuus admin-sivulla
 
 
 ## Nice to have
