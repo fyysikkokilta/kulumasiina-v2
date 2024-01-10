@@ -250,7 +250,7 @@ export const ItemModal = (props: ExpenseModalProps) => {
           <Input
             suffix="€"
             placeholder="0.00"
-            inputMode="numeric"
+            inputMode="decimal"
             step="0.01"
             min="0"
             lang="en" // TODO: Make this sync with selected language from i18n (fi/en)
