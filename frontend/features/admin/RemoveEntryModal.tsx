@@ -1,20 +1,20 @@
 import React from "react";
 import { Modal, Form, Button, Typography } from "antd";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { hideRemoveItemModal } from "./adminSlice";
+import { hideRemoveEntryModal } from "./adminSlice";
 import { deleteEntry } from "./api";
 import { loadItems } from "./EntryView";
-export const RemoveItemModal: React.FC<{ entry_id: number }> = ({
+export const RemoveEntryModal: React.FC<{ entry_id: number }> = ({
   entry_id,
 }) => {
   const dispatch = useAppDispatch();
-  const show = useAppSelector((state) => state.admin.removeItemModal);
+  const show = useAppSelector((state) => state.admin.removeEntryModal);
   // disable @typescript-eslint/no-explicit-any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSubmit = () => {
     deleteEntry(entry_id)
       .then(() => loadItems(dispatch))
-      .then(() => dispatch(hideRemoveItemModal()));
+      .then(() => dispatch(hideRemoveEntryModal()));
   };
   return (
     <>
@@ -22,7 +22,7 @@ export const RemoveItemModal: React.FC<{ entry_id: number }> = ({
         title="Remove item"
         open={show}
         footer={[]}
-        onCancel={() => dispatch(hideRemoveItemModal())}
+        onCancel={() => dispatch(hideRemoveEntryModal())}
       >
         <Form onFinish={handleSubmit}>
           <Form.Item>
@@ -41,7 +41,7 @@ export const RemoveItemModal: React.FC<{ entry_id: number }> = ({
             </Button>
             <Button
               key="cancel"
-              onClick={() => dispatch(hideRemoveItemModal())}
+              onClick={() => dispatch(hideRemoveEntryModal())}
             >
               Cancel
             </Button>
@@ -52,4 +52,4 @@ export const RemoveItemModal: React.FC<{ entry_id: number }> = ({
   );
 };
 
-export default RemoveItemModal;
+export default RemoveEntryModal;

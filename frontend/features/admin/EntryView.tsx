@@ -8,7 +8,8 @@ import {
   stopLoading,
   showDateModal,
   showConfirmPaymentModal,
-  showRemoveItemModal,
+  showRemoveEntryModal,
+  showEditItemModal,
 } from "./adminSlice";
 import type { ColumnsType } from "antd/es/table";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
@@ -20,7 +21,8 @@ import { AppDispatch } from "app/store";
 import SubmitDateModal from "./SubmitDateModal";
 import { ConfirmPaymentModal } from "./ConfirmPaymentModal";
 import { useLoaderData } from "react-router-dom";
-import RemoveItemModal from "./RemoveItemModal";
+import RemoveItemModal from "./RemoveEntryModal";
+import EditItemModal from "./EditItemModal";
 export const loadItems = (dispatch: AppDispatch) => {
   getEntries().then((entries) => {
     dispatch(loadSubmissions(entries));
@@ -171,11 +173,15 @@ const renderMileage = (mileage: MileageState) => {
 };
 
 const renderItem = (item: ItemState) => {
+  const dispatch = useAppDispatch();
   return (
-    <Typography.Text>
-      Item: <strong>{item.date}</strong>{" "}
-      {EURFormat.format(item.value_cents / 100)}
-    </Typography.Text>
+    <Space>
+      <Typography.Text>
+        Item: <strong>{item.date}</strong>{" "}
+        {EURFormat.format(item.value_cents / 100)}
+      </Typography.Text>
+      <Button onClick={() => dispatch(showEditItemModal(item))}>Edit</Button>
+    </Space>
   );
 };
 
@@ -283,7 +289,7 @@ const expandedRowRender = (record: tableSubmission) => {
         {record.archived && (
           <Button
             danger
-            onClick={() => dispatch(showRemoveItemModal(record.id))}
+            onClick={() => dispatch(showRemoveEntryModal(record.id))}
           >
             Remove
           </Button>
@@ -311,11 +317,13 @@ export function AdminEntryView() {
     };
   });
   const selected = useAppSelector((state) => state.admin.selected);
+  const selectedItem = useAppSelector((state) => state.admin.selectedItem);
   return (
     <>
       <ConfirmPaymentModal entry_id={selected} />
       <SubmitDateModal entry_id={selected} />
       <RemoveItemModal entry_id={selected} />
+      <EditItemModal item={selectedItem} />
       <Typography.Title level={3}>Submissions</Typography.Title>
       <Table
         dataSource={sumEnties}

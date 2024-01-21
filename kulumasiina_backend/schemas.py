@@ -32,6 +32,8 @@ class Item(ItemCreate):
     id: int
     receipts: list[ReceiptResponse]
 
+class ItemUpdate(BaseModel):
+    value_cents: int
 
 # NOTE: This is not exposed to the frontend yet due to the data privacy concerns.
 class MileageCreate(BaseModel):

@@ -40,3 +40,10 @@ export const payEntry = async (id: number, paidDate: string) => {
 export const archiveEntry = async (id: number) => {
   await api.post(`/archive/${id}`);
 };
+
+export const modifyItem = async (
+  item_id: number,
+  body: { value_cents: number },
+) => {
+  await api.post(`/item/${item_id}`, body);
+};

@@ -302,6 +302,15 @@ def archive_entry(
     assert_status_in(entry_id, ["denied", "paid"], db)
     return crud.archive_entry(entry_id, db)
 
+@api_router.post("/item/{item_id}")
+def update_item(
+    item_id: int,
+    item: schemas.ItemUpdate,
+    db: Session = Depends(get_db),
+    user=Depends(get_user),
+):
+    return crud.update_item(item_id, item, db)
+
 
 @api_router.get("/userdata")
 def user_data(user=Depends(get_user)):

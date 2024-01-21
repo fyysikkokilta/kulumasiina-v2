@@ -37,17 +37,32 @@ export interface AdminState {
   loading: boolean;
   dateModal: boolean;
   confirmPaymentModal: boolean;
-  removeItemModal: boolean;
+  removeEntryModal: boolean;
   selected: number;
+  editItemModal: boolean;
+  selectedItem: ItemState;
 }
 
+const initialItemState: ItemState = {
+  id: 0,
+  description: "",
+  date: "",
+  value_cents: 0,
+  receipts: [],
+};
+
 const initialState: AdminState = {
+  // Page state
   submissions: [],
   loading: false,
+  // Entry status
   dateModal: false,
   confirmPaymentModal: false,
-  removeItemModal: false,
+  removeEntryModal: false,
   selected: 0,
+  // Item state
+  editItemModal: false,
+  selectedItem: initialItemState,
 };
 
 export const adminSlice = createSlice({
@@ -83,12 +98,20 @@ export const adminSlice = createSlice({
     hideConfirmPaymentModal: (state) => {
       state.confirmPaymentModal = false;
     },
-    showRemoveItemModal: (state, action: PayloadAction<number>) => {
-      state.removeItemModal = true;
+    showRemoveEntryModal: (state, action: PayloadAction<number>) => {
+      state.removeEntryModal = true;
       state.selected = action.payload;
     },
-    hideRemoveItemModal: (state) => {
-      state.removeItemModal = false;
+    hideRemoveEntryModal: (state) => {
+      state.removeEntryModal = false;
+    },
+    showEditItemModal: (state, action: PayloadAction<ItemState>) => {
+      state.editItemModal = true;
+      state.selectedItem = action.payload;
+    },
+    hideEditItemModal: (state) => {
+      state.editItemModal = false;
+      state.selectedItem = initialItemState;
     },
   },
 });
@@ -103,8 +126,10 @@ export const {
   hideDateModal,
   showConfirmPaymentModal,
   hideConfirmPaymentModal,
-  showRemoveItemModal,
-  hideRemoveItemModal,
+  showRemoveEntryModal,
+  hideRemoveEntryModal,
+  showEditItemModal,
+  hideEditItemModal,
 } = adminSlice.actions;
 
 export default adminSlice.reducer;

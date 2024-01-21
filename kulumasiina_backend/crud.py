@@ -158,3 +158,11 @@ def reset_entry_status(id: int, db: Session):
         }
     )
     db.commit()
+
+def update_item(id: int, item: schemas.ItemUpdate, db: Session):
+    db.query(models.Item).filter(models.Item.id == id).update(
+        {
+            models.Item.value_cents: item.value_cents,
+        }
+    )
+    db.commit()
