@@ -48,6 +48,10 @@ if "JWT_EXPIRY_MINUTES" not in os.environ:
     raise Exception("JWT_EXPIRY_MINUTES not set. Please set it in .env")
 if "CORS_ALLOWED_ORIGINS" not in os.environ:
     raise Exception("CORS_ALLOWED_ORIGINS not set. Please set it in .env")
+if "MILEAGE_REIMBURSEMENT_RATE" not in os.environ:
+    raise Exception("MILEAGE_REIMBURSEMENT_RATE not set. Please set it in .env")
+if "MILEAGE_PROCOUNTOR_PRODUCT_ID" not in os.environ:
+    raise Exception("MILEAGE_PROCOUNTOR_PRODUCT_ID not set. Please set it in .env")
 
 HOSTER_OVER_HTTP = os.environ["OAUTH_REDIR_URL"].startswith("http://")
 if HOSTER_OVER_HTTP and not bool(int(os.environ["OAUTH_ALLOW_INSECURE_HTTP"])):
