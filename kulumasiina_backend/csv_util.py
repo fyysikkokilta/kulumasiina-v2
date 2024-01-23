@@ -58,4 +58,4 @@ def generate_csv(
   date = Pvm.strftime("%d-%m-%Y")
   document_name = f"{sanitized_name}-{date}-{entry_id}.csv"
   
-  return document_name, f.getvalue().encode("utf-8")
+  return document_name, f.getvalue().encode("cp1252")
