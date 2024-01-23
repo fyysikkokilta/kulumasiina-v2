@@ -16,13 +16,11 @@ Kulukorvauslomake Fyysikkokillalle.
 
 ## High prio TODO
 - Voiko `receipt` poistaa, jos `entry` on arkistoitu ja siitä on tallennettu PDF?.
-- CSV exportaus: https://support.procountor.fi/hc/fi/articles/360000256417-Laskuaineiston-siirtotiedosto
 
 ## Muuta TODO
 - Front muista admin `hyväksytty` kentän tekstin ja päivämäärän
 - IBAN validaatio backendissä
 - Filtteröinti lähetyspäivän mukaan date rangena (ei suoraan tuettu käytetyssä fronttikirjastossa)
-- Lomakkeen editointimahdollisuus admin-sivulla
 
 
 ## Nice to have
