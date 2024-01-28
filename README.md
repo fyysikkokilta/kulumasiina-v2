@@ -16,6 +16,7 @@ Kulukorvauslomake Fyysikkokillalle.
 
 ## High prio TODO
 - Voiko `receipt` poistaa, jos `entry` on arkistoitu ja siitä on tallennettu PDF?.
+- Multiselect ZIP-exporttaus. (lomakkeet, joissa sama tilinumero voi yhdistää saman kulukorvauksen/matkakorvauksen alle)
 
 ## Muuta TODO
 - Front muista admin `hyväksytty` kentän tekstin ja päivämäärän
