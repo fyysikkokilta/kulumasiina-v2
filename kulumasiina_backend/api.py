@@ -183,18 +183,8 @@ async def get_receipt(
     buffer.write(crud.get_receipt_data(receipt_id, db))
     return Response(buffer.getvalue())
 
-
-@api_router.get("/entry/{entry_id}/pdf")
-async def get_entry_pdf(
-    entry_id,
-    db: Session = Depends(get_db),
-    user=Depends(get_user),
-):
+def generate_parts(entry):
     parts = []
-    entry = crud.get_entry_by_id(entry_id, db)
-    if entry is None:
-        raise HTTPException(404)
-
     for item in entry.items:
         liitteet = []
         for liite in item.receipts:
@@ -212,6 +202,19 @@ async def get_entry_pdf(
             liitteet=[],
         )
         parts.append(part)
+    return parts
+
+@api_router.get("/entry/{entry_id}/pdf")
+async def get_entry_pdf(
+    entry_id,
+    db: Session = Depends(get_db),
+    user=Depends(get_user),
+):
+    entry = crud.get_entry_by_id(entry_id, db)
+    if entry is None:
+        raise HTTPException(404)
+
+    parts = generate_parts(entry)
 
     if entry.status not in {"approved", "paid", "submitted", "denied"}:
         raise HTTPException(500, "Invalid status")
@@ -266,6 +269,23 @@ async def get_entry_csv(
             matkalasku=True,
         ))
 
+    pdf = None
+    if entry.status == "paid":
+        parts = generate_parts(entry)
+        pdf = pdf_util.generate_combined_pdf(
+            status=entry.status,
+            entry_id=entry_id,
+            name=entry.name,
+            IBAN=entry.iban,
+            Pvm=entry.submission_date,
+            reason=entry.title,
+            parts=parts,
+            accepted_date=entry.approval_date,
+            accepted_note=entry.approval_note,
+            paid=entry.paid_date,
+            rejection_date=entry.rejection_date,
+        )
+
     document_name, csv = csv_util.generate_csv(
         entry_id=entry_id,
         name=entry.name,
@@ -273,6 +293,7 @@ async def get_entry_csv(
         HETU=entry.gov_id,
         Pvm=entry.submission_date,
         rows=rows,
+        pdf=pdf,
     )
 
     return Response(

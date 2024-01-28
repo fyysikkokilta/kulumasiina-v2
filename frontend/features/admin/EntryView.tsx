@@ -244,7 +244,7 @@ const expandedRowRender = (record: tableSubmission) => {
         </Button>
         {(record.status === "paid" || record.status === "approved") && (
           <Button onClick={() => window.open(`/api/entry/${record.id}/csv`)}>
-            Download csv
+            {record.status === "paid" ? "Download zip" : "Download csv"}
           </Button>
         )}
       </Space>
