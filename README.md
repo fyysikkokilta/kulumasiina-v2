@@ -16,6 +16,8 @@ Kulukorvauslomake Fyysikkokillalle.
 
 ## High prio TODO
 - Voiko `receipt` poistaa, jos `entry` on arkistoitu ja siitä on tallennettu PDF?.
+- Liitteiden koko pienennetään uploadin yhteydessä
+- Matka- ja kululaskuja ei voi laittaa samaan lomakkeeseen (ongelmallinen PDF:n takia, tulevat eri laskuun Procountorissa)
 
 ## Muuta TODO
 - Front muista admin `hyväksytty` kentän tekstin ja päivämäärän
