@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Typography, Table, Button, Space } from "antd";
 import {
   type SubmissionState,
@@ -316,6 +316,8 @@ export function AdminEntryView() {
   const adminEntries = useAppSelector((state) => state.admin.submissions);
   const loading = useAppSelector((state) => state.admin.loading);
 
+  const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
+
   const sumEnties: Array<tableSubmission> = adminEntries.map((entry) => {
     return {
       ...entry,
@@ -325,14 +327,51 @@ export function AdminEntryView() {
   });
   const selected = useAppSelector((state) => state.admin.selected);
   const selectedItem = useAppSelector((state) => state.admin.selectedItem);
+
+  // rowSelection object indicates the need for row selection
+  const rowSelection = {
+    onChange: (selectedRowKeys: React.Key[]) => {
+      setSelectedIndices(selectedRowKeys as number[]);
+    },
+    getCheckboxProps: (record: tableSubmission) => ({
+      name: String(record.id),
+      disabled: record.status !== "paid",
+    }),
+  };
+
   return (
     <>
       <ConfirmPaymentModal entry_id={selected} />
       <SubmitDateModal entry_id={selected} />
       <RemoveItemModal entry_id={selected} />
       <EditItemModal item={selectedItem} />
-      <Typography.Title level={3}>Submissions</Typography.Title>
+      <Typography.Title level={3} style={{ display: "inline-block" }}>
+        Submissions
+      </Typography.Title>
+      {selectedIndices.length > 0 && (
+        <div
+          style={{
+            float: "right",
+            display: "inline-block",
+            marginBlockStart: "2em",
+          }}
+        >
+          <Button
+            onClick={() => {
+              window.open(
+                `/api/entry/multi/csv?entry_ids=${selectedIndices.join(",")}`,
+              );
+            }}
+          >
+            Download combined zip
+          </Button>
+        </div>
+      )}
       <Table
+        rowSelection={{
+          type: "checkbox",
+          ...rowSelection,
+        }}
         dataSource={sumEnties}
         columns={columns(sumEnties)}
         expandable={{

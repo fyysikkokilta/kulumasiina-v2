@@ -65,6 +65,9 @@ def get_item_receipts(item_id: int, db: Session):
 def get_entry_by_id(id: int, db: Session) -> models.Entry | None:
     return db.query(models.Entry).filter(models.Entry.id == id).first()
 
+def get_entries_by_ids(ids: list[int], db: Session) -> list[models.Entry]:
+    return db.query(models.Entry).where(models.Entry.id.in_(ids)).all()
+
 
 def get_item_by_id(id: int, db: Session) -> schemas.Item | None:
     db_item = db.query(models.Item).filter(models.Item.id == id).first()

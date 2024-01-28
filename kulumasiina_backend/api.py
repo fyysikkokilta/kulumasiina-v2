@@ -239,6 +239,71 @@ async def get_entry_pdf(
         headers={"Content-Disposition": f"attachment; filename={document_name}"},
     )
 
+@api_router.get("/entry/multi/csv")
+async def get_multi_entry_csv(
+    entry_ids: str,
+    db: Session = Depends(get_db),
+    user=Depends(get_user),
+):
+    ids = entry_ids.split(",")
+    entries = crud.get_entries_by_ids(ids, db)
+    if len(entries) != len(ids):
+        raise HTTPException(404)
+    if any([entry.status not in {"paid"} for entry in entries]):
+        raise HTTPException(500, "Invalid status")
+
+    pdf_infos = []
+
+    for entry in entries:
+        rows = []
+        for item in entry.items:
+            rows.append(csv_util.Row(
+                yksikkohinta=str(item.value_cents / 100),
+                selite=item.description,
+                maara=1,
+                matkalasku=False,
+            ))
+        for mileage in entry.mileages:
+            rows.append(csv_util.Row(
+                yksikkohinta=float(os.environ("MILEAGE_REIMBURSEMENT_RATE")),
+                selite=f"Kilometrikorvaus: {mileage.description}",
+                maara=mileage.distance,
+                matkalasku=True,
+            ))
+
+        parts = generate_parts(entry)
+        pdf = pdf_util.generate_combined_pdf(
+            status=entry.status,
+            entry_id=entry.id,
+            name=entry.name,
+            IBAN=entry.iban,
+            Pvm=entry.submission_date,
+            reason=entry.title,
+            parts=parts,
+            accepted_date=entry.approval_date,
+            accepted_note=entry.approval_note,
+            paid=entry.paid_date,
+            rejection_date=entry.rejection_date,
+        )
+
+        pdf_infos.append(csv_util.CsvInfo(
+            entry_id=entry.id,
+            name=entry.name,
+            IBAN=entry.iban,
+            HETU=entry.gov_id,
+            Pvm=entry.submission_date,
+            rows=rows,
+            pdf=pdf,
+        ))
+
+    document_name, csv = csv_util.generate_csv(pdf_infos)
+
+    return Response(
+        csv,
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={document_name}"},
+    )
+
 @api_router.get("/entry/{entry_id}/csv")
 async def get_entry_csv(
     entry_id,
@@ -286,7 +351,7 @@ async def get_entry_csv(
             rejection_date=entry.rejection_date,
         )
 
-    document_name, csv = csv_util.generate_csv(
+    document_name, csv = csv_util.generate_csv([csv_util.CsvInfo(
         entry_id=entry_id,
         name=entry.name,
         IBAN=entry.iban,
@@ -294,7 +359,7 @@ async def get_entry_csv(
         Pvm=entry.submission_date,
         rows=rows,
         pdf=pdf,
-    )
+    )])
 
     return Response(
         csv,
