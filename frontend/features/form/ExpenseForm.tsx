@@ -84,13 +84,6 @@ export function ExpenseForm() {
   const [expenseForm] = Form.useForm<ExpenseFormValues>();
   const [mileageForm] = Form.useForm<MileageFormValues>();
   const [mainForm] = Form.useForm();
-  const total = entries.reduce((acc, entry) => {
-    if (entry.kind === "item") {
-      return acc + entry.value_cents / 100;
-    } else {
-      return acc + entry.distance * mileageReimbursementRate;
-    }
-  }, 0);
 
   const defaultFiles: UploadFile[] = [];
   console.log("Edit target " + editTarget);
@@ -239,6 +232,14 @@ export function ExpenseForm() {
       return entry.kind === "item";
     }
   };
+
+  const total = entries.filter(filterBasedOnForm).reduce((acc, entry) => {
+    if (entry.kind === "item") {
+      return acc + entry.value_cents / 100;
+    } else {
+      return acc + entry.distance * mileageReimbursementRate;
+    }
+  }, 0);
 
   console.log({ entries, total, editTarget });
 

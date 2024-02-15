@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const mileageReimbursementRate = 0.22;
+export const mileageReimbursementRate = 0.25;
 
 export const EURFormat = new Intl.NumberFormat("fi-FI", {
   style: "currency",
