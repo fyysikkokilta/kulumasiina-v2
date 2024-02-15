@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { Button, Result, Divider, Form, Input } from "antd";
+import {
+  Button,
+  Result,
+  Divider,
+  Form,
+  Input,
+  Radio,
+  Typography,
+  Space,
+} from "antd";
 import type { UploadFile } from "antd/es/upload/interface";
 import { Mileage, Item } from "./EntryRow";
 import type { ColPropsMap } from "features/types";
@@ -63,6 +72,7 @@ const SuccessConfirm = ({ onConfirm }: SuccessConfirmProps) => (
 
 export function ExpenseForm() {
   const [modal, setModal] = useState<null | "expense" | "mileage">(null);
+  const [isMileage, setIsMileage] = useState(false);
   const [editTarget, setEditTarget] = useState<null | number>(null);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -81,7 +91,6 @@ export function ExpenseForm() {
       return acc + entry.distance * mileageReimbursementRate;
     }
   }, 0);
-  const needGovId = entries.some((entry) => entry.kind === "mileage");
 
   const defaultFiles: UploadFile[] = [];
   console.log("Edit target " + editTarget);
@@ -206,9 +215,9 @@ export function ExpenseForm() {
     // const value_cents =
     const data: postInterface = {
       ...formData,
-      gov_id: needGovId ? formData.gov_id : null,
-      items: items,
-      mileages: mileages,
+      gov_id: isMileage ? formData.gov_id : null,
+      items: !isMileage ? items : [],
+      mileages: isMileage ? mileages : [],
     };
     postForm(data).then((res) => {
       console.log(res);
@@ -223,7 +232,15 @@ export function ExpenseForm() {
     setSuccess(true);
   };
 
-  console.log({ entries, total, needGovId, editTarget });
+  const filterBasedOnForm = (entry: ItemState | MileageState) => {
+    if (isMileage) {
+      return entry.kind === "mileage";
+    } else {
+      return entry.kind === "item";
+    }
+  };
+
+  console.log({ entries, total, editTarget });
 
   if (success) {
     return <SuccessConfirm onConfirm={() => setSuccess(false)} />;
@@ -238,6 +255,24 @@ export function ExpenseForm() {
         form={mainForm}
         requiredMark={false}
       >
+        <Radio.Group
+          onChange={(e) => setIsMileage(e.target.value)}
+          value={isMileage}
+        >
+          <Space size="large" align="baseline">
+            <Typography.Title level={4} style={{ margin: 0 }}>
+              Reimbursement type:{" "}
+            </Typography.Title>
+            <Radio value={false}>Expense</Radio>
+            {/* Disable mileages for now since there's no clear
+              decision on how social security numbers are going to be handled.
+          */}
+            <Radio value={true} disabled>
+              Mileage
+            </Radio>
+          </Space>
+        </Radio.Group>
+        <Divider />
         <Form.Item
           name="name"
           label="Payee name"
@@ -292,7 +327,7 @@ export function ExpenseForm() {
             rows={1}
           />
         </Form.Item>
-        {needGovId ? (
+        {isMileage ? (
           <Form.Item
             name="gov_id"
             label="Personal ID code"
@@ -309,7 +344,7 @@ export function ExpenseForm() {
         ) : null}
         {entries.length > 0 ? <Divider /> : null}
         <div className="entries">
-          {entries.map((entry) => {
+          {entries.filter(filterBasedOnForm).map((entry) => {
             if (entry.kind === "item") {
               return (
                 <Item
@@ -348,15 +383,16 @@ export function ExpenseForm() {
             className="addButtons"
         > */}
         <div className="addButtons">
-          <Button type="default" onClick={showExpense} htmlType="button">
-            Add an expense
-          </Button>
-          {/* Disable mileages for now since there's no clear
-              decision on how social security numbers are going to be handled.
-          */}
-          {/* <Button type="default" onClick={showMileage} htmlType="button">
-            Add a mileage
-          </Button> */}
+          {!isMileage && (
+            <Button type="default" onClick={showExpense} htmlType="button">
+              Add an expense
+            </Button>
+          )}
+          {isMileage && (
+            <Button type="default" onClick={showMileage} htmlType="button">
+              Add a mileage
+            </Button>
+          )}
           <span className="total">
             <strong>Total:</strong> {EURFormat.format(total)}
           </span>

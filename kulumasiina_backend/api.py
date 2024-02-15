@@ -127,6 +127,10 @@ def create_access_token(username: str, expires_delta: timedelta):
 def create_entry(
     entry: schemas.EntryCreate, db: Session = Depends(get_db)
 ) -> schemas.Entry:
+    
+    if len(entry.items) > 0 and len(entry.mileages) > 0:
+        raise HTTPException(400, "Cannot have both items and mileages in the same entry")
+
     print("Creating entry")
 
     # TODO: Data validation that receipts are not reused if those already assigned to some other entry.
