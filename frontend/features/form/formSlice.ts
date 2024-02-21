@@ -77,7 +77,9 @@ export const formSlice = createSlice({
         id: state.maxId + 1,
         description: action.payload.description,
         date: action.payload.date,
-        value_cents: Number(action.payload.value.replace(",", ".")) * 100,
+        value_cents: Math.round(
+          Number(action.payload.value.replace(",", ".")) * 100,
+        ),
         receipts: action.payload.receipts,
       };
       state.maxId = item.id;
@@ -89,7 +91,9 @@ export const formSlice = createSlice({
         id: action.payload.editTarget,
         description: action.payload.item.description,
         date: action.payload.item.date,
-        value_cents: Number(action.payload.item.value.replace(",", ".")) * 100,
+        value_cents: Math.round(
+          Number(action.payload.item.value.replace(",", ".")) * 100,
+        ),
         receipts: action.payload.item.receipts,
       };
       state.entries = state.entries.map((entry) =>
