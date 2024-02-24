@@ -15,8 +15,6 @@ Kulukorvauslomake Fyysikkokillalle.
 
 
 ## High prio TODO
-- Liitteiden koko pienennetään uploadin yhteydessä
-- Korvauksen ja sen liitteiden poisto automaattisesti aikaisintaan kuukauden päästä maksupäivästä, jos korvaus on asetettu arkistoiduksi
 
 ## Muuta TODO
 - Front muista admin `hyväksytty` kentän tekstin ja päivämäärän
