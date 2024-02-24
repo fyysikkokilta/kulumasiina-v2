@@ -156,6 +156,12 @@ export const ItemModal = (props: ExpenseModalProps) => {
   const handleChange: UploadProps["onChange"] = ({ fileList: newFileList }) =>
     props.setFileList(newFileList);
 
+  const handleRemove: UploadProps["onRemove"] = ({ response: receipt_id }) => {
+    if (receipt_id) {
+      api.delete(`/receipt/${receipt_id}`);
+    }
+  };
+
   const resetUpload = () => {
     setPreviewOpen(false);
     setPreviewImage("");
@@ -275,6 +281,7 @@ export const ItemModal = (props: ExpenseModalProps) => {
             fileList={props.fileList}
             onPreview={handlePreview}
             onChange={handleChange}
+            onRemove={handleRemove}
             accept="image/*,.pdf"
             beforeUpload={beforeUpload}
             customRequest={upload}

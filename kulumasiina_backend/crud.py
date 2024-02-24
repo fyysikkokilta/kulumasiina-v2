@@ -92,6 +92,11 @@ def create_receipt(
     db.refresh(db_receipt)
     return schemas.ReceiptResponse.model_validate(db_receipt)
 
+def delete_receipt(id: int, db: Session):
+    to_del = db.query(models.Receipt).filter(models.Receipt.id == id).first()
+    db.delete(to_del)
+    db.commit()
+
 
 def get_receipt_data(id, db: Session):
     return db.query(models.Receipt.data).filter(models.Receipt.id == id).first()[0]

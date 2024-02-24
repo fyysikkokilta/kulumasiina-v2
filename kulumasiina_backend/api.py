@@ -163,6 +163,9 @@ def create_receipt(file: UploadFile = File(), db: Session = Depends(get_db)) -> 
 
     return receipt_id
 
+@api_router.delete("/receipt/{receipt_id}")
+def del_receipt(receipt_id, db: Session = Depends(get_db)):
+    return crud.delete_receipt(receipt_id, db)
 
 @api_router.get("/entries")
 def get_entry(db: Session = Depends(get_db), user=Depends(get_user)):
