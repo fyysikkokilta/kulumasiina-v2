@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Typography, Table, Button, Space } from "antd";
+import { DatePicker, Typography, Table, Button, Space } from "antd";
+const { RangePicker } = DatePicker;
+import type { Dayjs } from "dayjs";
 import {
   type SubmissionState,
   type MileageState,
@@ -324,14 +326,23 @@ export function AdminEntryView() {
   const loading = useAppSelector((state) => state.admin.loading);
 
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
+  const [dateRange, setDateRange] = useState<[Dayjs, Dayjs] | undefined>();
 
-  const sumEnties: Array<tableSubmission> = adminEntries.map((entry) => {
-    return {
-      ...entry,
-      key: entry.id,
-      total: calculateSum(entry),
-    };
-  });
+  const sumEnties: Array<tableSubmission> = adminEntries
+    .filter((entry) => {
+      if (dateRange) {
+        const date = new Date(entry.submission_date);
+        return dateRange[0].toDate() <= date && date <= dateRange[1].toDate();
+      }
+      return true;
+    })
+    .map((entry) => {
+      return {
+        ...entry,
+        key: entry.id,
+        total: calculateSum(entry),
+      };
+    });
   const selected = useAppSelector((state) => state.admin.selected);
   const selectedItem = useAppSelector((state) => state.admin.selectedItem);
 
@@ -377,22 +388,35 @@ export function AdminEntryView() {
           marginBlockStart: "2em",
         }}
       >
-        {selectedIndices.length > 0 && (
-          <Button
-            onClick={() => {
-              window.open(
-                `/api/entry/multi/csv?entry_ids=${selectedIndices.join(",")}`,
-              );
+        <Space>
+          {selectedIndices.length > 0 && (
+            <Button
+              onClick={() => {
+                window.open(
+                  `/api/entry/multi/csv?entry_ids=${selectedIndices.join(",")}`,
+                );
+              }}
+            >
+              Download combined zip
+            </Button>
+          )}
+          {toBeDeleted > 0 && (
+            <Button danger onClick={() => dispatch(showRemoveEntriesModal())}>
+              Remove old entries ({toBeDeleted})
+            </Button>
+          )}
+          <RangePicker
+            onChange={(dates) => {
+              if (dates && dates[0] && dates[1]) {
+                setDateRange([dates[0].startOf("day"), dates[1].endOf("day")]);
+              } else {
+                setDateRange(undefined);
+              }
             }}
-          >
-            Download combined zip
-          </Button>
-        )}
-        {toBeDeleted > 0 && (
-          <Button danger onClick={() => dispatch(showRemoveEntriesModal())}>
-            Remove old entries ({toBeDeleted})
-          </Button>
-        )}
+            picker="date"
+            format={"DD.MM.YYYY"}
+          />
+        </Space>
       </div>
       <Table
         rowSelection={{
