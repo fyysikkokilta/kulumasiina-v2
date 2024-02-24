@@ -11,12 +11,9 @@ export const LoginCallback = () => {
   useEffect(() => {
     api
       .get(`/login/google/callback?${searchParamas.toString()}`)
-      .then((res) => {
-        dispatch(logIn(res.data.username));
-        navigate("/admin");
-      })
-      .catch(() => navigate("/login"));
-  });
+      .then((res) => dispatch(logIn(res.data.username)))
+      .finally(() => navigate("/admin")); // Admin redirects automatically to index if not logged in
+  }, []);
   return (
     <>
       <h2>Logging you in, please wait</h2>
