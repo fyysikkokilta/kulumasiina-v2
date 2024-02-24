@@ -78,7 +78,7 @@ class Item(Base):
     description: Mapped[str]
     date: Mapped[date]
     value_cents: Mapped[int]
-    receipts: Mapped[list[Receipt]] = relationship(lazy="immediate")
+    receipts: Mapped[list[Receipt]] = relationship(lazy="immediate", cascade="all, delete")
 
     # @property
     # def receipt_ids(self) -> list[int]:

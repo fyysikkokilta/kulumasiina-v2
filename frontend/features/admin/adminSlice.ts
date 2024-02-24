@@ -22,15 +22,21 @@ export interface MileageState {
 }
 
 export interface SubmissionState {
-  id: number;
-  submissionDate: string;
-  name: string;
-  title: string;
-  contact: string;
-  status: string;
+  approval_date: string | null;
+  approval_note: string | null;
   archived: boolean;
+  contact: string;
+  gov_id: string | null;
+  iban: string;
+  id: number;
   items: Array<ItemState>;
   mileages: Array<MileageState>;
+  name: string;
+  paid_date: string | null;
+  rejection_date: string | null;
+  status: string;
+  submission_date: string;
+  title: string;
 }
 export interface AdminState {
   submissions: Array<SubmissionState>;
@@ -38,6 +44,7 @@ export interface AdminState {
   dateModal: boolean;
   confirmPaymentModal: boolean;
   removeEntryModal: boolean;
+  removeEntriesModal: boolean;
   selected: number;
   editItemModal: boolean;
   selectedItem: ItemState;
@@ -59,6 +66,7 @@ const initialState: AdminState = {
   dateModal: false,
   confirmPaymentModal: false,
   removeEntryModal: false,
+  removeEntriesModal: false,
   selected: 0,
   // Item state
   editItemModal: false,
@@ -105,6 +113,12 @@ export const adminSlice = createSlice({
     hideRemoveEntryModal: (state) => {
       state.removeEntryModal = false;
     },
+    showRemoveEntriesModal: (state) => {
+      state.removeEntriesModal = true;
+    },
+    hideRemoveEntriesModal: (state) => {
+      state.removeEntriesModal = false;
+    },
     showEditItemModal: (state, action: PayloadAction<ItemState>) => {
       state.editItemModal = true;
       state.selectedItem = action.payload;
@@ -128,6 +142,8 @@ export const {
   hideConfirmPaymentModal,
   showRemoveEntryModal,
   hideRemoveEntryModal,
+  showRemoveEntriesModal,
+  hideRemoveEntriesModal,
   showEditItemModal,
   hideEditItemModal,
 } = adminSlice.actions;

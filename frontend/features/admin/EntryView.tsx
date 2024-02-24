@@ -10,11 +10,17 @@ import {
   showConfirmPaymentModal,
   showRemoveEntryModal,
   showEditItemModal,
+  showRemoveEntriesModal,
 } from "./adminSlice";
 import type { ColumnsType } from "antd/es/table";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 
-import { mileageReimbursementRate, EURFormat, KMFormat } from "../utils";
+import {
+  mileageReimbursementRate,
+  deleteArchivedAgeLimit,
+  EURFormat,
+  KMFormat,
+} from "../utils";
 import { archiveEntry, denyEntry, getEntries, resetEntry } from "./api";
 import { Receipt } from "./Receipt";
 import { AppDispatch } from "app/store";
@@ -23,6 +29,7 @@ import { ConfirmPaymentModal } from "./ConfirmPaymentModal";
 import { useLoaderData } from "react-router-dom";
 import RemoveItemModal from "./RemoveEntryModal";
 import EditItemModal from "./EditItemModal";
+import RemoveEntriesModal from "./RemoveEntriesModal";
 export const loadItems = (dispatch: AppDispatch) => {
   getEntries().then((entries) => {
     dispatch(loadSubmissions(entries));
@@ -328,6 +335,20 @@ export function AdminEntryView() {
   const selected = useAppSelector((state) => state.admin.selected);
   const selectedItem = useAppSelector((state) => state.admin.selectedItem);
 
+  const toBeDeleted = adminEntries
+    .filter((entry) => entry.archived)
+    .filter((entry) => {
+      const date = (
+        entry.status === "paid"
+          ? entry.paid_date && new Date(entry.paid_date)
+          : entry.rejection_date && new Date(entry.rejection_date)
+      ) as Date;
+      const monthAgo = new Date();
+      monthAgo.setTime(
+        monthAgo.getTime() - deleteArchivedAgeLimit * 24 * 60 * 60 * 1000,
+      );
+      return date < monthAgo;
+    }).length;
   // rowSelection object indicates the need for row selection
   const rowSelection = {
     onChange: (selectedRowKeys: React.Key[]) => {
@@ -344,18 +365,19 @@ export function AdminEntryView() {
       <ConfirmPaymentModal entry_id={selected} />
       <SubmitDateModal entry_id={selected} />
       <RemoveItemModal entry_id={selected} />
+      <RemoveEntriesModal />
       <EditItemModal item={selectedItem} />
       <Typography.Title level={3} style={{ display: "inline-block" }}>
         Submissions
       </Typography.Title>
-      {selectedIndices.length > 0 && (
-        <div
-          style={{
-            float: "right",
-            display: "inline-block",
-            marginBlockStart: "2em",
-          }}
-        >
+      <div
+        style={{
+          float: "right",
+          display: "inline-block",
+          marginBlockStart: "2em",
+        }}
+      >
+        {selectedIndices.length > 0 && (
           <Button
             onClick={() => {
               window.open(
@@ -365,8 +387,13 @@ export function AdminEntryView() {
           >
             Download combined zip
           </Button>
-        </div>
-      )}
+        )}
+        {toBeDeleted > 0 && (
+          <Button danger onClick={() => dispatch(showRemoveEntriesModal())}>
+            Remove old entries ({toBeDeleted})
+          </Button>
+        )}
+      </div>
       <Table
         rowSelection={{
           type: "checkbox",

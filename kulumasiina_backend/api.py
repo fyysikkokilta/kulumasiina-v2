@@ -52,6 +52,8 @@ if "MILEAGE_REIMBURSEMENT_RATE" not in os.environ:
     raise Exception("MILEAGE_REIMBURSEMENT_RATE not set. Please set it in .env")
 if "MILEAGE_PROCOUNTOR_PRODUCT_ID" not in os.environ:
     raise Exception("MILEAGE_PROCOUNTOR_PRODUCT_ID not set. Please set it in .env")
+if "DELETE_ARCHIVED_AGE_LIMIT" not in os.environ:
+    raise Exception("DELETE_ARCHIVED_AGE_LIMIT not set. Please set it in .env")
 
 HOSTER_OVER_HTTP = os.environ["OAUTH_REDIR_URL"].startswith("http://")
 if HOSTER_OVER_HTTP and not bool(int(os.environ["OAUTH_ALLOW_INSECURE_HTTP"])):
@@ -391,6 +393,10 @@ def del_entry(entry_id, db: Session = Depends(get_db), user=Depends(get_user)):
     assert_archived(entry_id, db)
     return crud.delete_entry(entry_id, db)
 
+@api_router.delete("/entries")
+def del_archived_old_entries(db: Session = Depends(get_db), user=Depends(get_user)):
+    age_limit = int(os.environ.get("DELETE_ARCHIVED_AGE_LIMIT"))
+    return crud.delete_archived_old_entries(age_limit, db)
 
 class ApproveBody(BaseModel):
     date: datetime

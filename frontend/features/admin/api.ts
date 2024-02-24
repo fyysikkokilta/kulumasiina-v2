@@ -31,6 +31,10 @@ export const deleteEntry = async (id: number) => {
   await api.delete(`/entry/${id}`);
 };
 
+export const deleteEntries = async () => {
+  await api.delete(`/entries`);
+};
+
 export const payEntry = async (id: number, paidDate: string) => {
   await api.post(`/pay/${id}`, {
     date: paidDate,

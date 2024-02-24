@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from kulumasiina_backend.pdf_util import is_file_acceptable
 from . import models, schemas
 from sqlalchemy.orm import Session
@@ -102,7 +102,18 @@ def delete_entry(id, db: Session):
     db.delete(to_del)
     db.commit()
 
-    # db.commit()
+
+def delete_archived_old_entries(age_limit: int, db: Session):
+    #Delete entries that have been paid and archived and are older than age_limit
+    archived_entries = db.query(models.Entry).filter(models.Entry.archived == True)
+    to_del = archived_entries.filter(models.Entry.paid_date < datetime.now() - timedelta(days = age_limit)).all()
+    for entry in to_del:
+        db.delete(entry)
+    #Delete entries that have been denied and archived and are older than age_limit
+    to_del = archived_entries.filter(models.Entry.rejection_date < datetime.now() - timedelta(days = age_limit)).all()
+    for entry in to_del:
+        db.delete(entry)
+    db.commit()
 
 
 def approve_entry(id: int, approval_date: date, approval_note: str, db: Session):
