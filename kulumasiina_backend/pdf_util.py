@@ -62,6 +62,7 @@ def generate_combined_pdf(
     status: Literal["approved", "paid", "submitted", "denied"],
     name: str,
     IBAN: str,
+    HETU: str | None,
     Pvm: datetime.datetime,
     reason: str,
     parts: list[Part],
@@ -116,6 +117,9 @@ def generate_combined_pdf(
     pdf.ln(6)
     pdf.cell(text="IBAN: " + IBAN)
     pdf.ln(6)
+    if HETU is not None:
+        pdf.cell(text="Henkilötunnus: " + HETU)
+        pdf.ln(6)
     date = Pvm.strftime("%d.%m.%Y")
     pdf.cell(text=f"Päivämäärä: {date}")
     pdf.ln(16)
