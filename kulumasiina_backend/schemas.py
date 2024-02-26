@@ -34,6 +34,9 @@ class Item(ItemCreate):
 
 class ItemUpdate(BaseModel):
     value_cents: int
+    description: str
+    date: date
+    receipts: list[int]
 
 # NOTE: This is not exposed to the frontend yet due to the data privacy concerns.
 class MileageCreate(BaseModel):

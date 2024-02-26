@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { DatePicker, Typography, Table, Button, Space } from "antd";
+import {
+  DatePicker,
+  Typography,
+  Table,
+  Button,
+  Space,
+  UploadFile,
+  Form,
+} from "antd";
 const { RangePicker } = DatePicker;
-import type { Dayjs } from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import {
   type SubmissionState,
   type MileageState,
@@ -13,6 +21,7 @@ import {
   showRemoveEntryModal,
   showEditItemModal,
   showRemoveEntriesModal,
+  hideEditItemModal,
 } from "./adminSlice";
 import type { ColumnsType } from "antd/es/table";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
@@ -22,16 +31,23 @@ import {
   deleteArchivedAgeLimit,
   EURFormat,
   KMFormat,
+  api,
 } from "../utils";
-import { archiveEntry, denyEntry, getEntries, resetEntry } from "./api";
+import {
+  archiveEntry,
+  denyEntry,
+  getEntries,
+  modifyItem,
+  resetEntry,
+} from "./api";
 import { Receipt } from "./Receipt";
 import { AppDispatch } from "app/store";
 import SubmitDateModal from "./SubmitDateModal";
 import { ConfirmPaymentModal } from "./ConfirmPaymentModal";
 import { useLoaderData } from "react-router-dom";
 import RemoveItemModal from "./RemoveEntryModal";
-import EditItemModal from "./EditItemModal";
 import RemoveEntriesModal from "./RemoveEntriesModal";
+import { ExpenseFormValues, ItemModal } from "../form/Modals";
 export const loadItems = (dispatch: AppDispatch) => {
   getEntries().then((entries) => {
     dispatch(loadSubmissions(entries));
@@ -328,6 +344,9 @@ export function AdminEntryView() {
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs] | undefined>();
 
+  const [expenseFileList, setExpenseFileList] = useState<UploadFile[]>([]);
+  const [editExpenseForm] = Form.useForm<ExpenseFormValues>();
+
   const sumEnties: Array<tableSubmission> = adminEntries
     .filter((entry) => {
       if (dateRange) {
@@ -345,6 +364,58 @@ export function AdminEntryView() {
     });
   const selected = useAppSelector((state) => state.admin.selected);
   const selectedItem = useAppSelector((state) => state.admin.selectedItem);
+  const showEditItemModal = useAppSelector(
+    (state) => state.admin.editItemModal,
+  );
+
+  useEffect(() => {
+    if (selectedItem) {
+      const formValues = {
+        description: selectedItem.description,
+        date: dayjs(selectedItem.date) as Dayjs,
+        value: String(selectedItem.value_cents / 100),
+      };
+      editExpenseForm.setFieldsValue(formValues);
+      setExpenseFileList(
+        selectedItem.receipts.map((r) => {
+          return {
+            uid: String(r.id),
+            name: r.filename,
+            status: "done",
+            response: r.id,
+            url: `/api/receipt/${r.id}`,
+          };
+        }),
+      );
+    }
+  }, [selectedItem]);
+
+  const handleCancelEditExpense = () => {
+    dispatch(hideEditItemModal());
+    editExpenseForm.resetFields();
+    setExpenseFileList([]);
+  };
+
+  const handleOkEditExpense = async () => {
+    try {
+      await editExpenseForm.validateFields();
+    } catch (err) {
+      return;
+    }
+    const values = editExpenseForm.getFieldsValue();
+    const body = {
+      description: values.description,
+      date: values.date.format("YYYY-MM-DD"),
+      value_cents: Math.round(Number(values.value) * 100),
+      receipts: expenseFileList.map((file) => file.response as number),
+    };
+    modifyItem(selectedItem.id, body).then(() => {
+      dispatch(hideEditItemModal());
+      loadItems(dispatch);
+      editExpenseForm.resetFields();
+      setExpenseFileList([]);
+    });
+  };
 
   const toBeDeleted = adminEntries
     .filter((entry) => entry.archived)
@@ -377,7 +448,14 @@ export function AdminEntryView() {
       <SubmitDateModal entry_id={selected} />
       <RemoveItemModal entry_id={selected} />
       <RemoveEntriesModal />
-      <EditItemModal item={selectedItem} />
+      <ItemModal
+        form={editExpenseForm}
+        onCancel={handleCancelEditExpense}
+        onOk={handleOkEditExpense}
+        visible={showEditItemModal}
+        fileList={expenseFileList}
+        setFileList={setExpenseFileList}
+      />
       <Typography.Title level={3} style={{ display: "inline-block" }}>
         Submissions
       </Typography.Title>

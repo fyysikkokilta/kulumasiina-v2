@@ -182,6 +182,13 @@ def update_item(id: int, item: schemas.ItemUpdate, db: Session):
     db.query(models.Item).filter(models.Item.id == id).update(
         {
             models.Item.value_cents: item.value_cents,
+            models.Item.description: item.description,
+            models.Item.date: item.date,
+        }
+    )
+    db.query(models.Receipt).filter(models.Receipt.id.in_(item.receipts)).update(
+        {
+            models.Receipt.item_id: id,
         }
     )
     db.commit()

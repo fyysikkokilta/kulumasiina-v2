@@ -47,7 +47,12 @@ export const archiveEntry = async (id: number) => {
 
 export const modifyItem = async (
   item_id: number,
-  body: { value_cents: number },
+  body: {
+    value_cents: number;
+    description: string;
+    date: string;
+    receipts: Array<number>;
+  },
 ) => {
   await api.post(`/item/${item_id}`, body);
 };
