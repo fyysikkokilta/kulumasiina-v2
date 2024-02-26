@@ -22,6 +22,8 @@ import {
   showEditItemModal,
   showRemoveEntriesModal,
   hideEditItemModal,
+  showEditMileageModal,
+  hideEditMileageModal,
 } from "./adminSlice";
 import type { ColumnsType } from "antd/es/table";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
@@ -31,13 +33,13 @@ import {
   deleteArchivedAgeLimit,
   EURFormat,
   KMFormat,
-  api,
 } from "../utils";
 import {
   archiveEntry,
   denyEntry,
   getEntries,
   modifyItem,
+  modifyMileage,
   resetEntry,
 } from "./api";
 import { Receipt } from "./Receipt";
@@ -47,7 +49,12 @@ import { ConfirmPaymentModal } from "./ConfirmPaymentModal";
 import { useLoaderData } from "react-router-dom";
 import RemoveItemModal from "./RemoveEntryModal";
 import RemoveEntriesModal from "./RemoveEntriesModal";
-import { ExpenseFormValues, ItemModal } from "../form/Modals";
+import {
+  ExpenseFormValues,
+  ItemModal,
+  MileageFormValues,
+  MileageModal,
+} from "../form/Modals";
 export const loadItems = (dispatch: AppDispatch) => {
   getEntries().then((entries) => {
     dispatch(loadSubmissions(entries));
@@ -188,12 +195,18 @@ const expandedColumns: ColumnsType<expandedRowTable> = [
 ];
 
 const renderMileage = (mileage: MileageState) => {
+  const dispatch = useAppDispatch();
   return (
-    <Typography.Text>
-      Mileage: <strong>{mileage.date}</strong>{" "}
-      {KMFormat.format(mileage.distance)} &rarr;{" "}
-      {EURFormat.format(mileage.distance * mileageReimbursementRate)}
-    </Typography.Text>
+    <Space>
+      <Typography.Text>
+        Mileage: <strong>{mileage.date}</strong>{" "}
+        {KMFormat.format(mileage.distance)} &rarr;{" "}
+        {EURFormat.format(mileage.distance * mileageReimbursementRate)}
+      </Typography.Text>
+      <Button onClick={() => dispatch(showEditMileageModal(mileage))}>
+        Edit
+      </Button>
+    </Space>
   );
 };
 
@@ -347,6 +360,8 @@ export function AdminEntryView() {
   const [expenseFileList, setExpenseFileList] = useState<UploadFile[]>([]);
   const [editExpenseForm] = Form.useForm<ExpenseFormValues>();
 
+  const [editMileageForm] = Form.useForm<MileageFormValues>();
+
   const sumEnties: Array<tableSubmission> = adminEntries
     .filter((entry) => {
       if (dateRange) {
@@ -363,9 +378,17 @@ export function AdminEntryView() {
       };
     });
   const selected = useAppSelector((state) => state.admin.selected);
+
   const selectedItem = useAppSelector((state) => state.admin.selectedItem);
   const showEditItemModal = useAppSelector(
     (state) => state.admin.editItemModal,
+  );
+
+  const selectedMileage = useAppSelector(
+    (state) => state.admin.selectedMileage,
+  );
+  const showEditMileageModal = useAppSelector(
+    (state) => state.admin.editMileageModal,
   );
 
   useEffect(() => {
@@ -389,6 +412,19 @@ export function AdminEntryView() {
       );
     }
   }, [selectedItem]);
+
+  useEffect(() => {
+    if (selectedMileage) {
+      const formValues = {
+        date: dayjs(selectedMileage.date) as Dayjs,
+        distance: String(selectedMileage.distance),
+        description: selectedMileage.description,
+        route: selectedMileage.route,
+        plate_no: selectedMileage.plate_no,
+      };
+      editMileageForm.setFieldsValue(formValues);
+    }
+  }, [selectedMileage]);
 
   const handleCancelEditExpense = () => {
     dispatch(hideEditItemModal());
@@ -414,6 +450,32 @@ export function AdminEntryView() {
       loadItems(dispatch);
       editExpenseForm.resetFields();
       setExpenseFileList([]);
+    });
+  };
+
+  const handleCancelEditMileage = () => {
+    dispatch(hideEditMileageModal());
+    editMileageForm.resetFields();
+  };
+
+  const handleOkEditMileage = async () => {
+    try {
+      await editMileageForm.validateFields();
+    } catch (err) {
+      return;
+    }
+    const values = editMileageForm.getFieldsValue();
+    const body = {
+      date: values.date.format("YYYY-MM-DD"),
+      description: values.description,
+      route: values.route,
+      plate_no: values.plate_no,
+      distance: Number(values.distance),
+    };
+    modifyMileage(selectedMileage.id, body).then(() => {
+      dispatch(hideEditMileageModal());
+      loadItems(dispatch);
+      editMileageForm.resetFields();
     });
   };
 
@@ -455,6 +517,12 @@ export function AdminEntryView() {
         visible={showEditItemModal}
         fileList={expenseFileList}
         setFileList={setExpenseFileList}
+      />
+      <MileageModal
+        form={editMileageForm}
+        onCancel={handleCancelEditMileage}
+        onOk={handleOkEditMileage}
+        visible={showEditMileageModal}
       />
       <Typography.Title level={3} style={{ display: "inline-block" }}>
         Submissions

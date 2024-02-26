@@ -56,3 +56,16 @@ export const modifyItem = async (
 ) => {
   await api.post(`/item/${item_id}`, body);
 };
+
+export const modifyMileage = async (
+  mileage_id: number,
+  body: {
+    date: string;
+    description: string;
+    route: string;
+    plate_no: string;
+    distance: number;
+  },
+) => {
+  await api.post(`/mileage/${mileage_id}`, body);
+};

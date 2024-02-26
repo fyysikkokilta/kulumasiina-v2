@@ -192,3 +192,14 @@ def update_item(id: int, item: schemas.ItemUpdate, db: Session):
         }
     )
     db.commit()
+
+def update_mileage(id: int, mileage: schemas.MileageUpdate, db: Session):
+    db.query(models.Mileage).filter(models.Mileage.id == id).update(
+        {
+            models.Mileage.description: mileage.description,
+            models.Mileage.date: mileage.date,
+            models.Mileage.route: mileage.route,
+            models.Mileage.distance: mileage.distance,
+        }
+    )
+    db.commit()

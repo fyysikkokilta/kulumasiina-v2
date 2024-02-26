@@ -48,6 +48,8 @@ export interface AdminState {
   selected: number;
   editItemModal: boolean;
   selectedItem: ItemState;
+  editMileageModal: boolean;
+  selectedMileage: MileageState;
 }
 
 const initialItemState: ItemState = {
@@ -56,6 +58,15 @@ const initialItemState: ItemState = {
   date: "",
   value_cents: 0,
   receipts: [],
+};
+
+const initialMileageState: MileageState = {
+  id: 0,
+  date: "",
+  description: "",
+  route: "",
+  plate_no: "",
+  distance: 0,
 };
 
 const initialState: AdminState = {
@@ -71,6 +82,9 @@ const initialState: AdminState = {
   // Item state
   editItemModal: false,
   selectedItem: initialItemState,
+  // Mileage state
+  editMileageModal: false,
+  selectedMileage: initialMileageState,
 };
 
 export const adminSlice = createSlice({
@@ -127,6 +141,14 @@ export const adminSlice = createSlice({
       state.editItemModal = false;
       state.selectedItem = initialItemState;
     },
+    showEditMileageModal: (state, action: PayloadAction<MileageState>) => {
+      state.editMileageModal = true;
+      state.selectedMileage = action.payload;
+    },
+    hideEditMileageModal: (state) => {
+      state.editMileageModal = false;
+      state.selectedMileage = initialMileageState;
+    },
   },
 });
 
@@ -146,6 +168,8 @@ export const {
   hideRemoveEntriesModal,
   showEditItemModal,
   hideEditItemModal,
+  showEditMileageModal,
+  hideEditMileageModal,
 } = adminSlice.actions;
 
 export default adminSlice.reducer;

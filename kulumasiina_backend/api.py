@@ -206,7 +206,7 @@ def generate_parts(entry):
         parts.append(part)
     for mileage in entry.mileages:
         part = pdf_util.Part(
-            hinta=str(mileage.distance * float(os.environ("MILEAGE_REIMBURSEMENT_RATE"))) + "e",
+            hinta=str(mileage.distance * float(os.environ["MILEAGE_REIMBURSEMENT_RATE"])) + "e",
             selite=f"Mileage: {mileage.description}:\n{mileage.route} ({mileage.distance} km)\nPlate no: {mileage.plate_no}",
             liitteet=[],
         )
@@ -275,7 +275,7 @@ async def get_multi_entry_csv(
             ))
         for mileage in entry.mileages:
             rows.append(csv_util.Row(
-                yksikkohinta=float(os.environ("MILEAGE_REIMBURSEMENT_RATE")),
+                yksikkohinta=float(os.environ["MILEAGE_REIMBURSEMENT_RATE"]),
                 selite=f"Kilometrikorvaus: {mileage.description}",
                 maara=mileage.distance,
                 matkalasku=True,
@@ -339,7 +339,7 @@ async def get_entry_csv(
         ))
     for mileage in entry.mileages:
         rows.append(csv_util.Row(
-            yksikkohinta=float(os.environ("MILEAGE_REIMBURSEMENT_RATE")),
+            yksikkohinta=float(os.environ["MILEAGE_REIMBURSEMENT_RATE"]),
             selite=f"Kilometrikorvaus: {mileage.description}",
             maara=mileage.distance,
             matkalasku=True,
@@ -401,7 +401,7 @@ def del_entry(entry_id, db: Session = Depends(get_db), user=Depends(get_user)):
 
 @api_router.delete("/entries")
 def del_archived_old_entries(db: Session = Depends(get_db), user=Depends(get_user)):
-    age_limit = int(os.environ.get("DELETE_ARCHIVED_AGE_LIMIT"))
+    age_limit = int(os.environ["DELETE_ARCHIVED_AGE_LIMIT"])
     return crud.delete_archived_old_entries(age_limit, db)
 
 class ApproveBody(BaseModel):
@@ -458,6 +458,15 @@ def update_item(
     user=Depends(get_user),
 ):
     return crud.update_item(item_id, item, db)
+
+@api_router.post("/mileage/{mileage_id}")
+def update_mileage(
+    mileage_id: int,
+    mileage: schemas.MileageUpdate,
+    db: Session = Depends(get_db),
+    user=Depends(get_user),
+):
+    return crud.update_mileage(mileage_id, mileage, db)
 
 
 @api_router.get("/userdata")

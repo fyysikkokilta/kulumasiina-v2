@@ -51,6 +51,13 @@ class Mileage(MileageCreate):
     model_config = ConfigDict(from_attributes=True)
     id: int
 
+class MileageUpdate(MileageCreate):
+    date: date
+    description: str
+    route: str
+    plate_no: str  # TODO: GDPR
+    distance: float
+
 
 class _EntryBase(BaseModel):
     name: str

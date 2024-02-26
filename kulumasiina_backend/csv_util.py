@@ -72,7 +72,7 @@ def generate_csv(csv_infos: list[CsvInfo]) -> tuple[str, bytes]:
       writer.writerow(["M", "EUR", "", IBAN, HETU, "Tilisiirto", name, "", 0, "t", "t", 0, Pvm.strftime("%d.%m.%Y"), "", Pvm.strftime("%d.%m.%Y"), "", "", "", "", "", "", "", "", "", "", 6, "", "", "t", "", "", "", "", pdf_name])
       for row in filter(isMileage, rows):
         #TYHJÄ, tuotteen kuvaus, tuotteen koodi, määrä (1 tai kilometrien määrä), yksikkö	(kpl tai km), yksikköhinta euroissa,	rivin alennusprosentti, rivin ALV, rivikommentti, TYHJÄ, TYHJÄ, TYHJÄ, TYHJÄ, kirjanpitotili
-        writer.writerow(["", substring80AndRemoveNewlines(row["selite"]), os.environ("MILEAGE_PROCOUNTOR_PRODUCT_ID"), row["maara"], "km", row["yksikkohinta"], 0, 0])
+        writer.writerow(["", substring80AndRemoveNewlines(row["selite"]), os.environ["MILEAGE_PROCOUNTOR_PRODUCT_ID"], row["maara"], "km", row["yksikkohinta"], 0, 0])
   
   sanitized_name = pathvalidate.sanitize_filename(name)
   date = Pvm.strftime("%d-%m-%Y")
