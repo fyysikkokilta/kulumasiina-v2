@@ -442,7 +442,7 @@ export function AdminEntryView() {
     const body = {
       description: values.description,
       date: values.date.format("YYYY-MM-DD"),
-      value_cents: Math.round(Number(values.value) * 100),
+      value_cents: Math.round(Number(values.value.replace(",", ".")) * 100),
       receipts: expenseFileList.map((file) => file.response as number),
     };
     modifyItem(selectedItem.id, body).then(() => {
@@ -470,7 +470,7 @@ export function AdminEntryView() {
       description: values.description,
       route: values.route,
       plate_no: values.plate_no,
-      distance: Number(values.distance),
+      distance: Number(values.distance.replace(",", ".")),
     };
     modifyMileage(selectedMileage.id, body).then(() => {
       dispatch(hideEditMileageModal());
