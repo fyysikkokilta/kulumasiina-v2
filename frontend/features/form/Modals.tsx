@@ -166,7 +166,6 @@ export const ItemModal = (props: ExpenseModalProps) => {
     setPreviewOpen(false);
     setPreviewImage("");
     setPreviewTitle("");
-    props.setFileList([]);
   };
   const beforeUpload = (file: RcFile) => {
     // check pdf size is under 4MB

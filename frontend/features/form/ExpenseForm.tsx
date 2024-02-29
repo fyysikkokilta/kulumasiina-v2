@@ -136,6 +136,7 @@ export function ExpenseForm() {
     setModal(null);
     setEditTarget(null);
     expenseForm.resetFields();
+    setExpenseFileList([]);
   };
   const handleOkMileage = (editTarget: null | number) => async () => {
     try {
@@ -161,6 +162,7 @@ export function ExpenseForm() {
     setModal(null);
     setEditTarget(null);
     expenseForm.resetFields();
+    setExpenseFileList([]);
   };
   const handleCancelMileage = () => {
     setModal(null);
