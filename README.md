@@ -24,12 +24,8 @@ Kulukorvauslomake Fyysikkokillalle.
 ## Nice to have
 
 - [ ] Postgres db
-- [ ] Vanhojen kuittien/korvausten arkistointi -> Zip pdf lataus
 - [ ] Login token refreshaus
 - [ ] Migraatiotuki
 - [ ] CI/CD (not gonna happen :D)
-- Make receipt table TTL (1d) and generate PDFs on the fly
-
-  - Add the PDF to the `entry` table
 
 - Enable travel reimbursement once social security number storage guidelines are set
