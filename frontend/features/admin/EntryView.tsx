@@ -482,16 +482,12 @@ export function AdminEntryView() {
   const toBeDeleted = adminEntries
     .filter((entry) => entry.archived)
     .filter((entry) => {
-      const date = (
+      const date =
         entry.status === "paid"
-          ? entry.paid_date && new Date(entry.paid_date)
-          : entry.rejection_date && new Date(entry.rejection_date)
-      ) as Date;
-      const monthAgo = new Date();
-      monthAgo.setTime(
-        monthAgo.getTime() - deleteArchivedAgeLimit * 24 * 60 * 60 * 1000,
-      );
-      return date < monthAgo;
+          ? entry.paid_date && dayjs(entry.paid_date)
+          : entry.rejection_date && dayjs(entry.rejection_date);
+      const monthAgo = dayjs().subtract(deleteArchivedAgeLimit, "days");
+      return date && date.isBefore(monthAgo);
     }).length;
   // rowSelection object indicates the need for row selection
   const rowSelection = {

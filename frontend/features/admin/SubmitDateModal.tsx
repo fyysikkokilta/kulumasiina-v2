@@ -4,6 +4,9 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { hideDateModal as hideApproveModal } from "./adminSlice";
 import { approveEntry } from "./api";
 import { loadItems } from "./EntryView";
+import dayjs, { Dayjs } from "dayjs";
+import utc from "dayjs/plugin/utc";
+dayjs.extend(utc);
 
 export const SubmitDateModal: React.FC<{ entry_id: number }> = ({
   entry_id,
@@ -12,8 +15,12 @@ export const SubmitDateModal: React.FC<{ entry_id: number }> = ({
   const show = useAppSelector((state) => state.admin.dateModal);
   // disable @typescript-eslint/no-explicit-any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleSubmit = (values: any) => {
-    approveEntry(entry_id, values.date.toISOString(), values.approvalNote)
+  const handleSubmit = (values: { date: Dayjs; approvalNote: string }) => {
+    approveEntry(
+      entry_id,
+      values.date.utcOffset(0).startOf("day").toISOString(),
+      values.approvalNote,
+    )
       .then(() => loadItems(dispatch))
       .then(() => dispatch(hideApproveModal()));
   };

@@ -5,6 +5,9 @@ import { hideConfirmPaymentModal } from "./adminSlice";
 import { payEntry } from "./api";
 import { loadItems } from "./EntryView";
 import dayjs, { Dayjs } from "dayjs";
+import utc from "dayjs/plugin/utc";
+dayjs.extend(utc);
+
 export const ConfirmPaymentModal: React.FC<{ entry_id: number }> = ({
   entry_id,
 }) => {
@@ -13,7 +16,7 @@ export const ConfirmPaymentModal: React.FC<{ entry_id: number }> = ({
   // disable @typescript-eslint/no-explicit-any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSubmit = (values: { date: Dayjs }) => {
-    payEntry(entry_id, values.date.toISOString())
+    payEntry(entry_id, values.date.utcOffset(0).startOf("day").toISOString())
       .then(() => loadItems(dispatch))
       .then(() => dispatch(hideConfirmPaymentModal()));
   };
