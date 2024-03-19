@@ -2,7 +2,7 @@ import React from "react";
 import { Modal, Form, Button, Typography } from "antd";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { hideRemoveEntriesModal } from "./adminSlice";
-import { deleteEntries } from "./api";
+import { deleteOldArchivedEntries } from "./api";
 import { loadItems } from "./EntryView";
 export const RemoveEntriesModal: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -10,7 +10,7 @@ export const RemoveEntriesModal: React.FC = () => {
   // disable @typescript-eslint/no-explicit-any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSubmit = () => {
-    deleteEntries()
+    deleteOldArchivedEntries()
       .then(() => loadItems(dispatch))
       .then(() => dispatch(hideRemoveEntriesModal()));
   };

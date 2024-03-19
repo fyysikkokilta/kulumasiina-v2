@@ -404,51 +404,75 @@ def del_archived_old_entries(db: Session = Depends(get_db), user=Depends(get_use
     age_limit = int(os.environ["DELETE_ARCHIVED_AGE_LIMIT"])
     return crud.delete_archived_old_entries(age_limit, db)
 
-class ApproveBody(BaseModel):
+class ChangeStatusBody(BaseModel):
+    ids: list[int]
+
+class ApproveBody(ChangeStatusBody):
     date: datetime
     approval_note: str
 
-
-@api_router.post("/approve/{entry_id}")
-async def approve_entry(
+@api_router.post("/approve")
+async def approve_entries(
     data: ApproveBody,
-    entry_id: int,
     db: Session = Depends(get_db),
     user=Depends(get_user),
 ):
-    assert_status_in(entry_id, ["submitted"], db)
-    return crud.approve_entry(entry_id, data.date.date(), data.approval_note, db)
+    for entry_id in data.ids:
+        assert_status_in(entry_id, ["submitted"], db)
+    for entry_id in data.ids:
+        crud.approve_entry(entry_id, data.date.date(), data.approval_note, db)
+    return
 
+@api_router.post("/deny")
+def deny_entries(
+    data: ChangeStatusBody,
+    db: Session = Depends(get_db),
+    user=Depends(get_user),
+):
+    for entry_id in data.ids:
+        assert_status_in(entry_id, ["submitted"], db)
+    for entry_id in data.ids:
+        crud.deny_entry(entry_id, db)
+    return
 
-@api_router.post("/deny/{entry_id}")
-def deny_entry(entry_id, db: Session = Depends(get_db), user=Depends(get_user)):
-    assert_status_in(entry_id, ["submitted"], db)
-    return crud.deny_entry(entry_id, db)
+@api_router.post("/reset")
+def reset_entries(
+    data: ChangeStatusBody,
+    db: Session = Depends(get_db),
+    user=Depends(get_user),
+):
+    for entry_id in data.ids:
+        assert_status_in(entry_id, ["approved", "denied", "paid"], db)
+    for entry_id in data.ids:
+        crud.reset_entry_status(entry_id, db)
+    return
 
-
-@api_router.post("/reset/{entry_id}")
-def reset_entry(entry_id, db: Session = Depends(get_db), user=Depends(get_user)):
-    assert_status_in(entry_id, ["approved", "denied", "paid"], db)
-    return crud.reset_entry_status(entry_id, db)
-
-
-class PayBody(BaseModel):
+class PayBody(ChangeStatusBody):
     date: datetime
 
-
-@api_router.post("/pay/{entry_id}")
-def pay_entry(
-    entry_id: int, data: PayBody, db: Session = Depends(get_db), user=Depends(get_user)
+@api_router.post("/pay")
+def pay_entries(
+    data: PayBody,
+    db: Session = Depends(get_db),
+    user=Depends(get_user),
 ):
-    assert_status_in(entry_id, ["approved"], db)
-    return crud.pay_entry(entry_id, data.date, db)
+    for entry_id in data.ids:
+        assert_status_in(entry_id, ["approved"], db)
+    for entry_id in data.ids:
+        crud.pay_entry(entry_id, data.date, db)
+    return
 
-@api_router.post("/archive/{entry_id}")
-def archive_entry(
-    entry_id: int, db: Session = Depends(get_db), user=Depends(get_user)
+@api_router.post("/archive")
+def archive_entries(
+    data: ChangeStatusBody,
+    db: Session = Depends(get_db),
+    user=Depends(get_user),
 ):
-    assert_status_in(entry_id, ["denied", "paid"], db)
-    return crud.archive_entry(entry_id, db)
+    for entry_id in data.ids:
+        assert_status_in(entry_id, ["denied", "paid"], db)
+    for entry_id in data.ids:
+        crud.archive_entry(entry_id, db)
+    return
 
 @api_router.post("/item/{item_id}")
 def update_item(

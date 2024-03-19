@@ -45,7 +45,7 @@ export interface AdminState {
   confirmPaymentModal: boolean;
   removeEntryModal: boolean;
   removeEntriesModal: boolean;
-  selected: number;
+  selected: number | number[];
   editItemModal: boolean;
   selectedItem: ItemState;
   editMileageModal: boolean;
@@ -106,19 +106,24 @@ export const adminSlice = createSlice({
     stopLoading: (state) => {
       state.loading = false;
     },
-    showDateModal: (state, action: PayloadAction<number>) => {
+    showDateModal: (state, action: PayloadAction<number | number[]>) => {
       state.dateModal = true;
       state.selected = action.payload;
     },
     hideDateModal: (state) => {
       state.dateModal = false;
+      state.selected = 0;
     },
-    showConfirmPaymentModal: (state, action: PayloadAction<number>) => {
+    showConfirmPaymentModal: (
+      state,
+      action: PayloadAction<number | number[]>,
+    ) => {
       state.confirmPaymentModal = true;
       state.selected = action.payload;
     },
     hideConfirmPaymentModal: (state) => {
       state.confirmPaymentModal = false;
+      state.selected = 0;
     },
     showRemoveEntryModal: (state, action: PayloadAction<number>) => {
       state.removeEntryModal = true;
@@ -126,6 +131,7 @@ export const adminSlice = createSlice({
     },
     hideRemoveEntryModal: (state) => {
       state.removeEntryModal = false;
+      state.selected = 0;
     },
     showRemoveEntriesModal: (state) => {
       state.removeEntriesModal = true;

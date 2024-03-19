@@ -35,11 +35,14 @@ import {
   KMFormat,
 } from "../utils";
 import {
+  archiveEntries,
   archiveEntry,
+  denyEntries,
   denyEntry,
   getEntries,
   modifyItem,
   modifyMileage,
+  resetEntries,
   resetEntry,
 } from "./api";
 import { Receipt } from "./Receipt";
@@ -489,6 +492,17 @@ export function AdminEntryView() {
       const monthAgo = dayjs().subtract(deleteArchivedAgeLimit, "days");
       return date && date.isBefore(monthAgo);
     }).length;
+
+  const selectionType =
+    selectedIndices.length > 0
+      ? adminEntries.find((entry) => entry.id === selectedIndices[0])?.status
+      : undefined;
+
+  const hasUnArchivedSelections =
+    selectedIndices.length > 0 &&
+    selectedIndices.every((id) => {
+      return adminEntries.find((entry) => entry.id === id)?.archived === false;
+    });
   // rowSelection object indicates the need for row selection
   const rowSelection = {
     onChange: (selectedRowKeys: React.Key[]) => {
@@ -496,15 +510,15 @@ export function AdminEntryView() {
     },
     getCheckboxProps: (record: tableSubmission) => ({
       name: String(record.id),
-      disabled: record.status !== "paid",
+      disabled: selectionType ? record.status !== selectionType : false,
     }),
   };
 
   return (
     <>
-      <ConfirmPaymentModal entry_id={selected} />
-      <SubmitDateModal entry_id={selected} />
-      <RemoveItemModal entry_id={selected} />
+      <ConfirmPaymentModal entry_ids={selected} />
+      <SubmitDateModal entry_ids={selected} />
+      <RemoveItemModal entry_ids={selected} />
       <RemoveEntriesModal />
       <ItemModal
         form={editExpenseForm}
@@ -531,7 +545,7 @@ export function AdminEntryView() {
         }}
       >
         <Space>
-          {selectedIndices.length > 0 && (
+          {selectedIndices.length > 0 && selectionType == "paid" && (
             <Button
               onClick={() => {
                 window.open(
@@ -542,6 +556,49 @@ export function AdminEntryView() {
               Download combined zip
             </Button>
           )}
+          {hasUnArchivedSelections && selectionType == "submitted" && (
+            <Button onClick={() => dispatch(showDateModal(selectedIndices))}>
+              Accept selected
+            </Button>
+          )}
+          {hasUnArchivedSelections && selectionType == "submitted" && (
+            <Button
+              onClick={() =>
+                denyEntries(selectedIndices).then(() => loadItems(dispatch))
+              }
+            >
+              Deny selected
+            </Button>
+          )}
+          {hasUnArchivedSelections && selectionType == "approved" && (
+            <Button
+              onClick={() => dispatch(showConfirmPaymentModal(selectedIndices))}
+            >
+              Mark selected as paid
+            </Button>
+          )}
+          {hasUnArchivedSelections &&
+            ["denied", "paid"].includes(selectionType!) && (
+              <Button
+                onClick={() =>
+                  archiveEntries(selectedIndices).then(() =>
+                    loadItems(dispatch),
+                  )
+                }
+              >
+                Archive selected
+              </Button>
+            )}
+          {hasUnArchivedSelections &&
+            ["denied", "approved", "paid"].includes(selectionType!) && (
+              <Button
+                onClick={() =>
+                  resetEntries(selectedIndices).then(() => loadItems(dispatch))
+                }
+              >
+                Reset selected
+              </Button>
+            )}
           {toBeDeleted > 0 && (
             <Button danger onClick={() => dispatch(showRemoveEntriesModal())}>
               Remove old entries ({toBeDeleted})

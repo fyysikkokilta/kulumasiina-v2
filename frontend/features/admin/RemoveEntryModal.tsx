@@ -4,15 +4,16 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { hideRemoveEntryModal } from "./adminSlice";
 import { deleteEntry } from "./api";
 import { loadItems } from "./EntryView";
-export const RemoveEntryModal: React.FC<{ entry_id: number }> = ({
-  entry_id,
+export const RemoveEntryModal: React.FC<{ entry_ids: number | number[] }> = ({
+  entry_ids,
 }) => {
   const dispatch = useAppDispatch();
   const show = useAppSelector((state) => state.admin.removeEntryModal);
   // disable @typescript-eslint/no-explicit-any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSubmit = () => {
-    deleteEntry(entry_id)
+    if (Array.isArray(entry_ids)) return;
+    deleteEntry(entry_ids)
       .then(() => loadItems(dispatch))
       .then(() => dispatch(hideRemoveEntryModal()));
   };

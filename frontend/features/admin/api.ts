@@ -14,35 +14,62 @@ export const approveEntry = async (
   approvalDate: string,
   approvalNote: string,
 ) => {
-  await api.post(`/approve/${id}`, {
+  return approveEntries([id], approvalDate, approvalNote);
+};
+
+export const approveEntries = async (
+  ids: number[],
+  approvalDate: string,
+  approvalNote: string,
+) => {
+  await api.post(`/approve`, {
+    ids,
     date: approvalDate,
     approval_note: approvalNote,
   });
 };
+
 export const denyEntry = async (id: number) => {
-  await api.post(`/deny/${id}`);
+  return denyEntries([id]);
+};
+
+export const denyEntries = async (ids: number[]) => {
+  await api.post(`/deny`, { ids });
 };
 
 export const resetEntry = async (id: number) => {
-  await api.post(`/reset/${id}`);
+  return resetEntries([id]);
+};
+
+export const resetEntries = async (ids: number[]) => {
+  await api.post(`/reset`, { ids });
 };
 
 export const deleteEntry = async (id: number) => {
   await api.delete(`/entry/${id}`);
 };
 
-export const deleteEntries = async () => {
+export const deleteOldArchivedEntries = async () => {
   await api.delete(`/entries`);
 };
 
 export const payEntry = async (id: number, paidDate: string) => {
-  await api.post(`/pay/${id}`, {
+  return payEntries([id], paidDate);
+};
+
+export const payEntries = async (ids: number[], paidDate: string) => {
+  await api.post(`/pay`, {
+    ids,
     date: paidDate,
   });
 };
 
 export const archiveEntry = async (id: number) => {
-  await api.post(`/archive/${id}`);
+  return archiveEntries([id]);
+};
+
+export const archiveEntries = async (ids: number[]) => {
+  await api.post(`/archive`, { ids });
 };
 
 export const modifyItem = async (
