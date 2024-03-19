@@ -15,6 +15,7 @@ Kulukorvauslomake Fyysikkokillalle.
 - GET `/admin` - Admin page for handling expense compensations
 
 ## High prio TODO
+- Show user if sending the form fails.
 
 ## Muuta TODO
 
