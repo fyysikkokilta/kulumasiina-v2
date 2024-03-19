@@ -243,6 +243,8 @@ export function ExpenseForm() {
     }
   }, 0);
 
+  const itemOrMileageCount = entries.filter(filterBasedOnForm).length;
+
   console.log({ entries, total, editTarget });
 
   if (success) {
@@ -405,6 +407,7 @@ export function ExpenseForm() {
             style={{ float: "right" }}
             loading={submitting}
             onClick={handleSubmit}
+            disabled={itemOrMileageCount === 0}
           >
             Submit
           </Button>
