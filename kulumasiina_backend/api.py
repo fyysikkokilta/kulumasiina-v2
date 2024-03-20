@@ -207,7 +207,7 @@ def generate_parts(entry):
     for mileage in entry.mileages:
         part = pdf_util.Part(
             hinta=str(mileage.distance * float(os.environ["MILEAGE_REIMBURSEMENT_RATE"])) + "e",
-            selite=f"Mileage: {mileage.description}:\n{mileage.route} ({mileage.distance} km)\nPlate no: {mileage.plate_no}",
+            selite=f"Kilometrikorvaus: {mileage.description}:\nReitti: {mileage.route} ({mileage.distance} km)\nRekisterinumero: {mileage.plate_no}",
             liitteet=[],
         )
         parts.append(part)
