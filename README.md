@@ -21,6 +21,7 @@ Kulukorvauslomake Fyysikkokillalle.
 
 - Front muista admin `hyväksytty` kentän tekstin ja päivämäärän
 - IBAN validaatio backendissä
+- HETU validaatio frontendissä sekä backendissä
 
 ## Nice to have
 
