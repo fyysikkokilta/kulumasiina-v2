@@ -88,7 +88,7 @@ export const MileageModal: React.FC<MileageModalProps> = (props) => (
       >
         <Input.TextArea
           showCount
-          maxLength={200}
+          maxLength={300}
           rows={2}
           placeholder="guild room - venue <address> - guild room"
         />
