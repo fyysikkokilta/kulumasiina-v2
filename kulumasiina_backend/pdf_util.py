@@ -109,7 +109,10 @@ def generate_combined_pdf(
     y_loc = (a4_height_mm - height) / 2
 
     pdf.set_font("Lora", size=20)  # font and textsize
-    pdf.cell(text="FYYSIKKOKILTA RY - Kulukorvauslomake")
+    if HETU is not None: # HETU is included only in travel expenses
+        pdf.cell(text="FYYSIKKOKILTA RY - Matkakorvauslomake")
+    else:
+        pdf.cell(text="FYYSIKKOKILTA RY - Kulukorvauslomake")
     pdf.ln(20)
     pdf.set_font("Sourcesanspro", size=14)
 
