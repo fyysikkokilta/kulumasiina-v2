@@ -259,10 +259,18 @@ const expandedRowRender = (record: tableSubmission) => {
                 <Typography.Title level={4}>Description: </Typography.Title>
                 <Typography.Text>{a.description}</Typography.Text>
                 {a.type === "mileage" ? (
-                  <> </>
+                  <>
+                    <Typography.Title level={4}>Route:</Typography.Title>
+                    <Typography.Text>
+                      {record.mileages[a.index].route}
+                    </Typography.Text>
+                    <Typography.Title level={4}>Plate number:</Typography.Title>
+                    <Typography.Text>
+                      {record.mileages[a.index].plate_no}
+                    </Typography.Text>
+                  </>
                 ) : (
                   <>
-                    {" "}
                     <Typography.Title level={4}>Receipts:</Typography.Title>
                     {record.items[a.index].receipts.map((r) => {
                       return <Receipt key={r.id} receipt={r} />;
