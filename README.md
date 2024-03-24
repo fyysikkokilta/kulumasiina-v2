@@ -16,6 +16,7 @@ Kulukorvauslomake Fyysikkokillalle.
 
 ## High prio TODO
 - Show user if sending the form fails.
+- Liitenumerot myös PDF-liitteisiin
 
 ## Muuta TODO
 
