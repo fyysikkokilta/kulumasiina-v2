@@ -15,9 +15,9 @@ Kulukorvauslomake Fyysikkokillalle.
 - GET `/admin` - Admin page for handling expense compensations
 
 ## High prio TODO
+
 - Show user if sending the form fails.
 - Liitenumerot myös PDF-liitteisiin
-- Selected entries can be copied to clipboard in a form that can be pasted directly into the agenda.
 
 ## Muuta TODO
 

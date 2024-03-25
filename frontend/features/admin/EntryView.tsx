@@ -522,6 +522,18 @@ export function AdminEntryView() {
     }),
   };
 
+  const generateClipboardText = () => {
+    const clipboardText = sumEnties
+      .filter((entry) => selectedIndices.includes(entry.id))
+      .map((entry) => {
+        return `${entry.name}, ${entry.title}; ${EURFormat.format(
+          entry.total,
+        )} ()`;
+      })
+      .join("\n");
+    navigator.clipboard.writeText(clipboardText);
+  };
+
   return (
     <>
       <ConfirmPaymentModal entry_ids={selected} />
@@ -576,6 +588,11 @@ export function AdminEntryView() {
               }
             >
               Deny selected
+            </Button>
+          )}
+          {hasUnArchivedSelections && selectionType == "submitted" && (
+            <Button onClick={generateClipboardText}>
+              Copy selected to clipboard
             </Button>
           )}
           {hasUnArchivedSelections && selectionType == "approved" && (
