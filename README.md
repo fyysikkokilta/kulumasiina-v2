@@ -17,6 +17,7 @@ Kulukorvauslomake Fyysikkokillalle.
 ## High prio TODO
 - Show user if sending the form fails.
 - Liitenumerot myös PDF-liitteisiin
+- Selected entries can be copied to clipboard in a form that can be pasted directly into the agenda.
 
 ## Muuta TODO
 
@@ -30,5 +31,6 @@ Kulukorvauslomake Fyysikkokillalle.
 - [ ] Login token refreshaus
 - [ ] Migraatiotuki
 - [ ] CI/CD (not gonna happen :D)
+- [ ] Kirjanpitotilien numeroiden tallentaminen item ja mileage tasolla kantaan (mukaan csv tiedostoihin ja pöytäkirjatekstiin)
 
 - Enable travel reimbursement once social security number storage guidelines are set
