@@ -1,11 +1,14 @@
 import datetime
 from io import BytesIO
+import sys
 import fpdf  # pip3 intall fpdf
 from pathlib import Path
 import pypdf
 import pathvalidate
 
 from typing import Literal, TypedDict
+
+from PIL import Image
 
 
 class Part(TypedDict):
@@ -201,10 +204,10 @@ def generate_combined_pdf(
 
     # writer.appendpages(pypdf_pdf.pages)
 
-    for i, attachement in enumerate(attachements):
+    for i, attachment in enumerate(attachements):
         # Check format from magic bytes
         # https://en.wikipedia.org/wiki/List_of_file_signatures
-        fileformat = is_file_acceptable(attachement)
+        fileformat = is_file_acceptable(attachment)
         if fileformat is None:
             raise ValueError("File format not supported")
 
@@ -214,7 +217,7 @@ def generate_combined_pdf(
             new_pdf = fpdf.FPDF(format="A4")
             new_pdf.add_page()
             new_pdf.image(
-                attachement,
+                attachment,
                 x=0,
                 y=0,
                 w=210,
@@ -222,16 +225,32 @@ def generate_combined_pdf(
                 alt_text=f"Liite {i+1}",
                 keep_aspect_ratio=True,
             )
-            attachement = new_pdf.output()
+            attachment = new_pdf.output()
         elif fileformat == "PDF":
-            pass
+            if sys.getsizeof(attachment) > 1024 * 1024:
+                width = pypdf.PaperSize.A4.width
+                height = pypdf.PaperSize.A4.height
+                old_attachment = pypdf.PdfReader(BytesIO(attachment))
+                new_attachment = pypdf.PdfWriter()
+                for page in old_attachment.pages:
+                    new_attachment.add_page(page)
+                for page in new_attachment.pages:
+                    for img in page.images:
+                        new_img = img.image.resize((width, height), Image.Resampling.LANCZOS)
+                        img.replace(new_img, quality=80)
+                    page.scale_to(width=width, height=height)
+                io = BytesIO()
+                new_attachment.write(io)
+                attachment = io.getvalue()
+            else:
+                pass
         else:
             raise ValueError("File format not supported")
 
-        old_pdf = attachement
-        attachement = watermark(f"Liite {i+1}", BytesIO(attachement)).getvalue()
+        old_pdf = attachment
+        attachment = watermark(f"Liite {i+1}", BytesIO(attachment)).getvalue()
 
-        writer.append(BytesIO(attachement))
+        writer.append(BytesIO(attachment))
         # pypdf_pdf.pages.extend(pypdf.PdfReader(attachement).pages)
 
     sanitized_name = pathvalidate.sanitize_filename(name)
