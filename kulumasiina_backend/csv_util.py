@@ -3,6 +3,7 @@ import datetime
 import os
 from io import BytesIO, StringIO
 from typing import Literal, TypedDict
+import zipfile
 import pathvalidate
 from zipfile import ZipFile
 
@@ -91,7 +92,7 @@ def generate_csv(csv_infos: list[CsvInfo]) -> tuple[str, bytes]:
     archive_name = document_name
   
   #Paid invoices are zipped
-  with ZipFile(archive, "w") as zip:
+  with ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as zip:
     zip.writestr(f"{archive_name}.csv", f.getvalue().encode("cp1252"))
 
     #Add PDFs
