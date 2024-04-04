@@ -8,7 +8,7 @@ import pathvalidate
 
 from typing import Literal, TypedDict
 
-from PIL import Image
+from PIL import Image, ImageOps
 
 
 class Part(TypedDict):
@@ -207,6 +207,9 @@ def generate_combined_pdf(
     width = pypdf.PaperSize.A4.width
     height = pypdf.PaperSize.A4.height
 
+    TOO_BIG_ATTACHMENT = 512 * 1024  # 512 KB
+    MIN_WIDTH = 720
+
     for i, attachment in enumerate(attachements):
         # Check format from magic bytes
         # https://en.wikipedia.org/wiki/List_of_file_signatures
@@ -219,12 +222,18 @@ def generate_combined_pdf(
         if fileformat in {"JPG", "PNG", "GIF"}:
             new_pdf = fpdf.FPDF(format="A4")
             new_pdf.add_page()
-            if sys.getsizeof(attachment) > 512 * 1024:
+            if sys.getsizeof(attachment) > TOO_BIG_ATTACHMENT:
                 image = Image.open(BytesIO(attachment))
+                ImageOps.exif_transpose(image, in_place=True)
                 with BytesIO() as img_io:
                     im_width, im_height = image.size
                     ratio = im_width / im_height
-                    resized_image = image.resize((round(width*ratio), height), Image.Resampling.LANCZOS)
+                    resized_width = round(width*ratio)
+                    resized_height = height
+                    if resized_width < MIN_WIDTH:
+                        resized_width = MIN_WIDTH
+                        resized_height = round(MIN_WIDTH/ratio)
+                    resized_image = image.resize((resized_width, resized_height), Image.Resampling.LANCZOS)
                     resized_image.save(img_io, format=image.format, quality=100)
                     attachment = img_io.getvalue()
             new_pdf.image(
@@ -238,7 +247,7 @@ def generate_combined_pdf(
             )
             attachment = new_pdf.output()
         elif fileformat == "PDF":
-            if sys.getsizeof(attachment) > 512 * 1024:
+            if sys.getsizeof(attachment) > TOO_BIG_ATTACHMENT:
                 old_attachment = pypdf.PdfReader(BytesIO(attachment))
                 new_attachment = pypdf.PdfWriter()
                 for page in old_attachment.pages:
@@ -247,7 +256,12 @@ def generate_combined_pdf(
                     for img in page.images:
                         im_width, im_height = img.image.size
                         ratio = im_width / im_height
-                        new_img = img.image.resize((round(width*ratio), height), Image.Resampling.LANCZOS)
+                        resized_width = round(width*ratio)
+                        resized_height = height
+                        if resized_width < MIN_WIDTH:
+                            resized_width = MIN_WIDTH
+                            resized_height = round(MIN_WIDTH/ratio)
+                        new_img = img.image.resize((resized_width, resized_height), Image.Resampling.LANCZOS)
                         img.replace(new_img)
                     page.scale_to(width=width, height=height)
                 io = BytesIO()
