@@ -204,6 +204,9 @@ def generate_combined_pdf(
 
     # writer.appendpages(pypdf_pdf.pages)
 
+    width = pypdf.PaperSize.A4.width
+    height = pypdf.PaperSize.A4.height
+
     for i, attachment in enumerate(attachements):
         # Check format from magic bytes
         # https://en.wikipedia.org/wiki/List_of_file_signatures
@@ -216,6 +219,14 @@ def generate_combined_pdf(
         if fileformat in {"JPG", "PNG", "GIF"}:
             new_pdf = fpdf.FPDF(format="A4")
             new_pdf.add_page()
+            if sys.getsizeof(attachment) > 512 * 1024:
+                image = Image.open(BytesIO(attachment))
+                with BytesIO() as img_io:
+                    im_width, im_height = image.size
+                    ratio = im_width / im_height
+                    resized_image = image.resize((round(width*ratio), height), Image.Resampling.LANCZOS)
+                    resized_image.save(img_io, format=image.format, quality=100)
+                    attachment = img_io.getvalue()
             new_pdf.image(
                 attachment,
                 x=0,
@@ -227,17 +238,17 @@ def generate_combined_pdf(
             )
             attachment = new_pdf.output()
         elif fileformat == "PDF":
-            if sys.getsizeof(attachment) > 1024 * 1024:
-                width = pypdf.PaperSize.A4.width
-                height = pypdf.PaperSize.A4.height
+            if sys.getsizeof(attachment) > 512 * 1024:
                 old_attachment = pypdf.PdfReader(BytesIO(attachment))
                 new_attachment = pypdf.PdfWriter()
                 for page in old_attachment.pages:
                     new_attachment.add_page(page)
                 for page in new_attachment.pages:
                     for img in page.images:
-                        new_img = img.image.resize((width, height), Image.Resampling.LANCZOS)
-                        img.replace(new_img, quality=80)
+                        im_width, im_height = img.image.size
+                        ratio = im_width / im_height
+                        new_img = img.image.resize((round(width*ratio), height), Image.Resampling.LANCZOS)
+                        img.replace(new_img)
                     page.scale_to(width=width, height=height)
                 io = BytesIO()
                 new_attachment.write(io)
