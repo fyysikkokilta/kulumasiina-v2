@@ -1,7 +1,7 @@
 from datetime import date, datetime, timedelta
 from kulumasiina_backend.pdf_util import is_file_acceptable
 from . import models, schemas
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, defer
 
 
 # def create_entry(author: str, entry: schemas.EntryCreate, db: Session) -> models.Entry:
@@ -50,7 +50,7 @@ def create_entry_full(entry: schemas.EntryCreate, db: Session) -> schemas.Entry:
 
 
 def get_entries(db: Session) -> list[models.Entry]:
-    return db.query(models.Entry).all()
+    return db.query(models.Entry).options(defer(models.Entry.gov_id)).all()
 
 
 def get_item_receipts(item_id: int, db: Session):
