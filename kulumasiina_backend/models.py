@@ -62,7 +62,7 @@ class Mileage(Base):
     description: Mapped[str]
     route: Mapped[str]
     distance: Mapped[float]
-    plate_no: Mapped[str]  # TODO: GDPR
+    plate_no: Mapped[str]
 
 
 class Receipt(Base):
@@ -102,7 +102,7 @@ class Entry(Base):
 
     archived: Mapped[bool] = mapped_column(default=False)
 
-    gov_id: Mapped[str | None] = mapped_column(default=None) # TODO: GDPR
+    gov_id: Mapped[str | None] = mapped_column(default=None)
     # TODO: status enum tms?
     status: Mapped[str] = mapped_column(
         default="submitted"

@@ -269,12 +269,7 @@ export function ExpenseForm() {
               Reimbursement type:{" "}
             </Typography.Title>
             <Radio value={false}>Expense</Radio>
-            {/* Disable mileages for now since there's no clear
-              decision on how social security numbers are going to be handled.
-          */}
-            <Radio value={true} disabled>
-              Mileage
-            </Radio>
+            <Radio value={true}>Mileage</Radio>
           </Space>
         </Radio.Group>
         <Divider />

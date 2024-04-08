@@ -32,5 +32,3 @@ Kulukorvauslomake Fyysikkokillalle.
 - [ ] Migraatiotuki
 - [ ] CI/CD (not gonna happen :D)
 - [ ] Kirjanpitotilien numeroiden tallentaminen item ja mileage tasolla kantaan (mukaan csv tiedostoihin ja pöytäkirjatekstiin)
-
-- Enable travel reimbursement once social security number storage guidelines are set

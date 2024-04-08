@@ -43,7 +43,7 @@ class MileageCreate(BaseModel):
     description: str
     date: date
     route: str
-    plate_no: str  # TODO: GDPR
+    plate_no: str
     distance: float
 
 
@@ -55,7 +55,7 @@ class MileageUpdate(MileageCreate):
     date: date
     description: str
     route: str
-    plate_no: str  # TODO: GDPR
+    plate_no: str
     distance: float
 
 
@@ -64,7 +64,7 @@ class _EntryBase(BaseModel):
     contact: str
     iban: str
     title: str
-    gov_id: str | None  # TODO: GDPR
+    gov_id: str | None
 
 
 class EntryCreate(_EntryBase):
