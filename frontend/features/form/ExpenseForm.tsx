@@ -423,6 +423,16 @@ export function ExpenseForm() {
         onOk={handleOkMileage(editTarget)}
         visible={modal === "mileage"}
       />
+      <Divider />
+      <div id="footer">
+        <Typography.Text>
+          The privacy policy can be found{" "}
+          <a href="https://drive.google.com/drive/u/1/folders/12VBoHzXG7vEYGul87egYQZ3QN_-CKpBa">
+            here
+          </a>{" "}
+          (currently only in Finnish).
+        </Typography.Text>
+      </div>
     </>
   );
 }
