@@ -18,6 +18,7 @@ Kulukorvauslomake Fyysikkokillalle.
 
 - Show user if sending the form fails.
 - Liitenumerot myös PDF-liitteisiin
+- Frontend hakee backendistä config-tiedot (esimerkiksi kilometrikorvauksen suuruus)
 
 ## Muuta TODO
 
