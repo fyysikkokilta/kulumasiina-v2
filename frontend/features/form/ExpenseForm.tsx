@@ -282,7 +282,7 @@ export function ExpenseForm() {
         </Form.Item>
         <Form.Item
           name="contact"
-          label="Payee concact"
+          label="Payee contact"
           rules={[
             {
               required: true,
@@ -335,7 +335,7 @@ export function ExpenseForm() {
               {
                 required: true,
                 message:
-                  "Government issues personal identification code is required for paying mileages!",
+                  "Government issued personal identification code is required for paying mileages!",
               },
             ]}
           >
