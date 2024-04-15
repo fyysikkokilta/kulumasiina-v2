@@ -25,6 +25,7 @@ Kulukorvauslomake Fyysikkokillalle.
 - Front muista admin `hyväksytty` kentän tekstin ja päivämäärän
 - IBAN validaatio backendissä
 - HETU validaatio frontendissä sekä backendissä
+- Käyttäjän kieli tallentuu kekseihin/local storageen
 
 ## Nice to have
 
