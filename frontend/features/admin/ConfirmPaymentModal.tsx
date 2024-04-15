@@ -6,12 +6,16 @@ import { payEntries, payEntry } from "./api";
 import { loadItems } from "./EntryView";
 import dayjs, { Dayjs } from "dayjs";
 import utc from "dayjs/plugin/utc";
+import { useTranslation } from "react-i18next";
 dayjs.extend(utc);
 
 export const ConfirmPaymentModal: React.FC<{
   entry_ids: number | number[];
 }> = ({ entry_ids }) => {
   const dispatch = useAppDispatch();
+  const { t } = useTranslation("translation", {
+    keyPrefix: "admin.confirm_payment_modal",
+  });
   const show = useAppSelector((state) => state.admin.confirmPaymentModal);
   // disable @typescript-eslint/no-explicit-any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -28,7 +32,7 @@ export const ConfirmPaymentModal: React.FC<{
   return (
     <>
       <Modal
-        title="Confirm payment"
+        title={t("title")}
         open={show}
         footer={[]}
         onCancel={() => dispatch(hideConfirmPaymentModal())}
@@ -37,20 +41,20 @@ export const ConfirmPaymentModal: React.FC<{
           {/* TODO: For some reason the default value is not considered valid here! */}
           <Form.Item
             name="date"
-            label="Date"
-            rules={[{ required: true, message: "Please select a date" }]}
+            label={t("date")}
+            rules={[{ required: true, message: t("date_error") }]}
           >
             <DatePicker />
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit">
-              Submit
+              {t("submit")}
             </Button>
             <Button
               key="cancel"
               onClick={() => dispatch(hideConfirmPaymentModal())}
             >
-              Cancel
+              {t("cancel")}
             </Button>
           </Form.Item>
         </Form>

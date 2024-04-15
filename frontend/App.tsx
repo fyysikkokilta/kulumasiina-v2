@@ -15,8 +15,11 @@ import { LoginBtn } from "./features/login/HeaderLoginBtn";
 import { useAppDispatch } from "./app/hooks";
 import { api } from "./features/utils";
 import { logIn } from "./features/login/loginSlice";
+import { changeLanguage } from "i18next";
+import { useTranslation } from "react-i18next";
 
 const Header = () => {
+  const { i18n } = useTranslation();
   return (
     <div
       style={{
@@ -29,8 +32,25 @@ const Header = () => {
       <div>
         <Space>
           <div>
-            <Typography.Text>FI </Typography.Text>/
-            <Typography.Text strong> EN</Typography.Text>
+            <Typography.Text
+              style={{
+                cursor: "pointer",
+                fontWeight: i18n.language === "fi" ? "bold" : "normal",
+              }}
+              onClick={() => changeLanguage("fi")}
+            >
+              FI
+            </Typography.Text>{" "}
+            /{" "}
+            <Typography.Text
+              style={{
+                cursor: "pointer",
+                fontWeight: i18n.language === "en" ? "bold" : "normal",
+              }}
+              onClick={() => changeLanguage("en")}
+            >
+              EN
+            </Typography.Text>
           </div>
           <LoginBtn />
         </Space>

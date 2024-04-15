@@ -3,6 +3,7 @@ import { Button, Form, Upload } from "antd";
 import type { ColProps } from "antd";
 import { EURFormat, KMFormat, mileageReimbursementRate } from "../utils";
 import type { ItemState, MileageState, FormState } from "./formSlice";
+import { useTranslation } from "react-i18next";
 
 interface MileageProps {
   mileage: MileageState;
@@ -19,6 +20,7 @@ export const Mileage: React.FC<MileageProps> = ({
   wrapperProps,
   labelProps,
 }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "form.main" });
   return (
     <Form.Item
       className="expenseCard mileage"
@@ -38,10 +40,10 @@ export const Mileage: React.FC<MileageProps> = ({
         </span>
         <div>
           <Button type="link" onClick={onEdit}>
-            Edit
+            {t("edit")}
           </Button>
           <Button type="primary" danger onClick={onRemove}>
-            Remove
+            {t("remove")}
           </Button>
         </div>
       </div>
@@ -68,6 +70,7 @@ export const Item: React.FC<ItemProps> = ({
   wrapperProps,
   labelProps,
 }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "form.main" });
   const ownFiles = item.receipts.map((id) => files[id]);
   return (
     <Form.Item
@@ -87,10 +90,10 @@ export const Item: React.FC<ItemProps> = ({
         </span>
         <div>
           <Button type="link" onClick={onEdit}>
-            Edit
+            {t("edit")}
           </Button>
           <Button type="primary" danger onClick={onRemove}>
-            Remove
+            {t("remove")}
           </Button>
         </div>
       </div>

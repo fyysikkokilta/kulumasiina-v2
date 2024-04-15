@@ -38,6 +38,7 @@ import {
 import { mileageReimbursementRate, EURFormat } from "../utils";
 import { postForm, postInterface } from "./api";
 import { isValidIBAN } from "ibantools";
+import { useTranslation } from "react-i18next";
 const spans: { [key: string]: ColPropsMap } = {
   main: {
     label: {
@@ -84,6 +85,8 @@ export function ExpenseForm() {
   const [expenseForm] = Form.useForm<ExpenseFormValues>();
   const [mileageForm] = Form.useForm<MileageFormValues>();
   const [mainForm] = Form.useForm();
+
+  const { t } = useTranslation("translation", { keyPrefix: "form.main" });
 
   const defaultFiles: UploadFile[] = [];
   console.log("Edit target " + editTarget);
@@ -266,63 +269,66 @@ export function ExpenseForm() {
         >
           <Space size="large" align="baseline">
             <Typography.Title level={4} style={{ margin: 0 }}>
-              Reimbursement type:{" "}
+              {t("reimbursement_type")}:{" "}
             </Typography.Title>
-            <Radio value={false}>Expense</Radio>
-            <Radio value={true}>Mileage</Radio>
+            <Radio value={false}>{t("expense")}</Radio>
+            <Radio value={true}>{t("mileage")}</Radio>
           </Space>
         </Radio.Group>
         <Divider />
         <Form.Item
           name="name"
-          label="Payee name"
-          rules={[{ required: true, message: "Please give your name!" }]}
+          label={t("payee_name")}
+          rules={[{ required: true, message: t("payee_name_error") }]}
         >
-          <Input placeholder="First Last" autoComplete="off" />
+          <Input placeholder={t("payee_name_placeholder")} autoComplete="off" />
         </Form.Item>
         <Form.Item
           name="contact"
-          label="Payee contact"
+          label={t("payee_contact")}
           rules={[
             {
               required: true,
-              message: "Please give your contact information!",
+              message: t("payee_contact_error"),
             },
           ]}
         >
-          <Input placeholder="Telegram / Email / Phone" autoComplete="off" />
+          <Input
+            placeholder={t("payee_contact_placeholder")}
+            autoComplete="off"
+          />
         </Form.Item>
         <Form.Item
           name="iban"
-          label="IBAN"
+          label={t("iban")}
           rules={[
             {
               required: true,
-              message: "Please give your bank account number!",
+              message: t("iban_error_1"),
               validator: (rule, value, callback) => {
                 if (isValidIBAN(value.replace(/\s/g, ""))) {
                   callback();
                 } else {
-                  callback("Please give a valid IBAN!");
+                  callback(t("iban_error_2"));
                 }
               },
             },
           ]}
         >
-          <Input placeholder="FI 12 3456 7890 1234 56" autoComplete="off" />
+          <Input placeholder={t("iban_placeholder")} autoComplete="off" />
         </Form.Item>
         <Form.Item
           name="title"
-          label="Claim title"
+          label={t("claim_title")}
           rules={[
             {
               required: true,
-              message: "Please give a title to your expense claim submission!",
+              message: t("claim_title_error"),
             },
           ]}
         >
           <Input.TextArea
-            placeholder="<event> expenses and mileages"
+            placeholder={t("claim_title_placeholder")}
             autoComplete="off"
             rows={1}
           />
@@ -330,16 +336,18 @@ export function ExpenseForm() {
         {isMileage ? (
           <Form.Item
             name="gov_id"
-            label="Personal ID code"
+            label={t("personal_id_code")}
             rules={[
               {
                 required: true,
-                message:
-                  "Government issued personal identification code is required for paying mileages!",
+                message: t("personal_id_code_error"),
               },
             ]}
           >
-            <Input placeholder="123456-789A" autoComplete="off" />
+            <Input
+              placeholder={t("personal_id_code_placeholder")}
+              autoComplete="off"
+            />
           </Form.Item>
         ) : null}
         {entries.length > 0 ? <Divider /> : null}
@@ -385,16 +393,16 @@ export function ExpenseForm() {
         <div className="addButtons">
           {!isMileage && (
             <Button type="default" onClick={showExpense} htmlType="button">
-              Add an expense
+              {t("add_expense")}
             </Button>
           )}
           {isMileage && (
             <Button type="default" onClick={showMileage} htmlType="button">
-              Add a mileage
+              {t("add_mileage")}
             </Button>
           )}
           <span className="total">
-            <strong>Total:</strong> {EURFormat.format(total)}
+            <strong>{t("total")}:</strong> {EURFormat.format(total)}
           </span>
           <Button
             type="primary"
@@ -404,7 +412,7 @@ export function ExpenseForm() {
             onClick={handleSubmit}
             disabled={itemOrMileageCount === 0}
           >
-            Submit
+            {t("submit")}
           </Button>
         </div>
         {/* </Form.Item> */}
@@ -426,11 +434,9 @@ export function ExpenseForm() {
       <Divider />
       <div id="footer">
         <Typography.Text>
-          The privacy policy can be found{" "}
-          <a href="https://drive.google.com/drive/u/1/folders/12VBoHzXG7vEYGul87egYQZ3QN_-CKpBa">
-            here
-          </a>{" "}
-          (currently only in Finnish).
+          {t("privacy_policy_text_1")}{" "}
+          <a href={t("privacy_policy_link")}>{t("privacy_policy_text_link")}</a>{" "}
+          {t("privacy_policy_text_2")}
         </Typography.Text>
       </div>
     </>

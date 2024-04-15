@@ -4,8 +4,12 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { hideRemoveEntriesModal } from "./adminSlice";
 import { deleteOldArchivedEntries } from "./api";
 import { loadItems } from "./EntryView";
+import { useTranslation } from "react-i18next";
 export const RemoveEntriesModal: React.FC = () => {
   const dispatch = useAppDispatch();
+  const { t } = useTranslation("translation", {
+    keyPrefix: "admin.remove_archived_entries_modal",
+  });
   const show = useAppSelector((state) => state.admin.removeEntriesModal);
   // disable @typescript-eslint/no-explicit-any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -17,7 +21,7 @@ export const RemoveEntriesModal: React.FC = () => {
   return (
     <>
       <Modal
-        title="Remove archived items"
+        title={t("title")}
         open={show}
         footer={[]}
         onCancel={() => dispatch(hideRemoveEntriesModal())}
@@ -25,23 +29,19 @@ export const RemoveEntriesModal: React.FC = () => {
         <Form onFinish={handleSubmit}>
           <Form.Item>
             <Typography.Paragraph type="danger">
-              Are you sure you want to remove old archived items? This action
-              cannot be undone.
+              {t("text_1")}
             </Typography.Paragraph>
-            <Typography.Paragraph>
-              Make sure that for each paid item the pdf has been archived to
-              Procountor.
-            </Typography.Paragraph>
+            <Typography.Paragraph>{t("text_2")}</Typography.Paragraph>
           </Form.Item>
           <Form.Item>
             <Button danger type="primary" htmlType="submit">
-              Remove
+              {t("remove")}
             </Button>
             <Button
               key="cancel"
               onClick={() => dispatch(hideRemoveEntriesModal())}
             >
-              Cancel
+              {t("cancel")}
             </Button>
           </Form.Item>
         </Form>

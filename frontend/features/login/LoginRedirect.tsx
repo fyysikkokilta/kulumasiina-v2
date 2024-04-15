@@ -3,11 +3,13 @@ import { api } from "../utils";
 import { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { logIn } from "./loginSlice";
+import { useTranslation } from "react-i18next";
 
 export const LoginCallback = () => {
   const [searchParamas, _setParams] = useSearchParams();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
   useEffect(() => {
     api
       .get(`/login/google/callback?${searchParamas.toString()}`)
@@ -16,7 +18,7 @@ export const LoginCallback = () => {
   }, []);
   return (
     <>
-      <h2>Logging you in, please wait</h2>
+      <h2>{t("login.logging_in")}</h2>
     </>
   );
 };

@@ -1,19 +1,35 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import { store } from "./app/store";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import "./index.css";
+import "./i18n";
+import { ConfigProvider } from "antd";
+import fiFI from "antd/es/locale/fi_FI";
+import enUS from "antd/es/locale/en_US";
+import { useTranslation } from "react-i18next";
 
 const container = document.getElementById("root");
 if (!container) throw new Error("Could not find root element");
 const root = createRoot(container);
 
+const LocalizedApp = () => {
+  const { i18n } = useTranslation();
+  return (
+    <ConfigProvider locale={i18n.language === "fi" ? fiFI : enUS}>
+      <App />
+    </ConfigProvider>
+  );
+};
+
 root.render(
   <React.StrictMode>
     <Provider store={store}>
-      <App />
+      <Suspense fallback="loading">
+        <LocalizedApp />
+      </Suspense>
     </Provider>
   </React.StrictMode>,
 );

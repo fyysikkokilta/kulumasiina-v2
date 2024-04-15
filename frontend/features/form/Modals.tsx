@@ -14,6 +14,7 @@ import { Dayjs } from "dayjs";
 import type { UploadRequestOption } from "rc-upload/lib/interface";
 import imageCompression from "browser-image-compression";
 import { api } from "../utils";
+import { useTranslation } from "react-i18next";
 
 type ModalProps = {
   visible: boolean;
@@ -46,84 +47,93 @@ type ExpenseModalProps = ModalProps & {
   setFileList: (fileList: UploadFile[]) => void;
 };
 
-export const MileageModal: React.FC<MileageModalProps> = (props) => (
-  <Modal
-    title="Add a mileage"
-    open={props.visible}
-    onOk={props.onOk}
-    onCancel={props.onCancel}
-  >
-    <Form
-      labelCol={{ span: 6 }}
-      wrapperCol={{ span: 18 }}
-      layout="horizontal"
-      form={props.form}
-      requiredMark={false}
+export const MileageModal: React.FC<MileageModalProps> = (props) => {
+  const { t } = useTranslation("translation", { keyPrefix: "form.mileage" });
+  return (
+    <Modal
+      title={t("add")}
+      open={props.visible}
+      onOk={props.onOk}
+      onCancel={props.onCancel}
     >
-      <Form.Item
-        name="description"
-        label="Description"
-        rules={[{ required: true, message: "Please provide a description!" }]}
+      <Form
+        labelCol={{ span: 6 }}
+        wrapperCol={{ span: 18 }}
+        layout="horizontal"
+        form={props.form}
+        requiredMark={false}
       >
-        <Input.TextArea
-          showCount
-          maxLength={500}
-          rows={3}
-          placeholder="Description"
-        />
-      </Form.Item>
-      <Form.Item
-        name="date"
-        label="Date"
-        rules={[
-          { required: true, message: "Please provide a date for the mileage!" },
-        ]}
-      >
-        <DatePicker format="YYYY-MM-DD" picker="date" />
-      </Form.Item>
-      <Form.Item
-        name="route"
-        label="Route"
-        rules={[{ required: true, message: "Please provide the used route!" }]}
-      >
-        <Input.TextArea
-          showCount
-          maxLength={300}
-          rows={2}
-          placeholder="guild room - venue <address> - guild room"
-        />
-      </Form.Item>
-      <Form.Item
-        name="distance"
-        label="Distance"
-        rules={[
-          {
-            required: true,
-            message: "Please provide the distance driven!",
-          },
-          {
-            pattern: /^\d+([.,]\d{1,2})?$/,
-            message: "Please provide a valid positive number!",
-          },
-        ]}
-      >
-        <Input suffix="km" placeholder="0" />
-      </Form.Item>
-      <Form.Item
-        name="plate_no"
-        label="Plate number"
-        rules={[
-          {
-            required: true,
-            message: "Please provide the plate number of the vehicle!",
-          },
-        ]}
-      >
-        <Input placeholder="ABC-123" />
-      </Form.Item>
-    </Form>
-  </Modal>
-);
+        <Form.Item
+          name="description"
+          label={t("description")}
+          rules={[{ required: true, message: t("description_error") }]}
+        >
+          <Input.TextArea
+            showCount
+            maxLength={500}
+            rows={3}
+            placeholder={t("description_placeholder")}
+          />
+        </Form.Item>
+        <Form.Item
+          name="date"
+          label={t("date")}
+          rules={[
+            {
+              required: true,
+              message: t("date_error"),
+            },
+          ]}
+        >
+          <DatePicker format="YYYY-MM-DD" picker="date" />
+        </Form.Item>
+        <Form.Item
+          name="route"
+          label={t("route")}
+          rules={[{ required: true, message: t("route_error") }]}
+        >
+          <Input.TextArea
+            showCount
+            maxLength={300}
+            rows={2}
+            placeholder={t("route_placeholder")}
+          />
+        </Form.Item>
+        <Form.Item
+          name="distance"
+          label={t("distance")}
+          rules={[
+            {
+              required: true,
+              message: t("distance_error_1"),
+            },
+            {
+              pattern: /^\d+([.,]\d{1,2})?$/,
+              message: t("distance_error_2"),
+            },
+          ]}
+        >
+          <Input
+            suffix={t("distance_unit")}
+            placeholder={t("distance_placeholder")}
+          />
+        </Form.Item>
+        <Form.Item
+          name="plate_no"
+          label={t("plate_number")}
+          rules={[
+            {
+              required: true,
+              message: t("plate_number_error"),
+            },
+          ]}
+        >
+          <Input placeholder={t("plate_number_placeholder")} />
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
+};
 
 const getBase64 = (file: RcFile): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -138,6 +148,10 @@ export const ItemModal = (props: ExpenseModalProps) => {
   const [previewImage, setPreviewImage] = useState("");
   const [previewTitle, setPreviewTitle] = useState("");
   // const [fileList, setFileList] = useState<UploadFile[]>();
+
+  const { i18n, t } = useTranslation("translation", {
+    keyPrefix: "form.expense",
+  });
 
   const handlePreview = async (file: UploadFile) => {
     if (!file.url) return;
@@ -171,7 +185,7 @@ export const ItemModal = (props: ExpenseModalProps) => {
     // check pdf size is under 4MB
     if (file.size > 4 * 1024 * 1024) {
       if (file.type === "application/pdf") {
-        AntdMessage.error("PDF needs to be under 4MB!", 5);
+        AntdMessage.error(t("upload_error"), 5);
         return Upload.LIST_IGNORE;
       }
       // compress too large image files
@@ -211,7 +225,7 @@ export const ItemModal = (props: ExpenseModalProps) => {
   console.log("FORM VALUES:", props.form.getFieldsValue());
   return (
     <Modal
-      title="Add an expense"
+      title={t("add")}
       open={props.visible}
       onOk={() => {
         props.onOk();
@@ -231,49 +245,49 @@ export const ItemModal = (props: ExpenseModalProps) => {
       >
         <Form.Item
           name="description"
-          label="Description"
-          rules={[{ required: true, message: "Please provide a description!" }]}
+          label={t("description")}
+          rules={[{ required: true, message: t("description_error") }]}
         >
           <Input.TextArea
             showCount
             maxLength={500}
             rows={3}
-            placeholder="Description"
+            placeholder={t("description_placeholder")}
           />
         </Form.Item>
         <Form.Item
           name="value"
-          label="Amount"
+          label={t("amount")}
           rules={[
-            { required: true, message: "Please provide expense value!" },
+            { required: true, message: t("amount_error_1") },
             {
               pattern: /^\d+([.,]\d{1,2})?$/,
-              message: "Please provide a valid positive number!",
+              message: t("amount_error_2"),
             },
           ]}
         >
           <Input
-            suffix="€"
-            placeholder="0.00"
+            suffix={t("amount_unit")}
+            placeholder={t("amount_placeholder")}
             inputMode="decimal"
             step="0.01"
             min="0"
-            lang="en" // TODO: Make this sync with selected language from i18n (fi/en)
+            lang={i18n.language}
           />
         </Form.Item>
         <Form.Item
           name="date"
-          label="Date"
+          label={t("date")}
           rules={[
             {
               required: true,
-              message: "Please provide a date for the expense!",
+              message: t("date_error"),
             },
           ]}
         >
           <DatePicker format="YYYY-MM-DD" picker="date" />
         </Form.Item>
-        <Form.Item name="receipts" label="Receipt">
+        <Form.Item name="receipts" label={t("receipts")}>
           <Upload
             action="/receipt"
             listType="picture-card"
@@ -288,7 +302,7 @@ export const ItemModal = (props: ExpenseModalProps) => {
             <div>
               {/* <PlusOutlined style={{}}/> */}
               +<br />
-              <div style={{ marginTop: 8 }}>Upload</div>
+              <div style={{ marginTop: 8 }}>{t("upload")}</div>
             </div>
           </Upload>
         </Form.Item>

@@ -3,12 +3,14 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useNavigate } from "react-router-dom";
 import { api } from "../utils";
 import { logOut } from "./loginSlice";
+import { useTranslation } from "react-i18next";
 
 export const LoginBtn = () => {
   const dispatch = useAppDispatch();
   const loggedIn = useAppSelector((state) => state.login.loggedIn);
   // const username = useAppSelector((state) => state.login.username);
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const logout = () => {
     api.get("/logout").then(() => {
       dispatch(logOut());
@@ -17,11 +19,11 @@ export const LoginBtn = () => {
   };
   return loggedIn ? (
     <>
-      <Button onClick={() => logout()}>Log out</Button>
+      <Button onClick={() => logout()}>{t("login.logout")}</Button>
     </>
   ) : (
     <>
-      <Button onClick={() => navigate("/login")}>Log in</Button>
+      <Button onClick={() => navigate("/login")}>{t("login.login")}</Button>
     </>
   );
 };

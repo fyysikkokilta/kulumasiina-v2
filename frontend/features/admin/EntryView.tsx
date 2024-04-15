@@ -58,6 +58,8 @@ import {
   MileageFormValues,
   MileageModal,
 } from "../form/Modals";
+import i18next from "../../i18n";
+import { useTranslation } from "react-i18next";
 export const loadItems = (dispatch: AppDispatch) => {
   getEntries().then((entries) => {
     dispatch(loadSubmissions(entries));
@@ -81,6 +83,11 @@ interface tableSubmission extends SubmissionState {
 }
 
 const columns = (entries: tableSubmission[]): ColumnsType<tableSubmission> => {
+  const t = i18next.getFixedT(
+    i18next.language,
+    "translation",
+    "admin.table_titles",
+  );
   const normalizedNames = entries
     .map((entry) => entry.name)
     .map((name) =>
@@ -97,21 +104,20 @@ const columns = (entries: tableSubmission[]): ColumnsType<tableSubmission> => {
   );
   return [
     {
-      title: "Entry id",
+      title: t("entry_id"),
       dataIndex: "id",
       key: "id",
       defaultSortOrder: "descend",
       sorter: (a, b) => a.id - b.id,
     },
     {
-      // Would be nice to be able to filter with date range also, but antd doesn't support it.
-      title: "Submission date",
+      title: t("submission_date"),
       dataIndex: "submission_date",
       key: "submissionDate",
       render: (value) => new Date(value).toLocaleDateString(),
     },
     {
-      title: "Name",
+      title: t("name"),
       dataIndex: "name",
       key: "name",
       // Allow filtering by name. Substring match.
@@ -124,54 +130,56 @@ const columns = (entries: tableSubmission[]): ColumnsType<tableSubmission> => {
       onFilter: (value, record) => record.name.toLocaleLowerCase() === value,
     },
     {
-      title: "Claimed expense",
+      title: t("total"),
       dataIndex: "total",
       key: "total",
       render: (value) => EURFormat.format(value),
     },
     {
-      title: "Submission title",
+      title: t("submission_title"),
       dataIndex: "title",
       key: "title",
     },
     {
-      title: "Status",
+      title: t("status"),
       dataIndex: "status",
       key: "status",
       // Allow filtering by status. "submitted", "paid", "approved", "denied"
       filters: [
         {
-          text: "Submitted",
+          text: t("status_filters.submitted"),
           value: "submitted",
         },
         {
-          text: "Paid",
+          text: t("status_filters.paid"),
           value: "paid",
         },
         {
-          text: "Approved",
+          text: t("status_filters.approved"),
           value: "approved",
         },
         {
-          text: "Denied",
+          text: t("status_filters.denied"),
           value: "denied",
         },
       ],
       onFilter: (value, record) => record.status === value,
+      render: (value) => t("status_filters." + value),
     },
     {
-      title: "Archived",
+      title: t("archived"),
       dataIndex: "archived",
       key: "archived",
-      render: (value) => (value ? "yes" : "no"),
+      render: (value) =>
+        value ? t("archived_values.yes") : t("archived_values.no"),
       // Allow filtering by archived status.
       filters: [
         {
-          text: "Archived",
+          text: t("archived_filters.archived"),
           value: true,
         },
         {
-          text: "Not archived",
+          text: t("archived_filters.not_archived"),
           value: false,
         },
       ],
@@ -199,15 +207,20 @@ const expandedColumns: ColumnsType<expandedRowTable> = [
 
 const renderMileage = (mileage: MileageState) => {
   const dispatch = useAppDispatch();
+  const t = i18next.getFixedT(
+    i18next.language,
+    "translation",
+    "admin.expanded.mileage",
+  );
   return (
     <Space>
       <Typography.Text>
-        Mileage: <strong>{mileage.date}</strong>{" "}
+        {t("mileage")}: <strong>{mileage.date}</strong>{" "}
         {KMFormat.format(mileage.distance)} &rarr;{" "}
         {EURFormat.format(mileage.distance * mileageReimbursementRate)}
       </Typography.Text>
       <Button onClick={() => dispatch(showEditMileageModal(mileage))}>
-        Edit
+        {t("edit")}
       </Button>
     </Space>
   );
@@ -215,13 +228,20 @@ const renderMileage = (mileage: MileageState) => {
 
 const renderItem = (item: ItemState) => {
   const dispatch = useAppDispatch();
+  const t = i18next.getFixedT(
+    i18next.language,
+    "translation",
+    "admin.expanded.item",
+  );
   return (
     <Space>
       <Typography.Text>
-        Item: <strong>{item.date}</strong>{" "}
+        {t("item")}: <strong>{item.date}</strong>{" "}
         {EURFormat.format(item.value_cents / 100)}
       </Typography.Text>
-      <Button onClick={() => dispatch(showEditItemModal(item))}>Edit</Button>
+      <Button onClick={() => dispatch(showEditItemModal(item))}>
+        {t("edit")}
+      </Button>
     </Space>
   );
 };
@@ -247,6 +267,11 @@ const expandedRowRender = (record: tableSubmission) => {
       })),
     );
   const dispatch = useAppDispatch();
+  const t = i18next.getFixedT(
+    i18next.language,
+    "translation",
+    "admin.expanded",
+  );
   return (
     <>
       <Table
@@ -256,22 +281,30 @@ const expandedRowRender = (record: tableSubmission) => {
           expandedRowRender: (a) => {
             return (
               <>
-                <Typography.Title level={4}>Description: </Typography.Title>
+                <Typography.Title level={4}>
+                  {t("description")}:{" "}
+                </Typography.Title>
                 <Typography.Text>{a.description}</Typography.Text>
                 {a.type === "mileage" ? (
                   <>
-                    <Typography.Title level={4}>Route:</Typography.Title>
+                    <Typography.Title level={4}>
+                      {t("mileage.route")}:
+                    </Typography.Title>
                     <Typography.Text>
                       {record.mileages[a.index].route}
                     </Typography.Text>
-                    <Typography.Title level={4}>Plate number:</Typography.Title>
+                    <Typography.Title level={4}>
+                      {t("mileage.plate_number")}:
+                    </Typography.Title>
                     <Typography.Text>
                       {record.mileages[a.index].plate_no}
                     </Typography.Text>
                   </>
                 ) : (
                   <>
-                    <Typography.Title level={4}>Receipts:</Typography.Title>
+                    <Typography.Title level={4}>
+                      {t("item.receipts")}:
+                    </Typography.Title>
                     {record.items[a.index].receipts.map((r) => {
                       return <Receipt key={r.id} receipt={r} />;
                     })}
@@ -285,15 +318,19 @@ const expandedRowRender = (record: tableSubmission) => {
         showHeader={false}
       />
       <br></br>
-      <h4>Status: {record.status}</h4>
-      <h4>Contact info: {record.contact}</h4>
+      <h4>
+        {t("status")}: {t("statuses." + record.status)}
+      </h4>
+      <h4>
+        {t("contact")}: {record.contact}
+      </h4>
       <Space>
         <Button onClick={() => window.open(`/api/entry/${record.id}/pdf`)}>
-          Download pdf
+          {t("download_pdf")}
         </Button>
         {(record.status === "paid" || record.status === "approved") && (
           <Button onClick={() => window.open(`/api/entry/${record.id}/csv`)}>
-            {record.status === "paid" ? "Download zip" : "Download csv"}
+            {record.status === "paid" ? t("download_zip") : t("download_csv")}
           </Button>
         )}
       </Space>
@@ -304,20 +341,20 @@ const expandedRowRender = (record: tableSubmission) => {
         {record.status === "submitted" && (
           <>
             <Button onClick={() => dispatch(showDateModal(record.id))}>
-              Accept
+              {t("actions.accept")}
             </Button>
             <Button
               onClick={() =>
                 denyEntry(record.id).then(() => loadItems(dispatch))
               }
             >
-              Deny
+              {t("actions.deny")}
             </Button>
           </>
         )}
         {record.status === "approved" && (
           <Button onClick={() => dispatch(showConfirmPaymentModal(record.id))}>
-            Mark as paid
+            {t("actions.pay")}
           </Button>
         )}
         {record.status !== "submitted" && !record.archived && (
@@ -327,7 +364,7 @@ const expandedRowRender = (record: tableSubmission) => {
                 resetEntry(record.id).then(() => loadItems(dispatch))
               }
             >
-              Reset
+              {t("actions.reset")}
             </Button>
           </>
         )}
@@ -339,7 +376,7 @@ const expandedRowRender = (record: tableSubmission) => {
                 archiveEntry(record.id).then(() => loadItems(dispatch))
               }
             >
-              Archive
+              {t("actions.archive")}
             </Button>
           )}
         {record.archived && (
@@ -347,7 +384,7 @@ const expandedRowRender = (record: tableSubmission) => {
             danger
             onClick={() => dispatch(showRemoveEntryModal(record.id))}
           >
-            Remove
+            {t("actions.remove")}
           </Button>
         )}
       </Space>
@@ -401,6 +438,8 @@ export function AdminEntryView() {
   const showEditMileageModal = useAppSelector(
     (state) => state.admin.editMileageModal,
   );
+
+  const { t } = useTranslation("translation", { keyPrefix: "admin" });
 
   useEffect(() => {
     if (selectedItem) {
@@ -555,7 +594,7 @@ export function AdminEntryView() {
         visible={showEditMileageModal}
       />
       <Typography.Title level={3} style={{ display: "inline-block" }}>
-        Submissions
+        {t("submissions")}
       </Typography.Title>
       <div
         style={{
@@ -573,12 +612,12 @@ export function AdminEntryView() {
                 );
               }}
             >
-              Download combined zip
+              {t("multi_actions.download_zip")}
             </Button>
           )}
           {hasUnArchivedSelections && selectionType == "submitted" && (
             <Button onClick={() => dispatch(showDateModal(selectedIndices))}>
-              Accept selected
+              {t("multi_actions.accept")}
             </Button>
           )}
           {hasUnArchivedSelections && selectionType == "submitted" && (
@@ -587,19 +626,19 @@ export function AdminEntryView() {
                 denyEntries(selectedIndices).then(() => loadItems(dispatch))
               }
             >
-              Deny selected
+              {t("multi_actions.deny")}
             </Button>
           )}
           {hasUnArchivedSelections && selectionType == "submitted" && (
             <Button onClick={generateClipboardText}>
-              Copy selected to clipboard
+              {t("multi_actions.copy_clipboard")}
             </Button>
           )}
           {hasUnArchivedSelections && selectionType == "approved" && (
             <Button
               onClick={() => dispatch(showConfirmPaymentModal(selectedIndices))}
             >
-              Mark selected as paid
+              {t("multi_actions.pay")}
             </Button>
           )}
           {hasUnArchivedSelections &&
@@ -611,7 +650,7 @@ export function AdminEntryView() {
                   )
                 }
               >
-                Archive selected
+                {t("multi_actions.archive")}
               </Button>
             )}
           {hasUnArchivedSelections &&
@@ -621,12 +660,12 @@ export function AdminEntryView() {
                   resetEntries(selectedIndices).then(() => loadItems(dispatch))
                 }
               >
-                Reset selected
+                {t("multi_actions.reset")}
               </Button>
             )}
           {toBeDeleted > 0 && (
             <Button danger onClick={() => dispatch(showRemoveEntriesModal())}>
-              Remove old entries ({toBeDeleted})
+              {t("multi_actions.remove_old_archived")} ({toBeDeleted})
             </Button>
           )}
           <RangePicker
