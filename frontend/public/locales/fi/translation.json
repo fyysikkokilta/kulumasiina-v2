@@ -1,10 +1,11 @@
 {
   "form": {
     "main": {
+      "title": "FK-Kulumasiina",
       "reimbursement_type": "Korvaustyyppi",
       "expense": "Kulu",
       "mileage": "Matka",
-      "payee_name": "Saaja",
+      "payee_name": "Saajan nimi",
       "payee_name_placeholder": "Etunimi Sukunimi",
       "payee_name_error": "Anna nimesi!",
       "payee_contact": "Yhteystiedot",

@@ -15,11 +15,15 @@ import { LoginBtn } from "./features/login/HeaderLoginBtn";
 import { useAppDispatch } from "./app/hooks";
 import { api } from "./features/utils";
 import { logIn } from "./features/login/loginSlice";
-import { changeLanguage } from "i18next";
 import { useTranslation } from "react-i18next";
 
 const Header = () => {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
+
+  useEffect(() => {
+    document.title = t("form.main.title");
+  }, [i18n.language]);
+
   return (
     <div
       style={{
@@ -28,16 +32,16 @@ const Header = () => {
         alignItems: "baseline",
       }}
     >
-      <Typography.Title level={1}>FK-Expenses</Typography.Title>
+      <Typography.Title level={1}>{t("form.main.title")}</Typography.Title>
       <div>
         <Space>
           <div>
             <Typography.Text
               style={{
                 cursor: "pointer",
-                fontWeight: i18n.language === "fi" ? "bold" : "normal",
+                fontWeight: i18n.language.startsWith("fi") ? "bold" : "normal",
               }}
-              onClick={() => changeLanguage("fi")}
+              onClick={() => i18n.changeLanguage("fi")}
             >
               FI
             </Typography.Text>{" "}
@@ -45,9 +49,9 @@ const Header = () => {
             <Typography.Text
               style={{
                 cursor: "pointer",
-                fontWeight: i18n.language === "en" ? "bold" : "normal",
+                fontWeight: i18n.language.startsWith("en") ? "bold" : "normal",
               }}
-              onClick={() => changeLanguage("en")}
+              onClick={() => i18n.changeLanguage("en")}
             >
               EN
             </Typography.Text>
