@@ -37,6 +37,27 @@ def hasMileages(rows: list[Row]) -> bool:
 def substring80AndRemoveNewlines(string: str) -> str:
   return string[:80].replace("\n", " ")
 
+def merge_csv_infos(csv_infos: list[CsvInfo]) -> list[CsvInfo]:
+  merged_csv_infos: list[CsvInfo] = []
+
+  for csv_info in csv_infos:
+    found = False
+    for merged_csv_info in merged_csv_infos:
+      if merged_csv_info["IBAN"].replace(" ", "") == csv_info["IBAN"].replace(" ", ""):
+        merged_csv_info["rows"] += csv_info["rows"]
+        if not merged_csv_info["HETU"] and csv_info["HETU"]:
+          merged_csv_info["HETU"] = csv_info["HETU"]
+        #Remove pdf from merged_csv_info, zip can have only one pdf per entry :(
+        merged_csv_info["pdf"] = None
+        merged_csv_info["Pvm"] = min(merged_csv_info["Pvm"], csv_info["Pvm"])
+        merged_csv_info["entry_id"] = f"{merged_csv_info['entry_id']}, {csv_info['entry_id']}"
+        found = True
+        break
+    if not found:
+      merged_csv_infos.append(csv_info.copy())
+  
+  return merged_csv_infos
+
 def generate_csv(csv_infos: list[CsvInfo]) -> tuple[str, bytes]:
 
   f = StringIO()
@@ -45,7 +66,10 @@ def generate_csv(csv_infos: list[CsvInfo]) -> tuple[str, bytes]:
 
   #Info about the CSV form is found here https://support.procountor.fi/hc/fi/articles/360000256417-Laskuaineiston-siirtotiedosto
 
-  for csv_info in csv_infos:
+  #Merge CSV infos with the same IBAN and HETU
+  merged_csv_infos = merge_csv_infos(csv_infos)
+
+  for csv_info in merged_csv_infos:
     entry_id = csv_info["entry_id"]
     name = csv_info["name"]
     IBAN = csv_info["IBAN"]
@@ -62,7 +86,10 @@ def generate_csv(csv_infos: list[CsvInfo]) -> tuple[str, bytes]:
     #Expenses
     if hasExpenses(rows):
       #Indeksi 34 on liitetiedoston nimi
-      writer.writerow(["K", "EUR", "", IBAN, "", "Tilisiirto", name, "", 0, "t", "t", 0, Pvm.strftime("%d.%m.%Y"), "", Pvm.strftime("%d.%m.%Y"), "", "", "", "", "", "", "", "", "", "", 6, "", "", "t", "", "", "", "", pdf_name])
+      notes = ""
+      if not pdf:
+        notes = f"Muista lisätä PDFt liitetiedostoina: {entry_id}"
+      writer.writerow(["K", "EUR", "", IBAN, "", "Tilisiirto", name, "", 0, "t", "t", 0, Pvm.strftime("%d.%m.%Y"), "", Pvm.strftime("%d.%m.%Y"), "", "", "", "", notes, "", "", "", "", "", 6, "", "", "t", "", "", "", "", pdf_name])
       for row in filter(isExpense, rows):
         #TYHJÄ, tuotteen kuvaus, tuotteen koodi, määrä (1 tai kilometrien määrä), yksikkö	(kpl tai km), yksikköhinta euroissa,	rivin alennusprosentti, rivin ALV, rivikommentti, TYHJÄ, TYHJÄ, TYHJÄ, TYHJÄ, kirjanpitotili
         writer.writerow(["", substring80AndRemoveNewlines(row["selite"]), "", row["maara"], "kpl", row["yksikkohinta"], 0, 0])
@@ -70,7 +97,10 @@ def generate_csv(csv_infos: list[CsvInfo]) -> tuple[str, bytes]:
     #Mileages
     if hasMileages(rows):
       #Indeksi 34 on liitetiedoston nimi
-      writer.writerow(["T", "EUR", "", IBAN, HETU, "Tilisiirto", name, "", 0, "t", "t", 0, Pvm.strftime("%d.%m.%Y"), "", Pvm.strftime("%d.%m.%Y"), "", "", "", "", "", "", "", "", "", "", 6, "", "", "t", "", "", "", "", pdf_name])
+      notes = ""
+      if not pdf:
+        notes = f"Muista lisätä PDFt liitetiedostoina: {entry_id}"
+      writer.writerow(["T", "EUR", "", IBAN, HETU, "Tilisiirto", name, "", 0, "t", "t", 0, Pvm.strftime("%d.%m.%Y"), "", Pvm.strftime("%d.%m.%Y"), "", "", "", "", notes, "", "", "", "", "", 6, "", "", "t", "", "", "", "", pdf_name])
       for row in filter(isMileage, rows):
         #TYHJÄ, tuotteen kuvaus, tuotteen koodi, määrä (1 tai kilometrien määrä), yksikkö	(kpl tai km), yksikköhinta euroissa,	rivin alennusprosentti, rivin ALV, rivikommentti, TYHJÄ, TYHJÄ, TYHJÄ, TYHJÄ, kirjanpitotili
         writer.writerow(["", substring80AndRemoveNewlines(row["selite"]), os.environ["MILEAGE_PROCOUNTOR_PRODUCT_ID"], row["maara"], "km", row["yksikkohinta"], 0, 0])
@@ -96,7 +126,8 @@ def generate_csv(csv_infos: list[CsvInfo]) -> tuple[str, bytes]:
     zip.writestr(f"{archive_name}.csv", f.getvalue().encode("cp1252"))
 
     #Add PDFs
-    for pdf_name, pdf_data in map(lambda csv_info: csv_info["pdf"], csv_infos):
+    pdfs = filter(lambda csv_info: csv_info["pdf"], merged_csv_infos)
+    for pdf_name, pdf_data in map(lambda csv_info: csv_info["pdf"], pdfs):
       zip.writestr(pdf_name, pdf_data)
 
   return f"{archive_name}.zip", archive.getvalue()
