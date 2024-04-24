@@ -699,6 +699,14 @@ export function AdminEntryView() {
           expandedRowRender: expandedRowRender,
         }}
         loading={loading}
+        pagination={{
+          defaultPageSize: 10,
+          showSizeChanger: true,
+          pageSizeOptions: [10, 25, 50],
+          showTotal: (total, range) => {
+            return `${range[0]}-${range[1]} / ${total}`;
+          },
+        }}
       />
     </>
   );
