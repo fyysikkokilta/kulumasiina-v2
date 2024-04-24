@@ -94,8 +94,15 @@ const columns = (entries: tableSubmission[]): ColumnsType<tableSubmission> => {
       name
         .toLocaleLowerCase()
         .split(" ")
-        .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
-        .join(" "),
+        .map((s1) => {
+          const s2 = s1
+            .split("-")
+            .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+            .join("-");
+          return s2.charAt(0).toUpperCase() + s2.substring(1);
+        })
+        .join(" ")
+        .trim(),
     );
 
   const uniqueNames = normalizedNames.filter(

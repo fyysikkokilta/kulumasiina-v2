@@ -37,7 +37,7 @@ import {
 
 import { mileageReimbursementRate, EURFormat } from "../utils";
 import { postForm, postInterface } from "./api";
-import { isValidIBAN } from "ibantools";
+import { friendlyFormatIBAN, isValidIBAN } from "ibantools";
 import { useTranslation } from "react-i18next";
 const spans: { [key: string]: ColPropsMap } = {
   main: {
@@ -214,6 +214,7 @@ export function ExpenseForm() {
     const data: postInterface = {
       ...formData,
       gov_id: isMileage ? formData.gov_id : null,
+      iban: friendlyFormatIBAN(formData.iban),
       items: !isMileage ? items : [],
       mileages: isMileage ? mileages : [],
     };
