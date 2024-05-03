@@ -309,10 +309,14 @@ async def get_multi_entry_csv(
 
     document_name, csv = csv_util.generate_csv(pdf_infos)
 
+    media_type = "text/csv"
+    if document_name.endswith("zip"):
+        media_type = "application/zip"
+
     return Response(
         csv,
-        media_type="text/csv",
-        headers={"Content-Disposition": f"attachment; filename={document_name}"},
+        media_type=media_type,
+        headers={"Content-Disposition": f"attachment; filename=\"{document_name}\""},
     )
 
 @api_router.get("/entry/{entry_id}/csv")
@@ -373,10 +377,14 @@ async def get_entry_csv(
         pdf=pdf,
     )])
 
+    media_type = "text/csv"
+    if document_name.endswith("zip"):
+        media_type = "application/zip"
+
     return Response(
         csv,
-        media_type="text/csv",
-        headers={"Content-Disposition": f"attachment; filename={document_name}"},
+        media_type=media_type,
+        headers={"Content-Disposition": f"attachment; filename=\"{document_name}\""},
     )
 
 def assert_status_in(entry_id, statuses, db):

@@ -50,7 +50,7 @@ def merge_csv_infos(csv_infos: list[CsvInfo]) -> list[CsvInfo]:
         #Remove pdf from merged_csv_info, zip can have only one pdf per entry :(
         merged_csv_info["pdf"] = None
         merged_csv_info["Pvm"] = min(merged_csv_info["Pvm"], csv_info["Pvm"])
-        merged_csv_info["entry_id"] = f"{merged_csv_info['entry_id']}, {csv_info['entry_id']}"
+        merged_csv_info["entry_id"] = f"{merged_csv_info['entry_id']}-{csv_info['entry_id']}"
         found = True
         break
     if not found:
@@ -109,21 +109,30 @@ def generate_csv(csv_infos: list[CsvInfo]) -> tuple[str, bytes]:
   date = Pvm.strftime("%d-%m-%Y")
   document_name = f"{sanitized_name}-{date}-{entry_id}"
 
-  if not pdf:
+  csv_info_length = len(csv_infos)
+  has_pdf = any(map(lambda csv_info: csv_info["pdf"], merged_csv_infos))
+
+  #If there is only one csv info and it doesn't have a pdf, we can return the csv as is
+  if not has_pdf and csv_info_length == 1:
     return f"{document_name}.csv", f.getvalue().encode("cp1252")
-  
-  archive = BytesIO()
 
   entry_ids = "-".join(map(lambda csv_info: str(csv_info["entry_id"]), csv_infos))
+  multi_name = f"{date}-entries-{entry_ids}"
 
-  archive_name = f"{date}-entries-{entry_ids}"
-
+  # If merged csv infos don't have pdfs, we can return the csv as is
+  if not has_pdf:
+    return f"{multi_name}.csv", f.getvalue().encode("cp1252")
+  
+  archive_name = multi_name
+  #If there is only one csv info, we can use the document name
   if len(csv_infos) == 1:
     archive_name = document_name
+
+  archive = BytesIO()
   
   #Paid invoices are zipped
   with ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as zip:
-    zip.writestr(f"{archive_name}.csv", f.getvalue().encode("cp1252"))
+    zip.writestr(f"{multi_name}.csv", f.getvalue().encode("cp1252"))
 
     #Add PDFs
     pdfs = filter(lambda csv_info: csv_info["pdf"], merged_csv_infos)
