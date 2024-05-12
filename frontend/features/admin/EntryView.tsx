@@ -572,6 +572,15 @@ export function AdminEntryView() {
     const clipboardText = sumEnties
       .filter((entry) => selectedIndices.includes(entry.id))
       .map((entry) => {
+        if (entry.mileages.length > 0) {
+          const totalDistance = entry.mileages.reduce(
+            (acc, mileage) => acc + mileage.distance,
+            0,
+          );
+          return `${entry.name}, ${
+            entry.title
+          } (${totalDistance} km); ${EURFormat.format(entry.total)} ()`;
+        }
         return `${entry.name}, ${entry.title}; ${EURFormat.format(
           entry.total,
         )} ()`;
