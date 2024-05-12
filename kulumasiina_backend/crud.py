@@ -200,6 +200,7 @@ def update_mileage(id: int, mileage: schemas.MileageUpdate, db: Session):
             models.Mileage.date: mileage.date,
             models.Mileage.route: mileage.route,
             models.Mileage.distance: mileage.distance,
+            models.Mileage.plate_no: mileage.plate_no,
         }
     )
     db.commit()
