@@ -126,17 +126,45 @@ def create_access_token(username: str, expires_delta: timedelta):
 
 
 @api_router.post("/entry/")
-def create_entry(
+async def create_entry(
     entry: schemas.EntryCreate, db: Session = Depends(get_db)
-) -> schemas.Entry:
-    
-    if len(entry.items) > 0 and len(entry.mileages) > 0:
-        raise HTTPException(400, "Cannot have both items and mileages in the same entry")
+) -> list[schemas.Entry]:
 
     print("Creating entry")
 
     # TODO: Data validation that receipts are not reused if those already assigned to some other entry.
-    return crud.create_entry_full(entry=entry, db=db)
+    created_entries = []
+
+    # Create separate entries for mileages and items if both are present
+    if(entry.mileages):
+        entry_without_items = schemas.EntryCreate(
+            name=entry.name,
+            contact=entry.contact,
+            iban=entry.iban,
+            gov_id=entry.gov_id,
+            title=entry.title,
+            items=[],
+            mileages=entry.mileages,
+        )
+
+        created_mileages = crud.create_entry_full(entry=entry_without_items, db=db)
+        created_entries.append(created_mileages)
+
+    if(entry.items):
+        entry_without_mileages = schemas.EntryCreate(
+            name=entry.name,
+            contact=entry.contact,
+            iban=entry.iban,
+            gov_id=None,
+            title=entry.title,
+            items=entry.items,
+            mileages=[],
+        )
+
+        created_items = crud.create_entry_full(entry=entry_without_mileages, db=db)
+        created_entries.append(created_items)
+
+    return created_entries
 
 
 # @api_router.get('/mileage/{mileage_id}')
