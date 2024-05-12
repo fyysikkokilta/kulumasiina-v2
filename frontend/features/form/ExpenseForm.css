@@ -22,13 +22,19 @@
   margin-right: 0px;
 }
 
-.addButtons .total {
+.total {
+  text-align: end;
   margin-left: 4px;
 }
 
 .expenseCard .date,
 .expenseCard .value {
   margin-right: 1.5em;
+}
+
+.expenseCard .actionButtons {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .separator {
@@ -66,6 +72,7 @@ p.route {
 
 .expenseCard > div {
   /* box-shadow: #00000033 0 1px 3px; */
+  padding: 1em;
   border-radius: 6px;
   padding-top: 16px;
   padding-right: 16px;

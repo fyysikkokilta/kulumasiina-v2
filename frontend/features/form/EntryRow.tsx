@@ -36,9 +36,8 @@ export const Mileage: React.FC<MileageProps> = ({
             {KMFormat.format(mileage.distance)} &rarr;{" "}
             {EURFormat.format(mileage.distance * mileageReimbursementRate)}
           </span>
-          <span className="plate-no"># {mileage.plate_no.toUpperCase()}</span>
         </span>
-        <div>
+        <div className="actionButtons">
           <Button type="link" onClick={onEdit}>
             {t("edit")}
           </Button>
@@ -47,6 +46,9 @@ export const Mileage: React.FC<MileageProps> = ({
           </Button>
         </div>
       </div>
+      <p>
+        <span className="plate-no"># {mileage.plate_no.toUpperCase()}</span>
+      </p>
       <p className="description">{mileage.description}</p>
       <p className="route">{mileage.route}</p>
     </Form.Item>
@@ -88,7 +90,7 @@ export const Item: React.FC<ItemProps> = ({
             {EURFormat.format(item.value_cents / 100)}
           </span>
         </span>
-        <div>
+        <div className="actionButtons">
           <Button type="link" onClick={onEdit}>
             {t("edit")}
           </Button>

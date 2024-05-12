@@ -356,6 +356,11 @@ export function ExpenseForm() {
             }
           })}
         </div>
+        <div className="total">
+          <h3>
+            {t("total")}: {EURFormat.format(total)}
+          </h3>
+        </div>
         <Divider />
         {/* <Form.Item
             wrapperCol={{span: 16, offset: 4}}
@@ -368,9 +373,6 @@ export function ExpenseForm() {
           <Button type="default" onClick={showMileage} htmlType="button">
             {t("add_mileage")}
           </Button>
-          <span className="total">
-            <strong>{t("total")}:</strong> {EURFormat.format(total)}
-          </span>
           <Button
             type="primary"
             htmlType="submit"

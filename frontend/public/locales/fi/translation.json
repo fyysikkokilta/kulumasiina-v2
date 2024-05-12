@@ -1,7 +1,7 @@
 {
   "form": {
     "main": {
-      "title": "FK-Kulumasiina",
+      "title": "FK-Kulut",
       "reimbursement_type": "Korvaustyyppi",
       "expense": "Kulu",
       "mileage": "Matka",
