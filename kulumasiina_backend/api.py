@@ -220,21 +220,21 @@ async def get_receipt(
     buffer.write(crud.get_receipt_data(receipt_id, db))
     return Response(buffer.getvalue())
 
-def generate_parts(entry):
+def generate_parts(entry: schemas.Entry):
     parts = []
     for item in entry.items:
         liitteet = []
         for liite in item.receipts:
             liitteet.append(liite.data)
         part = pdf_util.Part(
-            hinta=str(item.value_cents / 100) + "e",
+            hinta=item.value_cents / 100,
             selite=item.description,
             liitteet=liitteet,
         )
         parts.append(part)
     for mileage in entry.mileages:
         part = pdf_util.Part(
-            hinta=str(mileage.distance * float(os.environ["MILEAGE_REIMBURSEMENT_RATE"])) + "e",
+            hinta=mileage.distance * float(os.environ["MILEAGE_REIMBURSEMENT_RATE"]),
             selite=f"Kilometrikorvaus: {mileage.description}\nReitti: {mileage.route}\nMatkan pituus: {mileage.distance} km\nRekisterinumero: {mileage.plate_no}",
             liitteet=[],
         )

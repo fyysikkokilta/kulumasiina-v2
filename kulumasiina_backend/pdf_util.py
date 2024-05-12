@@ -1,6 +1,7 @@
 import datetime
 from io import BytesIO
 import sys
+import os
 import fpdf  # pip3 intall fpdf
 from pathlib import Path
 import pypdf
@@ -13,7 +14,7 @@ from PIL import Image, ImageOps
 
 class Part(TypedDict):
     selite: str
-    hinta: str
+    hinta: float
     liitteet: list[bytes]
 
 
@@ -119,11 +120,13 @@ def generate_combined_pdf(
     pdf.ln(20)
     pdf.set_font("Sourcesanspro", size=14)
 
+    is_mileage = HETU is not None
+
     pdf.cell(text="Nimi: " + name)
     pdf.ln(6)
     pdf.cell(text="IBAN: " + IBAN)
     pdf.ln(6)
-    if HETU is not None:
+    if is_mileage:
         pdf.cell(text="Henkilötunnus: " + HETU)
         pdf.ln(6)
     date = Pvm.strftime("%d.%m.%Y")
@@ -167,14 +170,29 @@ def generate_combined_pdf(
 
     # Generate table data from the data dict
     table_data: list[tuple[str, str, str]] = [("Selite", "Liitteet", "Hinta")]
+    if is_mileage:
+        table_data = [("Selite", "Kilometrikorvaus", "Hinta")]
     for part in parts:
-        table_data.append(
-            (
-                part["selite"],
-                ", ".join(part["liitteet"]),
-                part["hinta"],
+        if is_mileage:
+            table_data.append(
+                (
+                    part["selite"],
+                    f"{os.environ['MILEAGE_REIMBURSEMENT_RATE']} €/km",
+                    f"{part['hinta']} €",
+                )
             )
-        )
+        else:
+            table_data.append(
+                (
+                    part["selite"],
+                    ", ".join(part["liitteet"]),
+                    f"{part['hinta']} €",
+                )
+            )
+
+    # Total row
+    total = sum(part["hinta"] for part in parts)
+    table_data.append(("Yhteensä", "", f"{total} €"))
 
     pdf.set_font("Sourcesanspro", size=12)
     pdf.set_draw_color(50)  # very dark grey
@@ -185,9 +203,10 @@ def generate_combined_pdf(
         borders_layout="SINGLE_TOP_LINE",
         cell_fill_mode="ROWS",
         cell_fill_color=(alternate_bg_color, alternate_bg_color, alternate_bg_color),
+        first_row_as_headings=True,
         width=a4_width_mm - 2 * table_margin,
         text_align=("LEFT", "LEFT", "RIGHT"),
-        col_widths=(3, 1, 1),
+        col_widths=(9, 4, 3),
     ) as table:
         for data_row in table_data:
             row = table.row()
