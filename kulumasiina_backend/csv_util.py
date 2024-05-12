@@ -37,16 +37,19 @@ def hasMileages(rows: list[Row]) -> bool:
 def substring80AndRemoveNewlines(string: str) -> str:
   return string[:80].replace("\n", " ")
 
+def removeAllWhitespace(string: str) -> str:
+  return "".join(string.split())
+
 def merge_csv_infos(csv_infos: list[CsvInfo]) -> list[CsvInfo]:
   merged_csv_infos: list[CsvInfo] = []
 
   for csv_info in csv_infos:
     found = False
     for merged_csv_info in merged_csv_infos:
-      if merged_csv_info["IBAN"].replace(" ", "") == csv_info["IBAN"].replace(" ", ""):
+      same_iban = removeAllWhitespace(merged_csv_info["IBAN"]) == removeAllWhitespace(csv_info["IBAN"])
+      same_hetu = removeAllWhitespace(merged_csv_info["HETU"] or "") == removeAllWhitespace(csv_info["HETU"] or "")
+      if same_iban and same_hetu:
         merged_csv_info["rows"] += csv_info["rows"]
-        if not merged_csv_info["HETU"] and csv_info["HETU"]:
-          merged_csv_info["HETU"] = csv_info["HETU"]
         #Remove pdf from merged_csv_info, zip can have only one pdf per entry :(
         merged_csv_info["pdf"] = None
         merged_csv_info["Pvm"] = min(merged_csv_info["Pvm"], csv_info["Pvm"])
@@ -71,9 +74,9 @@ def generate_csv(csv_infos: list[CsvInfo]) -> tuple[str, bytes]:
 
   for csv_info in merged_csv_infos:
     entry_id = csv_info["entry_id"]
-    name = csv_info["name"]
-    IBAN = csv_info["IBAN"]
-    HETU = csv_info["HETU"]
+    name = removeAllWhitespace(csv_info["name"])
+    IBAN = removeAllWhitespace(csv_info["IBAN"])
+    HETU = removeAllWhitespace(csv_info["HETU"] or "")
     Pvm = csv_info["Pvm"]
     rows = csv_info["rows"]
     pdf = csv_info["pdf"]
