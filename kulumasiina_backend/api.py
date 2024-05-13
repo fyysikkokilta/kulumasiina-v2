@@ -227,6 +227,7 @@ def generate_parts(entry: schemas.Entry):
         for liite in item.receipts:
             liitteet.append(liite.data)
         part = pdf_util.Part(
+            paivamaara=item.date,
             hinta=item.value_cents / 100,
             selite=item.description,
             liitteet=liitteet,
@@ -234,6 +235,7 @@ def generate_parts(entry: schemas.Entry):
         parts.append(part)
     for mileage in entry.mileages:
         part = pdf_util.Part(
+            paivamaara=mileage.date,
             hinta=mileage.distance * float(os.environ["MILEAGE_REIMBURSEMENT_RATE"]),
             selite=f"Kilometrikorvaus: {mileage.description}\nReitti: {mileage.route}\nMatkan pituus: {mileage.distance} km\nRekisterinumero: {mileage.plate_no}",
             liitteet=[],

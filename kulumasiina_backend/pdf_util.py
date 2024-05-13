@@ -13,6 +13,7 @@ from PIL import Image, ImageOps
 
 
 class Part(TypedDict):
+    paivamaara: datetime.date
     selite: str
     hinta: float
     liitteet: list[bytes]
@@ -169,13 +170,14 @@ def generate_combined_pdf(
     pdf.ln(20)
 
     # Generate table data from the data dict
-    table_data: list[tuple[str, str, str]] = [("Selite", "Liitteet", "Hinta")]
+    table_data: list[tuple[str, str, str, str]] = [("Pvm","Selite", "Liitteet", "Hinta")]
     if is_mileage:
-        table_data = [("Selite", "Kilometrikorvaus", "Hinta")]
+        table_data = [("Pvm", "Selite", "Kilometrikorvaus", "Hinta")]
     for part in parts:
         if is_mileage:
             table_data.append(
                 (
+                    part["paivamaara"].strftime("%d.%m.%Y"),
                     part["selite"],
                     f"{os.environ['MILEAGE_REIMBURSEMENT_RATE']} €/km",
                     f"{part['hinta']} €",
@@ -184,6 +186,7 @@ def generate_combined_pdf(
         else:
             table_data.append(
                 (
+                    part["paivamaara"].strftime("%d.%m.%Y"),
                     part["selite"],
                     ", ".join(part["liitteet"]),
                     f"{part['hinta']} €",
@@ -192,12 +195,12 @@ def generate_combined_pdf(
 
     # Total row
     total = sum(part["hinta"] for part in parts)
-    table_data.append(("Yhteensä", "", f"{total} €"))
+    table_data.append(("Yhteensä", "", "", f"{total} €"))
 
     pdf.set_font("Sourcesanspro", size=12)
     pdf.set_draw_color(50)  # very dark grey
     pdf.set_line_width(0.5)
-    table_margin = 20
+    table_margin = 15
     alternate_bg_color = 220
     with pdf.table(
         borders_layout="SINGLE_TOP_LINE",
@@ -205,8 +208,8 @@ def generate_combined_pdf(
         cell_fill_color=(alternate_bg_color, alternate_bg_color, alternate_bg_color),
         first_row_as_headings=True,
         width=a4_width_mm - 2 * table_margin,
-        text_align=("LEFT", "LEFT", "RIGHT"),
-        col_widths=(9, 4, 3),
+        text_align=("LEFT", "LEFT", "LEFT", "RIGHT"),
+        col_widths=(3, 9, 4, 3),
     ) as table:
         for data_row in table_data:
             row = table.row()
