@@ -74,7 +74,7 @@ def generate_csv(csv_infos: list[CsvInfo]) -> tuple[str, bytes]:
 
   for csv_info in merged_csv_infos:
     entry_id = csv_info["entry_id"]
-    name = removeAllWhitespace(csv_info["name"])
+    name = csv_info["name"]
     IBAN = removeAllWhitespace(csv_info["IBAN"])
     HETU = removeAllWhitespace(csv_info["HETU"] or "")
     Pvm = csv_info["Pvm"]
