@@ -194,7 +194,7 @@ def generate_combined_pdf(
             )
 
     # Total row
-    total = sum(part["hinta"] for part in parts)
+    total = "{:.2f}".format(sum(part["hinta"] for part in parts))
     table_data.append(("Yhteensä", "", "", f"{total} €"))
 
     pdf.set_font("Sourcesanspro", size=12)
