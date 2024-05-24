@@ -154,17 +154,13 @@ export const ItemModal = (props: ExpenseModalProps) => {
   });
 
   const handlePreview = async (file: UploadFile) => {
-    if (!file.url) return;
-
     if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj as RcFile);
     }
 
     setPreviewImage(file.url || (file.preview as string));
     setPreviewOpen(true);
-    setPreviewTitle(
-      file.name || file.url.substring(file.url.lastIndexOf("/") + 1),
-    );
+    setPreviewTitle(file.name);
   };
 
   const handleChange: UploadProps["onChange"] = ({ fileList: newFileList }) =>
