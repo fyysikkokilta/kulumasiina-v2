@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Result, Divider, Form, Input, Typography } from "antd";
 import type { UploadFile } from "antd/es/upload/interface";
 import { Mileage, Item } from "./EntryRow";
@@ -26,8 +26,8 @@ import {
   ItemModal,
 } from "./Modals";
 
-import { mileageReimbursementRate, EURFormat } from "../utils";
-import { postForm, postInterface } from "./api";
+import { EURFormat } from "../utils";
+import { getConfig, postForm, postInterface } from "./api";
 import { friendlyFormatIBAN, isValidIBAN } from "ibantools";
 import { useTranslation } from "react-i18next";
 const spans: { [key: string]: ColPropsMap } = {
@@ -67,6 +67,7 @@ export function ExpenseForm() {
   const [editTarget, setEditTarget] = useState<null | number>(null);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [config, setConfig] = useState({ mileageReimbursementRate: 0.25 });
   const dispatch = useAppDispatch();
   const entries = useAppSelector((state) => state.form.entries);
   const files = useAppSelector((state) => state.form.files);
@@ -75,6 +76,10 @@ export function ExpenseForm() {
   const [expenseForm] = Form.useForm<ExpenseFormValues>();
   const [mileageForm] = Form.useForm<MileageFormValues>();
   const [mainForm] = Form.useForm();
+
+  useEffect(() => {
+    getConfig().then((config) => setConfig(config));
+  }, []);
 
   const { t } = useTranslation("translation", { keyPrefix: "form.main" });
 
@@ -228,7 +233,7 @@ export function ExpenseForm() {
     if (entry.kind === "item") {
       return acc + entry.value_cents / 100;
     } else {
-      return acc + entry.distance * mileageReimbursementRate;
+      return acc + entry.distance * config.mileageReimbursementRate;
     }
   }, 0);
 
@@ -343,6 +348,7 @@ export function ExpenseForm() {
                 <Mileage
                   key={entry.id}
                   mileage={entry}
+                  mileageReimbursementRate={config.mileageReimbursementRate}
                   onEdit={() => {
                     handleEdit(entry);
                   }}

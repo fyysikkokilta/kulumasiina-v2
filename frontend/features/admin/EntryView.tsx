@@ -28,17 +28,13 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 
-import {
-  mileageReimbursementRate,
-  deleteArchivedAgeLimit,
-  EURFormat,
-  KMFormat,
-} from "../utils";
+import { EURFormat, KMFormat } from "../utils";
 import {
   archiveEntries,
   archiveEntry,
   denyEntries,
   denyEntry,
+  getAdminConfig,
   getEntries,
   modifyItem,
   modifyMileage,
@@ -67,7 +63,10 @@ export const loadItems = (dispatch: AppDispatch) => {
   });
 };
 
-const calculateSum = (submission: SubmissionState) => {
+const calculateSum = (
+  submission: SubmissionState,
+  mileageReimbursementRate: number,
+) => {
   const mileageSum = submission.mileages.reduce((acc, item) => {
     return acc + item.distance * mileageReimbursementRate;
   }, 0);
@@ -212,7 +211,10 @@ const expandedColumns: ColumnsType<expandedRowTable> = [
   },
 ];
 
-const renderMileage = (mileage: MileageState) => {
+const renderMileage = (
+  mileage: MileageState,
+  mileageReimbursementRate: number,
+) => {
   const dispatch = useAppDispatch();
   const t = i18next.getFixedT(
     i18next.language,
@@ -253,12 +255,15 @@ const renderItem = (item: ItemState) => {
   );
 };
 
-const expandedRowRender = (record: tableSubmission) => {
+const expandedRowRender = (
+  record: tableSubmission,
+  mileageReimbursementRate: number,
+) => {
   const submissionRows: expandedRowTable[] = record.mileages
     .map((mileage, i) => {
       return {
         key: `mileage-${mileage.id}`,
-        rendered: renderMileage(mileage),
+        rendered: renderMileage(mileage, mileageReimbursementRate),
         type: "mileage",
         index: i,
         description: mileage.description,
@@ -402,17 +407,22 @@ const expandedRowRender = (record: tableSubmission) => {
 export function AdminEntryView() {
   const dispatch = useAppDispatch();
   const entries = useLoaderData() as SubmissionState[];
-  useEffect(() => {
-    dispatch(loadSubmissions(entries));
-    dispatch(stopLoading());
-  }, []);
-  const adminEntries = useAppSelector((state) => state.admin.submissions);
-  const loading = useAppSelector((state) => state.admin.loading);
 
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs] | undefined>();
-
   const [expenseFileList, setExpenseFileList] = useState<UploadFile[]>([]);
+  const [config, setConfig] = useState({
+    mileageReimbursementRate: 0.25,
+    deleteArchivedAgeLimit: 30,
+  });
+
+  useEffect(() => {
+    dispatch(loadSubmissions(entries));
+    dispatch(stopLoading());
+    getAdminConfig().then((config) => setConfig(config));
+  }, []);
+  const adminEntries = useAppSelector((state) => state.admin.submissions);
+  const loading = useAppSelector((state) => state.admin.loading);
   const [editExpenseForm] = Form.useForm<ExpenseFormValues>();
 
   const [editMileageForm] = Form.useForm<MileageFormValues>();
@@ -429,7 +439,7 @@ export function AdminEntryView() {
       return {
         ...entry,
         key: entry.id,
-        total: calculateSum(entry),
+        total: calculateSum(entry, config.mileageReimbursementRate),
       };
     });
   const selected = useAppSelector((state) => state.admin.selected);
@@ -543,7 +553,7 @@ export function AdminEntryView() {
         entry.status === "paid"
           ? entry.paid_date && dayjs(entry.paid_date)
           : entry.rejection_date && dayjs(entry.rejection_date);
-      const monthAgo = dayjs().subtract(deleteArchivedAgeLimit, "days");
+      const monthAgo = dayjs().subtract(config.deleteArchivedAgeLimit, "days");
       return date && date.isBefore(monthAgo);
     }).length;
 
@@ -705,7 +715,8 @@ export function AdminEntryView() {
         dataSource={sumEnties}
         columns={columns(sumEnties)}
         expandable={{
-          expandedRowRender: expandedRowRender,
+          expandedRowRender: (record: tableSubmission) =>
+            expandedRowRender(record, config.mileageReimbursementRate),
         }}
         loading={loading}
         pagination={{

@@ -96,3 +96,7 @@ export const modifyMileage = async (
 ) => {
   await api.post(`/mileage/${mileage_id}`, body);
 };
+
+export const getAdminConfig = async () => {
+  return (await api.get("/config/admin")).data;
+};

@@ -577,6 +577,19 @@ async def logout(response: Response):
     response.delete_cookie("token")
     return {"success": True}
 
+@api_router.get("/config")
+async def get_config():
+    return {
+        "mileageReimbursementRate": os.environ["MILEAGE_REIMBURSEMENT_RATE"]
+    }
+
+@api_router.get("/config/admin")
+async def get_admin_config(user=Depends(get_user)):
+    return {
+        "mileageReimbursementRate": os.environ["MILEAGE_REIMBURSEMENT_RATE"],
+        "deleteArchivedAgeLimit": os.environ["DELETE_ARCHIVED_AGE_LIMIT"],
+    }
+
 
 # @api_router.get('/receipt/{filename}')
 # def get_file(filename: str, db: Session = Depends(get_db)) ->

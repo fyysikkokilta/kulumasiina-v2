@@ -1,9 +1,5 @@
 import axios from "axios";
 
-export const mileageReimbursementRate = 0.25;
-
-export const deleteArchivedAgeLimit = 30;
-
 export const EURFormat = new Intl.NumberFormat("fi-FI", {
   style: "currency",
   currency: "EUR",

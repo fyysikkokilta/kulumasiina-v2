@@ -1,12 +1,13 @@
 import React from "react";
 import { Button, Form, Upload } from "antd";
 import type { ColProps } from "antd";
-import { EURFormat, KMFormat, mileageReimbursementRate } from "../utils";
+import { EURFormat, KMFormat } from "../utils";
 import type { ItemState, MileageState, FormState } from "./formSlice";
 import { useTranslation } from "react-i18next";
 
 interface MileageProps {
   mileage: MileageState;
+  mileageReimbursementRate: number;
   onEdit: () => void;
   onRemove: () => void;
   wrapperProps: ColProps;
@@ -15,6 +16,7 @@ interface MileageProps {
 
 export const Mileage: React.FC<MileageProps> = ({
   mileage,
+  mileageReimbursementRate,
   onEdit,
   onRemove,
   wrapperProps,

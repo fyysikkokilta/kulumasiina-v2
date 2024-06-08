@@ -14,3 +14,8 @@ export const postForm = async (payload: postInterface) => {
   const response = await api.post("/entry", payload);
   return response.data;
 };
+
+export const getConfig = async () => {
+  const response = await api.get("/config");
+  return response.data;
+};
