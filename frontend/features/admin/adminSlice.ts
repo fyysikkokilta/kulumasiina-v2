@@ -6,6 +6,7 @@ export interface ItemState {
   date: string;
   value_cents: number;
   receipts: Array<ReceiptState>;
+  account: string | null;
 }
 export interface ReceiptState {
   id: number;
@@ -19,6 +20,7 @@ export interface MileageState {
   route: string;
   plate_no: string;
   distance: number;
+  account: string | null;
 }
 
 export interface SubmissionState {
@@ -58,6 +60,7 @@ const initialItemState: ItemState = {
   date: "",
   value_cents: 0,
   receipts: [],
+  account: null,
 };
 
 const initialMileageState: MileageState = {
@@ -67,6 +70,7 @@ const initialMileageState: MileageState = {
   route: "",
   plate_no: "",
   distance: 0,
+  account: null,
 };
 
 const initialState: AdminState = {

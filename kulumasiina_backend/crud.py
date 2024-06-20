@@ -204,3 +204,19 @@ def update_mileage(id: int, mileage: schemas.MileageUpdate, db: Session):
         }
     )
     db.commit()
+
+def update_mileage_bookkeeping(id: int, account: str, db: Session):
+    db.query(models.Mileage).filter(models.Mileage.id == id).update(
+        {
+            models.Mileage.account: account,
+        }
+    )
+    db.commit()
+
+def update_item_bookkeeping(id: int, account: str, db: Session):
+    db.query(models.Item).filter(models.Item.id == id).update(
+        {
+            models.Item.account: account,
+        }
+    )
+    db.commit()

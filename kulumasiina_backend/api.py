@@ -20,7 +20,7 @@ from typing import Optional, TypedDict
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from kulumasiina_backend import crud, models, schemas, pdf_util, csv_util
+from kulumasiina_backend import crud, models, schemas, pdf_util, csv_util, bookkeeping_accounts
 from kulumasiina_backend.db import SessionLocal, engine
 from fastapi.security import HTTPBearer
 from fastapi_sso.sso.google import GoogleSSO
@@ -370,6 +370,7 @@ async def get_entry_csv(
             selite=item.description,
             maara=1,
             matkalasku=False,
+            kirjanpitotili=item.account,
         ))
     for mileage in entry.mileages:
         rows.append(csv_util.Row(
@@ -377,6 +378,7 @@ async def get_entry_csv(
             selite=f"Kilometrikorvaus: {mileage.description}",
             maara=mileage.distance,
             matkalasku=True,
+            kirjanpitotili=mileage.account,
         ))
 
     pdf = None
@@ -530,6 +532,24 @@ def update_mileage(
 ):
     return crud.update_mileage(mileage_id, mileage, db)
 
+class BookkeepingAccountBody(BaseModel):
+    account: str
+    is_mileage: bool
+
+@api_router.post("/bookkeeping/{item_or_mileage_id}")
+def update_bookkeeping(
+    item_or_mileage_id: int,
+    data: BookkeepingAccountBody,
+    db: Session = Depends(get_db),
+    user=Depends(get_user),
+):
+    isMileage = data.is_mileage
+    account = data.account
+    if isMileage:
+        return crud.update_mileage_bookkeeping(item_or_mileage_id, account, db)
+    else:
+        return crud.update_item_bookkeeping(item_or_mileage_id, account, db)
+
 
 @api_router.get("/userdata")
 def user_data(user=Depends(get_user)):
@@ -588,6 +608,7 @@ async def get_admin_config(user=Depends(get_user)):
     return {
         "mileageReimbursementRate": os.environ["MILEAGE_REIMBURSEMENT_RATE"],
         "deleteArchivedAgeLimit": os.environ["DELETE_ARCHIVED_AGE_LIMIT"],
+        "bookkeepingAccounts": bookkeeping_accounts.bookkeeping_accounts
     }
 
 

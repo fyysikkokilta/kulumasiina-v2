@@ -7,6 +7,7 @@ import {
   Space,
   UploadFile,
   Form,
+  Select,
 } from "antd";
 const { RangePicker } = DatePicker;
 import dayjs, { Dayjs } from "dayjs";
@@ -40,6 +41,7 @@ import {
   modifyMileage,
   resetEntries,
   resetEntry,
+  upsertBookkeepingAccount,
 } from "./api";
 import { Receipt } from "./Receipt";
 import { AppDispatch } from "app/store";
@@ -211,9 +213,18 @@ const expandedColumns: ColumnsType<expandedRowTable> = [
   },
 ];
 
+type BookkeepingAccount = {
+  label: string;
+  value: string;
+};
+
+const filterAccountOption = (input: string, option?: BookkeepingAccount) =>
+  (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
+
 const renderMileage = (
   mileage: MileageState,
   mileageReimbursementRate: number,
+  bookkeepingAccounts: BookkeepingAccount[],
 ) => {
   const dispatch = useAppDispatch();
   const t = i18next.getFixedT(
@@ -221,6 +232,14 @@ const renderMileage = (
     "translation",
     "admin.expanded.mileage",
   );
+
+  const onAccountChange = (value: string) => {
+    upsertBookkeepingAccount(mileage.id, {
+      account: value,
+      is_mileage: true,
+    }).then(() => loadItems(dispatch));
+  };
+
   return (
     <Space>
       <Typography.Text>
@@ -231,17 +250,38 @@ const renderMileage = (
       <Button onClick={() => dispatch(showEditMileageModal(mileage))}>
         {t("edit")}
       </Button>
+      <Select
+        style={{ width: "400px" }}
+        showSearch={true}
+        placeholder={t("bookkeeping_account")}
+        optionFilterProp="label"
+        onChange={onAccountChange}
+        filterOption={filterAccountOption}
+        defaultValue={mileage.account}
+        options={bookkeepingAccounts}
+      />
     </Space>
   );
 };
 
-const renderItem = (item: ItemState) => {
+const renderItem = (
+  item: ItemState,
+  bookkeepingAccounts: BookkeepingAccount[],
+) => {
   const dispatch = useAppDispatch();
   const t = i18next.getFixedT(
     i18next.language,
     "translation",
     "admin.expanded.item",
   );
+
+  const onAccountChange = (value: string) => {
+    upsertBookkeepingAccount(item.id, {
+      account: value,
+      is_mileage: false,
+    }).then(() => loadItems(dispatch));
+  };
+
   return (
     <Space>
       <Typography.Text>
@@ -251,6 +291,16 @@ const renderItem = (item: ItemState) => {
       <Button onClick={() => dispatch(showEditItemModal(item))}>
         {t("edit")}
       </Button>
+      <Select
+        style={{ width: "400px" }}
+        showSearch={true}
+        placeholder={t("bookkeeping_account")}
+        optionFilterProp="label"
+        onChange={onAccountChange}
+        filterOption={filterAccountOption}
+        defaultValue={item.account}
+        options={bookkeepingAccounts}
+      />
     </Space>
   );
 };
@@ -258,12 +308,17 @@ const renderItem = (item: ItemState) => {
 const expandedRowRender = (
   record: tableSubmission,
   mileageReimbursementRate: number,
+  bookkeepingAccounts: BookkeepingAccount[],
 ) => {
   const submissionRows: expandedRowTable[] = record.mileages
     .map((mileage, i) => {
       return {
         key: `mileage-${mileage.id}`,
-        rendered: renderMileage(mileage, mileageReimbursementRate),
+        rendered: renderMileage(
+          mileage,
+          mileageReimbursementRate,
+          bookkeepingAccounts,
+        ),
         type: "mileage",
         index: i,
         description: mileage.description,
@@ -272,7 +327,7 @@ const expandedRowRender = (
     .concat(
       record.items.map((item, i) => ({
         key: `item-${item.id}`,
-        rendered: renderItem(item),
+        rendered: renderItem(item, bookkeepingAccounts),
         type: "item",
         index: i,
         description: item.description,
@@ -414,6 +469,7 @@ export function AdminEntryView() {
   const [config, setConfig] = useState({
     mileageReimbursementRate: 0.25,
     deleteArchivedAgeLimit: 30,
+    bookkeepingAccounts: [],
   });
 
   useEffect(() => {
@@ -716,7 +772,11 @@ export function AdminEntryView() {
         columns={columns(sumEnties)}
         expandable={{
           expandedRowRender: (record: tableSubmission) =>
-            expandedRowRender(record, config.mileageReimbursementRate),
+            expandedRowRender(
+              record,
+              config.mileageReimbursementRate,
+              config.bookkeepingAccounts,
+            ),
         }}
         loading={loading}
         pagination={{

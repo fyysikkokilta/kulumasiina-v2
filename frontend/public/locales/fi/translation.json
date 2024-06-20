@@ -139,13 +139,15 @@
       "item": {
         "item": "Kulu",
         "edit": "Muokkaa",
-        "receipts": "Tositteet"
+        "receipts": "Tositteet",
+        "bookkeeping_account": "Kirjanpitotili"
       },
       "mileage": {
         "mileage": "Matka",
         "edit": "Muokkaa",
         "route": "Reitti",
-        "plate_number": "Rekisterinumero"
+        "plate_number": "Rekisterinumero",
+        "bookkeeping_account": "Kirjanpitotili"
       }
     },
     "accept_modal": {

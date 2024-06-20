@@ -63,6 +63,7 @@ class Mileage(Base):
     route: Mapped[str]
     distance: Mapped[float]
     plate_no: Mapped[str]
+    account: Mapped[str | None] = mapped_column(default=None)
 
 
 class Receipt(Base):
@@ -79,6 +80,7 @@ class Item(Base):
     date: Mapped[date]
     value_cents: Mapped[int]
     receipts: Mapped[list[Receipt]] = relationship(lazy="immediate", cascade="all, delete")
+    account: Mapped[str | None] = mapped_column(default=None)
 
     # @property
     # def receipt_ids(self) -> list[int]:

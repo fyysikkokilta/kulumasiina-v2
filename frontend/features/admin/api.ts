@@ -97,6 +97,16 @@ export const modifyMileage = async (
   await api.post(`/mileage/${mileage_id}`, body);
 };
 
+export const upsertBookkeepingAccount = async (
+  item_or_mileage_id: number,
+  body: {
+    account: string;
+    is_mileage: boolean;
+  },
+) => {
+  await api.post(`/bookkeeping/${item_or_mileage_id}`, body);
+};
+
 export const getAdminConfig = async () => {
   return (await api.get("/config/admin")).data;
 };

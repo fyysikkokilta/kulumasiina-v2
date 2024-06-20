@@ -139,13 +139,15 @@
       "item": {
         "item": "Item",
         "edit": "Edit",
-        "receipts": "Receipts"
+        "receipts": "Receipts",
+        "bookkeeping_account": "Bookkeeping account"
       },
       "mileage": {
         "mileage": "Mileage",
         "edit": "Edit",
         "route": "Route",
-        "plate_number": "Plate Number"
+        "plate_number": "Plate Number",
+        "bookkeeping_account": "Bookkeeping account"
       }
     },
     "accept_modal": {
