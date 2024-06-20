@@ -459,6 +459,12 @@ const expandedRowRender = (
   );
 };
 
+type Config = {
+  mileageReimbursementRate: number;
+  deleteArchivedAgeLimit: number;
+  bookkeepingAccounts: BookkeepingAccount[];
+};
+
 export function AdminEntryView() {
   const dispatch = useAppDispatch();
   const entries = useLoaderData() as SubmissionState[];
@@ -466,7 +472,7 @@ export function AdminEntryView() {
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs] | undefined>();
   const [expenseFileList, setExpenseFileList] = useState<UploadFile[]>([]);
-  const [config, setConfig] = useState({
+  const [config, setConfig] = useState<Config>({
     mileageReimbursementRate: 0.25,
     deleteArchivedAgeLimit: 30,
     bookkeepingAccounts: [],
@@ -638,6 +644,19 @@ export function AdminEntryView() {
     const clipboardText = sumEnties
       .filter((entry) => selectedIndices.includes(entry.id))
       .map((entry) => {
+        const accounts = entry.items
+          .map((item) => item.account)
+          .concat(entry.mileages.map((mileage) => mileage.account));
+        const uniqueAccounts = accounts
+          .filter(
+            (value, index, self) => self.indexOf(value) === index && value,
+          )
+          .map(
+            (account) =>
+              config.bookkeepingAccounts.find((a) => a.value === account)
+                ?.label,
+          )
+          .join(", ");
         if (entry.mileages.length > 0) {
           const totalDistance = entry.mileages.reduce(
             (acc, mileage) => acc + mileage.distance,
@@ -645,11 +664,13 @@ export function AdminEntryView() {
           );
           return `${entry.name}, ${
             entry.title
-          } (${totalDistance} km); ${EURFormat.format(entry.total)} ()`;
+          } (${totalDistance} km); ${EURFormat.format(
+            entry.total,
+          )} (${uniqueAccounts})`;
         }
         return `${entry.name}, ${entry.title}; ${EURFormat.format(
           entry.total,
-        )} ()`;
+        )} (${uniqueAccounts})`;
       })
       .join("\n");
     navigator.clipboard.writeText(clipboardText);
