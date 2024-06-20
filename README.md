@@ -8,6 +8,14 @@ Kulukorvauslomake Fyysikkokillalle.
 2. Run `pdm install` and `npm install` on root folder
 3. Start the program by running `pdm dev` and `npm start`
 
+## DB Migrations
+
+Migrations are to be applied manually. Install sqlite-utils by following instructions at https://github.com/simonw/sqlite-migrate.
+Migrations are saved in migrations folder and each migration should have its own subfolder and a migrations.py file.
+
+Refer https://github.com/simonw/sqlite-migrate on how to apply migrations. When applying migrations to production please backup the database to make sure the change can be reverted if the migration fails.
+
+
 ## Paths
 
 - GET `/` - Index page the actual form
@@ -17,8 +25,6 @@ Kulukorvauslomake Fyysikkokillalle.
 ## High prio TODO
 
 - Show user if sending the form fails.
-- Liitenumerot myös PDF-liitteisiin
-- Frontend hakee backendistä config-tiedot (esimerkiksi kilometrikorvauksen suuruus)
 
 ## Muuta TODO
 
@@ -30,6 +36,4 @@ Kulukorvauslomake Fyysikkokillalle.
 
 - [ ] Postgres db
 - [ ] Login token refreshaus
-- [ ] Migraatiotuki
 - [ ] CI/CD (not gonna happen :D)
-- [ ] Kirjanpitotilien numeroiden tallentaminen item ja mileage tasolla kantaan (mukaan csv tiedostoihin ja pöytäkirjatekstiin)
