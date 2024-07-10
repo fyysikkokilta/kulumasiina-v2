@@ -789,6 +789,8 @@ export function AdminEntryView() {
           type: "checkbox",
           ...rowSelection,
         }}
+        style={{ maxWidth: "100vw" }}
+        scroll={{ x: true }}
         dataSource={sumEnties}
         columns={columns(sumEnties)}
         expandable={{
