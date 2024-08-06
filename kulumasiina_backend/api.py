@@ -302,6 +302,7 @@ async def get_multi_entry_csv(
                 selite=item.description,
                 maara=1,
                 matkalasku=False,
+                kirjanpitotili=item.account
             ))
         for mileage in entry.mileages:
             rows.append(csv_util.Row(
@@ -309,6 +310,7 @@ async def get_multi_entry_csv(
                 selite=f"Kilometrikorvaus: {mileage.description}",
                 maara=mileage.distance,
                 matkalasku=True,
+                kirjanpitotili=mileage.account
             ))
 
         parts = generate_parts(entry)
