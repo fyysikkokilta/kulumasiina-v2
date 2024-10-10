@@ -94,7 +94,7 @@ export const MileageModal: React.FC<MileageModalProps> = (props) => {
         >
           <Input.TextArea
             showCount
-            maxLength={300}
+            maxLength={500}
             rows={2}
             placeholder={t("route_placeholder")}
           />
