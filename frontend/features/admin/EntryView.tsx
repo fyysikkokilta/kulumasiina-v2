@@ -656,6 +656,7 @@ export function AdminEntryView() {
               config.bookkeepingAccounts.find((a) => a.value === account)
                 ?.label,
           )
+          .sort()
           .join(", ");
         if (entry.mileages.length > 0) {
           const totalDistance = entry.mileages.reduce(
