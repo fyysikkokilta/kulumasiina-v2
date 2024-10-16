@@ -212,7 +212,7 @@ export function ExpenseForm() {
     const data: postInterface = {
       ...formData,
       gov_id: hasMileages ? formData.gov_id : null,
-      iban: friendlyFormatIBAN(formData.iban),
+      iban: friendlyFormatIBAN(formData.iban.replace(/\s/g, "")),
       items,
       mileages,
     };
