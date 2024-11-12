@@ -16,6 +16,7 @@ dependencies = [
     "fpdf2>=2.7.6",
     "pathvalidate>=3.2.0",
     "sqlite-utils>=3.36",
+    "sqlite-migrate>=0.1b0",
 ]
 requires-python = ">=3.10"
 readme = "README.md"

@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["cross_platform"]
 lock_version = "4.4"
-content_hash = "sha256:16d5e691f00832e20ff954814fd1636d8c8fb8308a1cd8f0375a17acfd089d7f"
+content_hash = "sha256:752dbd1efc61379e571184809238e808281e0eafa1372347baac538df980f9df"
 
 [[package]]
 name = "annotated-types"
@@ -691,6 +691,18 @@ summary = "Python functions for working with SQLite FTS4 search"
 files = [
     {file = "sqlite-fts4-1.0.3.tar.gz", hash = "sha256:78b05eeaf6680e9dbed8986bde011e9c086a06cb0c931b3cf7da94c214e8930c"},
     {file = "sqlite_fts4-1.0.3-py3-none-any.whl", hash = "sha256:0359edd8dea6fd73c848989e1e2b1f31a50fe5f9d7272299ff0e8dbaa62d035f"},
+]
+
+[[package]]
+name = "sqlite-migrate"
+version = "0.1b0"
+summary = "A simple database migration system for SQLite, based on sqlite-utils"
+dependencies = [
+    "sqlite-utils",
+]
+files = [
+    {file = "sqlite-migrate-0.1b0.tar.gz", hash = "sha256:8d502b3ca4b9c45e56012bd35c03d23235f0823c976d4ce940cbb40e33087ded"},
+    {file = "sqlite_migrate-0.1b0-py3-none-any.whl", hash = "sha256:a4125e35e1de3dc56b6b6ec60e9833ce0ce20192b929ddcb2d4246c5098859c6"},
 ]
 
 [[package]]
