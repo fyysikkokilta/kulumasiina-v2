@@ -17,8 +17,7 @@ export const ConfirmPaymentModal: React.FC<{
     keyPrefix: "admin.confirm_payment_modal",
   });
   const show = useAppSelector((state) => state.admin.confirmPaymentModal);
-  // disable @typescript-eslint/no-explicit-any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const handleSubmit = (values: { date: Dayjs }) => {
     const date = values.date.utcOffset(0).startOf("day").toISOString();
     const promise = Array.isArray(entry_ids)

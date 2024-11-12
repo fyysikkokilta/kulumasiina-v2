@@ -11,8 +11,7 @@ export const RemoveEntriesModal: React.FC = () => {
     keyPrefix: "admin.remove_archived_entries_modal",
   });
   const show = useAppSelector((state) => state.admin.removeEntriesModal);
-  // disable @typescript-eslint/no-explicit-any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const handleSubmit = () => {
     deleteOldArchivedEntries()
       .then(() => loadItems(dispatch))

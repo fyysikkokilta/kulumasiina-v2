@@ -565,6 +565,7 @@ export function AdminEntryView() {
     try {
       await editExpenseForm.validateFields();
     } catch (err) {
+      console.log(err);
       return;
     }
     const values = editExpenseForm.getFieldsValue();
@@ -591,6 +592,7 @@ export function AdminEntryView() {
     try {
       await editMileageForm.validateFields();
     } catch (err) {
+      console.log(err);
       return;
     }
     const values = editMileageForm.getFieldsValue();

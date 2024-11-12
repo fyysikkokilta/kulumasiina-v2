@@ -17,8 +17,7 @@ export const SubmitDateModal: React.FC<{ entry_ids: number | number[] }> = ({
     keyPrefix: "admin.accept_modal",
   });
   const show = useAppSelector((state) => state.admin.dateModal);
-  // disable @typescript-eslint/no-explicit-any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const handleSubmit = (values: { date: Dayjs; approvalNote: string }) => {
     const date = values.date.utcOffset(0).startOf("day").toISOString();
     const note = values.approvalNote;

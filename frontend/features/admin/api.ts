@@ -5,10 +5,6 @@ export const getEntries = async () => {
   return entries;
 };
 
-export const getReceipt = async (id: string) => {
-  (await api.get(`/receipt/${id}`)).data;
-};
-
 export const approveEntry = async (
   id: number,
   approvalDate: string,

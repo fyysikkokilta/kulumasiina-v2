@@ -106,6 +106,7 @@ export function ExpenseForm() {
     try {
       await expenseForm.validateFields();
     } catch (err) {
+      console.log(err);
       return;
     }
     const values = expenseForm.getFieldsValue();
@@ -140,6 +141,7 @@ export function ExpenseForm() {
     try {
       await mileageForm.validateFields();
     } catch (err) {
+      console.log(err);
       return;
     }
     const values = mileageForm.getFieldsValue();
@@ -202,6 +204,7 @@ export function ExpenseForm() {
     try {
       await mainForm.validateFields();
     } catch (err) {
+      console.log(err);
       return;
     }
     setSubmitting(true);

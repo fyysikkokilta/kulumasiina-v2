@@ -13,8 +13,7 @@ export const RemoveEntryModal: React.FC<{ entry_ids: number | number[] }> = ({
     keyPrefix: "admin.remove_entry_modal",
   });
   const show = useAppSelector((state) => state.admin.removeEntryModal);
-  // disable @typescript-eslint/no-explicit-any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const handleSubmit = () => {
     if (Array.isArray(entry_ids)) return;
     deleteEntry(entry_ids)
