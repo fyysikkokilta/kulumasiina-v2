@@ -1,17 +1,17 @@
-import { api } from "../utils";
+import { api } from '../utils'
 
 export const getEntries = async () => {
-  const entries = (await api.get("/entries")).data;
-  return entries;
-};
+  const entries = (await api.get('/entries')).data
+  return entries
+}
 
 export const approveEntry = async (
   id: number,
   approvalDate: string,
   approvalNote: string,
 ) => {
-  return approveEntries([id], approvalDate, approvalNote);
-};
+  return approveEntries([id], approvalDate, approvalNote)
+}
 
 export const approveEntries = async (
   ids: number[],
@@ -22,87 +22,90 @@ export const approveEntries = async (
     ids,
     date: approvalDate,
     approval_note: approvalNote,
-  });
-};
+  })
+}
 
 export const denyEntry = async (id: number) => {
-  return denyEntries([id]);
-};
+  return denyEntries([id])
+}
 
 export const denyEntries = async (ids: number[]) => {
-  await api.post(`/deny`, { ids });
-};
+  await api.post(`/deny`, { ids })
+}
 
 export const resetEntry = async (id: number) => {
-  return resetEntries([id]);
-};
+  return resetEntries([id])
+}
 
 export const resetEntries = async (ids: number[]) => {
-  await api.post(`/reset`, { ids });
-};
+  await api.post(`/reset`, { ids })
+}
 
 export const deleteEntry = async (id: number) => {
-  await api.delete(`/entry/${id}`);
-};
+  await api.delete(`/entry/${id}`)
+}
 
 export const deleteOldArchivedEntries = async () => {
-  await api.delete(`/entries`);
-};
+  await api.delete(`/entries`)
+}
 
 export const payEntry = async (id: number, paidDate: string) => {
-  return payEntries([id], paidDate);
-};
+  return payEntries([id], paidDate)
+}
 
 export const payEntries = async (ids: number[], paidDate: string) => {
   await api.post(`/pay`, {
     ids,
     date: paidDate,
-  });
-};
+  })
+}
 
 export const archiveEntry = async (id: number) => {
-  return archiveEntries([id]);
-};
+  return archiveEntries([id])
+}
 
 export const archiveEntries = async (ids: number[]) => {
-  await api.post(`/archive`, { ids });
-};
+  await api.post(`/archive`, { ids })
+}
 
 export const modifyItem = async (
   item_id: number,
   body: {
-    value_cents: number;
-    description: string;
-    date: string;
-    receipts: Array<number>;
+    description: string
+    date: string
+    attachments: Array<{
+      id: number
+      value_cents: number | null
+      is_not_receipt: boolean
+    }>
   },
 ) => {
-  await api.post(`/item/${item_id}`, body);
-};
+  await api.post(`/item/${item_id}`, body)
+}
 
 export const modifyMileage = async (
   mileage_id: number,
   body: {
-    date: string;
-    description: string;
-    route: string;
-    plate_no: string;
-    distance: number;
+    date: string
+    description: string
+    route: string
+    plate_no: string
+    distance: number
   },
 ) => {
-  await api.post(`/mileage/${mileage_id}`, body);
-};
+  await api.post(`/mileage/${mileage_id}`, body)
+}
 
 export const upsertBookkeepingAccount = async (
   item_or_mileage_id: number,
   body: {
-    account: string;
-    is_mileage: boolean;
+    account: string
+    is_mileage: boolean
   },
 ) => {
-  await api.post(`/bookkeeping/${item_or_mileage_id}`, body);
-};
+  await api.post(`/bookkeeping/${item_or_mileage_id}`, body)
+}
 
 export const getAdminConfig = async () => {
-  return (await api.get("/config/admin")).data;
-};
+  return (await api.get('/config/admin')).data
+}

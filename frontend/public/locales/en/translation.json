@@ -37,16 +37,18 @@
       "description": "Description",
       "description_placeholder": "Description of the expense",
       "description_error": "Please provide a description!",
-      "amount": "Amount",
-      "amount_placeholder": "0.00",
-      "amount_error_1": "Please provide the amount of the expense!",
-      "amount_error_2": "Please provide a valid positive number!",
-      "amount_unit": "€",
       "date": "Date",
       "date_error": "Please provide a date for the expense!",
-      "receipts": "Receipts",
+      "attachments": "Attachments",
+      "attachments_error": "Please provide at least one attachment!",
       "upload": "Upload",
-      "upload_error": "PDF needs to be under 4MB!"
+      "upload_error": "PDF needs to be under 4MB!",
+      "value_cents": "Price",
+      "value_cents_placeholder": "0.00",
+      "value_cents_error_1": "Please provide the price!",
+      "value_cents_error_2": "Please provide a valid positive number!",
+      "value_cents_unit": "€",
+      "is_not_receipt": "Not a receipt"
     },
     "mileage": {
       "add": "Add a mileage",
@@ -139,7 +141,7 @@
       "item": {
         "item": "Item",
         "edit": "Edit",
-        "receipts": "Receipts",
+        "attachments": "Attachments",
         "bookkeeping_account": "Bookkeeping account"
       },
       "mileage": {

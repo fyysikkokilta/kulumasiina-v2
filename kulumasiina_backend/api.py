@@ -132,7 +132,7 @@ async def create_entry(
 
     print("Creating entry")
 
-    # TODO: Data validation that receipts are not reused if those already assigned to some other entry.
+    # TODO: Data validation that attachments are not reused if those already assigned to some other entry.
     created_entries = []
 
     # Create separate entries for mileages and items if both are present
@@ -175,60 +175,64 @@ async def create_entry(
 #     return schemas.Mileage.from_orm(db_mileage)
 
 
-@api_router.post("/receipt")
-def create_receipt(file: UploadFile = File(), db: Session = Depends(get_db)) -> int:
+@api_router.post("/attachment")
+def create_attachment(file: UploadFile = File(), db: Session = Depends(get_db)) -> int:
     filename = file.filename
     if filename:
         filename = sanitise_filename(filename)
-    receipt = schemas.ReceiptCreate(
+    attachment = schemas.AttachmentCreate(
         filename=filename,
         data=file.file.read(),
     )
     try:
-        receipt_id = crud.create_receipt(receipt=receipt, db=db).id
+        attachment_id = crud.create_attachment(attachment=attachment, db=db).id
     except crud.UnknownFileFormatError:
         raise HTTPException(status_code=415, detail="Unsupported file format")
 
-    return receipt_id
+    return attachment_id
 
-@api_router.delete("/receipt/{receipt_id}")
-def del_receipt(receipt_id, db: Session = Depends(get_db)):
-    return crud.delete_receipt(receipt_id, db)
+@api_router.delete("/attachment/{attachment_id}")
+def del_attachment(attachment_id, db: Session = Depends(get_db)):
+    return crud.delete_attachment(attachment_id, db)
 
 @api_router.get("/entries")
 def get_entry(db: Session = Depends(get_db), user=Depends(get_user)):
     return crud.get_entries(db)
 
 
-@api_router.get("/items/{item_id}/receipts")
-def get_receipt_for_item(
+@api_router.get("/items/{item_id}/attachments")
+def get_attachment_for_item(
     item_id, db: Session = Depends(get_db), user=Depends(get_user)
 ):
-    data = crud.get_item_receipts(item_id, db)
+    data = crud.get_item_attachments(item_id, db)
     return data
 
 
-@api_router.get("/receipt/{receipt_id}")
-async def get_receipt(
-    receipt_id,
+@api_router.get("/attachment/{attachment_id}")
+async def get_attachment(
+    attachment_id,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     user=Depends(get_user),
 ):
     buffer = io.BytesIO()  # BytesIO stream containing the pdf data
     background_tasks.add_task(buffer.close)
-    buffer.write(crud.get_receipt_data(receipt_id, db))
+    buffer.write(crud.get_attachment_data(attachment_id, db))
     return Response(buffer.getvalue())
 
-def generate_parts(entry: schemas.Entry):
+def generate_parts(entry: models.Entry):
     parts = []
     for item in entry.items:
         liitteet = []
-        for liite in item.receipts:
-            liitteet.append(liite.data)
+        for liite in item.attachments:
+            liitteet.append(pdf_util.Attachment(
+                data=liite.data,
+                value_cents=liite.value_cents,
+                is_not_receipt=liite.is_not_receipt,
+            ))
         part = pdf_util.Part(
             paivamaara=item.date,
-            hinta=item.value_cents / 100,
+            hinta=sum([attachment.value_cents if attachment.value_cents else 0 for attachment in item.attachments]) / 100,
             selite=item.description,
             liitteet=liitteet,
         )
@@ -298,7 +302,7 @@ async def get_multi_entry_csv(
         rows = []
         for item in entry.items:
             rows.append(csv_util.Row(
-                yksikkohinta=str(item.value_cents / 100),
+                yksikkohinta=str(sum([attachment.value_cents for attachment in item.attachments]) / 100),
                 selite=item.description,
                 maara=1,
                 matkalasku=False,
@@ -612,9 +616,5 @@ async def get_admin_config(user=Depends(get_user)):
         "deleteArchivedAgeLimit": os.environ["DELETE_ARCHIVED_AGE_LIMIT"],
         "bookkeepingAccounts": bookkeeping_accounts.bookkeeping_accounts
     }
-
-
-# @api_router.get('/receipt/{filename}')
-# def get_file(filename: str, db: Session = Depends(get_db)) ->
 
 app.include_router(api_router)

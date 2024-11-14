@@ -3,42 +3,41 @@ from pydantic import BaseModel, ConfigDict
 from datetime import date
 
 
-class ReceiptResponse(BaseModel):
+class AttachmentResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
     filename: str | None
 
 
-class Receipt(ReceiptResponse):
+class Attachment(AttachmentResponse):
     data: bytes
+    value_cents: int | None
+    is_not_receipt: bool
 
-
-class ReceiptCreate(BaseModel):
+class AttachmentCreate(BaseModel):
     filename: str | None
     data: bytes
-
+    
+class AttachmentUpdate(BaseModel):
+    id: int
+    value_cents: int | None
+    is_not_receipt: bool
 
 class ItemCreate(BaseModel):
     description: str
     date: date
-    value_cents: int
-    receipts: list[int]
-    # receipts: list[int] = Field(alias='receipt_ids')  # alias for orm more
-    # receipts: list[ReceiptResponse]
-
+    attachments: list[AttachmentUpdate]
 
 class Item(ItemCreate):
     model_config = ConfigDict(from_attributes=True)
     id: int
-    receipts: list[ReceiptResponse]
+    attachments: list[AttachmentResponse]
 
 class ItemUpdate(BaseModel):
-    value_cents: int
     description: str
     date: date
-    receipts: list[int]
+    attachments: list[AttachmentUpdate]
 
-# NOTE: This is not exposed to the frontend yet due to the data privacy concerns.
 class MileageCreate(BaseModel):
     description: str
     date: date

@@ -11,12 +11,16 @@ from typing import Literal, TypedDict
 
 from PIL import Image, ImageOps
 
+class Attachment(TypedDict):
+    data: bytes
+    value_cents: int
+    is_not_receipt: bool
 
 class Part(TypedDict):
     paivamaara: datetime.date
     selite: str
     hinta: float
-    liitteet: list[bytes]
+    liitteet: list[Attachment]
 
 
 def is_file_acceptable(file: bytes) -> Literal["PDF", "PNG", "GIF", "JPG"] | None:
@@ -95,15 +99,13 @@ def generate_combined_pdf(
 
     piipath = "./kulumasiina_backend/assets/fii_2.svg"
 
-    # convert the "liitteet" to numbers and add them to list
-    attachements = [liite for part in parts for liite in part["liitteet"]]
+    attachments = [liite["data"] for part in parts for liite in part["liitteet"]]
+    
     i = 1
     for part in parts:
-        liitteet = []
         for liite in part["liitteet"]:
-            liitteet.append(str(i))
+            liite["numero"] = i
             i += 1
-        part["liitteet"] = liitteet
 
     # The units are in millimetres :DD
     width = 170
@@ -188,7 +190,7 @@ def generate_combined_pdf(
                 (
                     part["paivamaara"].strftime("%d.%m.%Y"),
                     part["selite"],
-                    ", ".join(part["liitteet"]),
+                    ", ".join(f'{liite["numero"]}{f': {liite["value_cents"]/100} €' if liite["value_cents"] else ''}' for liite in part["liitteet"]),
                     f"{part['hinta']} €",
                 )
             )
@@ -232,7 +234,7 @@ def generate_combined_pdf(
     TOO_BIG_ATTACHMENT = 512 * 1024  # 512 KB
     MIN_WIDTH = 720
 
-    for i, attachment in enumerate(attachements):
+    for i, attachment in enumerate(attachments):
         # Check format from magic bytes
         # https://en.wikipedia.org/wiki/List_of_file_signatures
         fileformat = is_file_acceptable(attachment)

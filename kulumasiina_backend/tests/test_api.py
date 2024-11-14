@@ -13,12 +13,12 @@ def test_hello():
     assert response.json() == {'msg': 'hello'}
 
 
-def test_receipt_upload():
+def test_attachment_upload():
     filepath = os.path.dirname(os.path.realpath(__file__))
     filepath = os.path.join(filepath, 'test_image.png')
     with open(filepath, 'rb') as f:
         response = client.post(
-            '/receipt/',
+            '/attachment/',
             files={'file': ('test_image.png', f, 'image/png')},
         )
     assert response.status_code == 200
@@ -43,11 +43,11 @@ def test_entry_only():
 # test entry update status
 # test item get id
 # test mileage get id
-# test receipt get id / filename
+# test attachment get id / filename
 # test unauthorised access
-# test entry with bad receipt ids
-# test entry unauthorised receipt id
-# test receipt null filename
+# test entry with bad attachment ids
+# test entry unauthorised attachment id
+# test attachment null filename
 
 # test login
 # test roles

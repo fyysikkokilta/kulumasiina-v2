@@ -1,17 +1,17 @@
-import React from "react";
-import { Button, Form, Upload } from "antd";
-import type { ColProps } from "antd";
-import { EURFormat, KMFormat } from "../utils";
-import type { ItemState, MileageState, FormState } from "./formSlice";
-import { useTranslation } from "react-i18next";
+import React from 'react'
+import { Button, Form, Upload } from 'antd'
+import type { ColProps } from 'antd'
+import { EURFormat, KMFormat } from '../utils'
+import type { ItemState, MileageState, FormState } from './formSlice'
+import { useTranslation } from 'react-i18next'
 
 interface MileageProps {
-  mileage: MileageState;
-  mileageReimbursementRate: number;
-  onEdit: () => void;
-  onRemove: () => void;
-  wrapperProps: ColProps;
-  labelProps: ColProps;
+  mileage: MileageState
+  mileageReimbursementRate: number
+  onEdit: () => void
+  onRemove: () => void
+  wrapperProps: ColProps
+  labelProps: ColProps
 }
 
 export const Mileage: React.FC<MileageProps> = ({
@@ -22,7 +22,7 @@ export const Mileage: React.FC<MileageProps> = ({
   wrapperProps,
   labelProps,
 }) => {
-  const { t } = useTranslation("translation", { keyPrefix: "form.main" });
+  const { t } = useTranslation('translation', { keyPrefix: 'form.main' })
   return (
     <Form.Item
       className="expenseCard mileage"
@@ -35,16 +35,16 @@ export const Mileage: React.FC<MileageProps> = ({
         <span>
           <span className="date">{mileage.date}</span>
           <span className="value">
-            {KMFormat.format(mileage.distance)} &rarr;{" "}
+            {KMFormat.format(mileage.distance)} &rarr;{' '}
             {EURFormat.format(mileage.distance * mileageReimbursementRate)}
           </span>
         </span>
         <div className="actionButtons">
           <Button type="link" onClick={onEdit}>
-            {t("edit")}
+            {t('edit')}
           </Button>
           <Button type="primary" danger onClick={onRemove}>
-            {t("remove")}
+            {t('remove')}
           </Button>
         </div>
       </div>
@@ -54,16 +54,16 @@ export const Mileage: React.FC<MileageProps> = ({
       <p className="description">{mileage.description}</p>
       <p className="route">{mileage.route}</p>
     </Form.Item>
-  );
-};
+  )
+}
 
 interface ItemProps {
-  files: FormState["files"];
-  item: ItemState;
-  onEdit: () => void;
-  onRemove: () => void;
-  wrapperProps: ColProps;
-  labelProps: ColProps;
+  files: FormState['files']
+  item: ItemState
+  onEdit: () => void
+  onRemove: () => void
+  wrapperProps: ColProps
+  labelProps: ColProps
 }
 
 export const Item: React.FC<ItemProps> = ({
@@ -74,8 +74,8 @@ export const Item: React.FC<ItemProps> = ({
   wrapperProps,
   labelProps,
 }) => {
-  const { t } = useTranslation("translation", { keyPrefix: "form.main" });
-  const ownFiles = item.receipts.map((id) => files[id]);
+  const { t } = useTranslation('translation', { keyPrefix: 'form.main' })
+  const ownFiles = item.attachments.map(({ id }) => files[id])
   return (
     <Form.Item
       className="expenseCard item"
@@ -89,15 +89,20 @@ export const Item: React.FC<ItemProps> = ({
         <span>
           <span className="date">{item.date}</span>
           <span className="value">
-            {EURFormat.format(item.value_cents / 100)}
+            {EURFormat.format(
+              item.attachments.reduce(
+                (acc, { value_cents }) => acc + (value_cents || 0),
+                0,
+              ) / 100,
+            )}
           </span>
         </span>
         <div className="actionButtons">
           <Button type="link" onClick={onEdit}>
-            {t("edit")}
+            {t('edit')}
           </Button>
           <Button type="primary" danger onClick={onRemove}>
-            {t("remove")}
+            {t('remove')}
           </Button>
         </div>
       </div>
@@ -112,5 +117,5 @@ export const Item: React.FC<ItemProps> = ({
         }}
       />
     </Form.Item>
-  );
-};
+  )
+}

@@ -20,8 +20,8 @@ from sqlalchemy.orm import Session, defer
 #     return db_entry
 
 
-def _get_receipts(ids: list[int], db: Session) -> list[models.Receipt]:
-    return db.query(models.Receipt).where(models.Receipt.id.in_(ids)).all()
+def _get_attachments(attachments: list[schemas.AttachmentUpdate], db: Session) -> list[models.Attachment]:
+    return db.query(models.Attachment).where(models.Attachment.id.in_(attachment.id for attachment in attachments)).all()
 
 
 def create_entry_full(entry: schemas.EntryCreate, db: Session) -> schemas.Entry:
@@ -30,8 +30,8 @@ def create_entry_full(entry: schemas.EntryCreate, db: Session) -> schemas.Entry:
         models.Item(
             **item.dict()
             | dict(
-                # TODO: raise error for invalid receipt ids?
-                receipts=_get_receipts(item.receipts, db=db)
+                # TODO: raise error for invalid attachment ids?
+                attachments=_get_attachments(item.attachments, db=db)
             )
         )
         for item in entry.items
@@ -46,6 +46,22 @@ def create_entry_full(entry: schemas.EntryCreate, db: Session) -> schemas.Entry:
     db.add(db_entry)
     db.commit()
     db.refresh(db_entry)
+    
+    # Collect attachment updates
+    attachment_updates = []
+    for item in entry.items:
+        for attachment in item.attachments:
+            attachment_updates.append({
+                "id": attachment.id,
+                "value_cents": attachment.value_cents,
+                "is_not_receipt": attachment.is_not_receipt,
+            })
+
+    # Perform bulk update for attachments
+    if attachment_updates:
+        db.bulk_update_mappings(models.Attachment, attachment_updates)
+        db.commit()
+        
     return schemas.Entry.from_orm(db_entry)
 
 
@@ -53,13 +69,13 @@ def get_entries(db: Session) -> list[models.Entry]:
     return db.query(models.Entry).options(defer(models.Entry.gov_id)).all()
 
 
-def get_item_receipts(item_id: int, db: Session):
-    receipts = (
-        db.query(models.Receipt.filename, models.Receipt.item_id, models.Receipt.id)
-        .where(models.Receipt.item_id == item_id)
+def get_item_attachments(item_id: int, db: Session):
+    attachments = (
+        db.query(models.Attachment.filename, models.Attachment.item_id, models.Attachment.id)
+        .where(models.Attachment.item_id == item_id)
         .all()
     )
-    return receipts
+    return attachments
 
 
 def get_entry_by_id(id: int, db: Session) -> models.Entry | None:
@@ -78,28 +94,28 @@ class UnknownFileFormatError(Exception):
     """Raised when the file format is not supported"""
 
 
-def create_receipt(
-    receipt: schemas.ReceiptCreate, db: Session
-) -> schemas.ReceiptResponse:
-    # Verify that the receipt file is acceptable
-    file_type = is_file_acceptable(receipt.data)
+def create_attachment(
+    attachment: schemas.AttachmentCreate, db: Session
+) -> schemas.AttachmentResponse:
+    # Verify that the attachment file is acceptable
+    file_type = is_file_acceptable(attachment.data)
     if file_type is None:
         raise UnknownFileFormatError("File type not supported")
 
-    db_receipt = models.Receipt(**receipt.dict())
-    db.add(db_receipt)
+    db_attachment = models.Attachment(**attachment.dict())
+    db.add(db_attachment)
     db.commit()
-    db.refresh(db_receipt)
-    return schemas.ReceiptResponse.model_validate(db_receipt)
+    db.refresh(db_attachment)
+    return schemas.AttachmentResponse.model_validate(db_attachment)
 
-def delete_receipt(id: int, db: Session):
-    to_del = db.query(models.Receipt).filter(models.Receipt.id == id).first()
+def delete_attachment(id: int, db: Session):
+    to_del = db.query(models.Attachment).filter(models.Attachment.id == id).first()
     db.delete(to_del)
     db.commit()
 
 
-def get_receipt_data(id, db: Session):
-    return db.query(models.Receipt.data).filter(models.Receipt.id == id).first()[0]
+def get_attachment_data(id, db: Session):
+    return db.query(models.Attachment.data).filter(models.Attachment.id == id).first()[0]
 
 
 def delete_entry(id, db: Session):
@@ -181,17 +197,31 @@ def reset_entry_status(id: int, db: Session):
 def update_item(id: int, item: schemas.ItemUpdate, db: Session):
     db.query(models.Item).filter(models.Item.id == id).update(
         {
-            models.Item.value_cents: item.value_cents,
             models.Item.description: item.description,
             models.Item.date: item.date,
         }
     )
-    db.query(models.Receipt).filter(models.Receipt.id.in_(item.receipts)).update(
+    db.query(models.Attachment).filter(models.Attachment.id.in_(attachment.id for attachment in item.attachments)).update(
         {
-            models.Receipt.item_id: id,
+            models.Attachment.item_id: id,
         }
     )
+
     db.commit()
+    
+    # Collect attachment updates
+    attachment_updates = []
+    for attachment in item.attachments:
+        attachment_updates.append({
+            "id": attachment.id,
+            "value_cents": attachment.value_cents,
+            "is_not_receipt": attachment.is_not_receipt,
+        })
+
+    # Perform bulk update for attachments
+    if attachment_updates:
+        db.bulk_update_mappings(models.Attachment, attachment_updates)
+        db.commit()
 
 def update_mileage(id: int, mileage: schemas.MileageUpdate, db: Session):
     db.query(models.Mileage).filter(models.Mileage.id == id).update(
