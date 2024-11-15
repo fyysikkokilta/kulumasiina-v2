@@ -190,7 +190,7 @@ def generate_combined_pdf(
                 (
                     part["paivamaara"].strftime("%d.%m.%Y"),
                     part["selite"],
-                    ", ".join(f'{liite["numero"]}{f': {liite["value_cents"]/100} €' if liite["value_cents"] else ''}' for liite in part["liitteet"]),
+                    ", ".join(f'{liite["numero"]}{": " if liite["value_cents"] else ""}{liite["value_cents"]/100 if liite["value_cents"] else ""}' for liite in part["liitteet"]),
                     f"{part['hinta']} €",
                 )
             )
