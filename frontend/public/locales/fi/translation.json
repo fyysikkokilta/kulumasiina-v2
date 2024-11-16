@@ -48,7 +48,7 @@
       "value_cents_error_1": "Anna summa!",
       "value_cents_error_2": "Anna positiivinen summa!",
       "value_cents_unit": "€",
-      "is_not_receipt": "Ei kuitti"
+      "is_not_receipt": "Lisäliite"
     },
     "mileage": {
       "add": "Lisää matka",

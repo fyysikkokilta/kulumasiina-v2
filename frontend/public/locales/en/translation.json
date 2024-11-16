@@ -48,7 +48,7 @@
       "value_cents_error_1": "Please provide the price!",
       "value_cents_error_2": "Please provide a valid positive number!",
       "value_cents_unit": "€",
-      "is_not_receipt": "Not a receipt"
+      "is_not_receipt": "Extra attachment"
     },
     "mileage": {
       "add": "Add a mileage",
