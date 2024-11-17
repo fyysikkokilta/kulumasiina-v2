@@ -330,6 +330,7 @@ export const ItemModal = (props: ExpenseModalProps) => {
                         message: t('value_cents_error_2'),
                       },
                     ]}
+                    style={{ width: '50%', marginBottom: 0 }}
                   >
                     <Input
                       placeholder={t('value_cents_placeholder')}
