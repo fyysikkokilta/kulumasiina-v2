@@ -192,8 +192,8 @@ def generate_combined_pdf(
                 (
                     part["paivamaara"].strftime("%d.%m.%Y"),
                     part["selite"],
-                    ", ".join(f'{liite["numero"]}{": " if liite["value_cents"] else ""}{liite["value_cents"]/100 if liite["value_cents"] else ""}{" €" if liite["value_cents"] else ""}' for liite in part["liitteet"]),
-                    f"{part['hinta']} €",
+                    ", ".join(str(liite["numero"]) for liite in part["liitteet"]),
+                    "{:.2f} €".format(part['hinta']),
                 )
             )
 
@@ -301,7 +301,8 @@ def generate_combined_pdf(
             raise ValueError("File format not supported")
 
         show_price = attachment["value_cents"] and not attachment["is_not_receipt"]
-        pdf_data = watermark(f"Liite {i+1}{': '+str(attachment['value_cents']/100)+' €' if show_price else ''}", BytesIO(data)).getvalue()
+        price_text = " : {:.2f} €".format(attachment["value_cents"]/100) if show_price else ""
+        pdf_data = watermark(f"Liite {i+1}{price_text}", BytesIO(data)).getvalue()
 
         writer.append(BytesIO(pdf_data))
         # pypdf_pdf.pages.extend(pypdf.PdfReader(attachement).pages)
