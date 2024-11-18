@@ -48,7 +48,9 @@ def watermark(
     )
     waterstamp_pdf.add_page()
     waterstamp_pdf.set_font("Lora", size=20)
-    waterstamp_pdf.cell(text=text)
+    with waterstamp_pdf.local_context(fill_opacity=0.7):
+        waterstamp_pdf.set_fill_color(220, 220, 220)
+        waterstamp_pdf.cell(text=text, fill=True)
     waterpdf = BytesIO(waterstamp_pdf.output())
 
     stamp_page = pypdf.PdfReader(waterpdf).pages[0]
@@ -99,7 +101,7 @@ def generate_combined_pdf(
 
     piipath = "./kulumasiina_backend/assets/fii_2.svg"
 
-    attachments = [liite["data"] for part in parts for liite in part["liitteet"]]
+    attachments = [liite for part in parts for liite in part["liitteet"]]
     
     i = 1
     for part in parts:
@@ -235,9 +237,10 @@ def generate_combined_pdf(
     MIN_WIDTH = 720
 
     for i, attachment in enumerate(attachments):
+        data = attachment["data"]
         # Check format from magic bytes
         # https://en.wikipedia.org/wiki/List_of_file_signatures
-        fileformat = is_file_acceptable(attachment)
+        fileformat = is_file_acceptable(data)
         if fileformat is None:
             raise ValueError("File format not supported")
 
@@ -246,8 +249,8 @@ def generate_combined_pdf(
         if fileformat in {"JPG", "PNG", "GIF"}:
             new_pdf = fpdf.FPDF(format="A4")
             new_pdf.add_page()
-            if sys.getsizeof(attachment) > TOO_BIG_ATTACHMENT:
-                image = Image.open(BytesIO(attachment))
+            if sys.getsizeof(data) > TOO_BIG_ATTACHMENT:
+                image = Image.open(BytesIO(data))
                 ImageOps.exif_transpose(image, in_place=True)
                 with BytesIO() as img_io:
                     im_width, im_height = image.size
@@ -259,9 +262,9 @@ def generate_combined_pdf(
                         resized_height = round(MIN_WIDTH/ratio)
                     resized_image = image.resize((resized_width, resized_height), Image.Resampling.LANCZOS)
                     resized_image.save(img_io, format=image.format, quality=100)
-                    attachment = img_io.getvalue()
+                    data = img_io.getvalue()
             new_pdf.image(
-                attachment,
+                data,
                 x=0,
                 y=0,
                 w=210,
@@ -269,10 +272,10 @@ def generate_combined_pdf(
                 alt_text=f"Liite {i+1}",
                 keep_aspect_ratio=True,
             )
-            attachment = new_pdf.output()
+            data = new_pdf.output()
         elif fileformat == "PDF":
-            if sys.getsizeof(attachment) > TOO_BIG_ATTACHMENT:
-                old_attachment = pypdf.PdfReader(BytesIO(attachment))
+            if sys.getsizeof(data) > TOO_BIG_ATTACHMENT:
+                old_attachment = pypdf.PdfReader(BytesIO(data))
                 new_attachment = pypdf.PdfWriter()
                 for page in old_attachment.pages:
                     new_attachment.add_page(page)
@@ -290,16 +293,16 @@ def generate_combined_pdf(
                     page.scale_to(width=width, height=height)
                 io = BytesIO()
                 new_attachment.write(io)
-                attachment = io.getvalue()
+                data = io.getvalue()
             else:
                 pass
         else:
             raise ValueError("File format not supported")
 
-        old_pdf = attachment
-        attachment = watermark(f"Liite {i+1}", BytesIO(attachment)).getvalue()
+        show_price = attachment["value_cents"] and not attachment["is_not_receipt"]
+        pdf_data = watermark(f"Liite {i+1}{': '+str(attachment['value_cents']/100)+' €' if show_price else ''}", BytesIO(data)).getvalue()
 
-        writer.append(BytesIO(attachment))
+        writer.append(BytesIO(pdf_data))
         # pypdf_pdf.pages.extend(pypdf.PdfReader(attachement).pages)
 
     sanitized_name = pathvalidate.sanitize_filename(name)
