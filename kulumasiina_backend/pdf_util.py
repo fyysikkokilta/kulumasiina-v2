@@ -274,11 +274,11 @@ def generate_combined_pdf(
             )
             data = new_pdf.output()
         elif fileformat == "PDF":
+            new_attachment = pypdf.PdfWriter()
+            old_attachment = pypdf.PdfReader(BytesIO(data))
+            for page in old_attachment.pages:
+                new_attachment.add_page(page)
             if sys.getsizeof(data) > TOO_BIG_ATTACHMENT:
-                old_attachment = pypdf.PdfReader(BytesIO(data))
-                new_attachment = pypdf.PdfWriter()
-                for page in old_attachment.pages:
-                    new_attachment.add_page(page)
                 for page in new_attachment.pages:
                     for img in page.images:
                         im_width, im_height = img.image.size
@@ -290,12 +290,13 @@ def generate_combined_pdf(
                             resized_height = round(MIN_WIDTH/ratio)
                         new_img = img.image.resize((resized_width, resized_height), Image.Resampling.LANCZOS)
                         img.replace(new_img)
-                    page.scale_to(width=width, height=height)
-                io = BytesIO()
-                new_attachment.write(io)
-                data = io.getvalue()
-            else:
-                pass
+
+            for page in new_attachment.pages:
+                page.scale_to(width=width, height=height)
+
+            io = BytesIO()
+            new_attachment.write(io)
+            data = io.getvalue()
         else:
             raise ValueError("File format not supported")
 
