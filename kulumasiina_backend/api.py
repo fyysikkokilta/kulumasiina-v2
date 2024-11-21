@@ -302,7 +302,7 @@ async def get_multi_entry_csv(
         rows = []
         for item in entry.items:
             rows.append(csv_util.Row(
-                yksikkohinta=str(sum([attachment.value_cents for attachment in item.attachments]) / 100),
+                yksikkohinta=str(sum(attachment.value_cents if attachment.value_cents else 0 for attachment in item.attachments) / 100),
                 selite=item.description,
                 maara=1,
                 matkalasku=False,
