@@ -118,7 +118,10 @@ export function ExpenseForm() {
         value_cents:
           values.value_cents[file.response] &&
           !values.is_not_receipts[file.response]
-            ? Number(values.value_cents[file.response].replace(',', '.')) * 100
+            ? Math.round(
+                Number(values.value_cents[file.response].replace(',', '.')) *
+                  100,
+              )
             : null,
         is_not_receipt: values.is_not_receipts[file.response] || false,
       }))
