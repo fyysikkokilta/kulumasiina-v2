@@ -292,7 +292,20 @@ def generate_combined_pdf(
                         img.replace(new_img)
 
             for page in new_attachment.pages:
-                page.scale_to(width=width, height=height)
+                page_width = page.mediabox.width
+                page_height = page.mediabox.height
+                
+                if page_width > page_height:
+                    resized_width = height # Landscape
+                    ratio = resized_width / page_width
+                    resized_height = page_height * ratio
+                    
+                else:
+                    resized_height = height # Portrait
+                    ratio = resized_height / page_height
+                    resized_width = page_width * ratio
+                    
+                page.scale_to(width=resized_width, height=resized_height)
 
             io = BytesIO()
             new_attachment.write(io)
