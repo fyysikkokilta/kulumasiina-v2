@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: ./docker/Dockerfile.nginx.prod
     ports:
-      - "8024:80"
+      - "127.0.0.1:8024:80"
     restart: always
     # Limit logging to 20MB per container
     logging:
