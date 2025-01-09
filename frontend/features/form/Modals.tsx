@@ -284,15 +284,19 @@ export const ItemModal = (props: ExpenseModalProps) => {
           rules={[
             {
               required: true,
-              message: t('attachments_error'),
+              message: t('attachments_error_1'),
             },
             {
               validator: (_, value) => {
                 const fileList = value.fileList as UploadFile[]
-                if (Array.isArray(fileList) && fileList.length > 0) {
-                  return Promise.resolve()
+                if (!Array.isArray(fileList) || fileList.length === 0) {
+                  return Promise.reject(t('attachments_error_1'))
                 }
-                return Promise.reject(t('attachments_error'))
+
+                if (Object.values(disableValueCents).every(Boolean)) {
+                  return Promise.reject(t('attachments_error_2'))
+                }
+                return Promise.resolve()
               },
             },
           ]}
