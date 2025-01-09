@@ -330,7 +330,7 @@ export const ItemModal = (props: ExpenseModalProps) => {
                         message: t('value_cents_error_1'),
                       },
                       {
-                        pattern: /^\d+([.,]\d{1,2})?$/,
+                        pattern: /^(?!0+(?:[.,]0+)?$)\d+([.,]\d{1,2})?$/,
                         message: t('value_cents_error_2'),
                       },
                     ]}
