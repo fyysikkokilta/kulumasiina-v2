@@ -19,7 +19,7 @@ export const ConfirmPaymentModal: React.FC<{
   const show = useAppSelector((state) => state.admin.confirmPaymentModal)
 
   const handleSubmit = (values: { date: Dayjs }) => {
-    const date = values.date.utcOffset(0).startOf('day').toISOString()
+    const date = values.date.utc(true).startOf('day').toISOString()
     const promise = Array.isArray(entry_ids)
       ? payEntries(entry_ids, date)
       : payEntry(entry_ids, date)

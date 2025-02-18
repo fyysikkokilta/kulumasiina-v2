@@ -20,7 +20,14 @@ from typing import Optional, TypedDict
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from kulumasiina_backend import crud, models, schemas, pdf_util, csv_util, bookkeeping_accounts
+from kulumasiina_backend import (
+    crud,
+    models,
+    schemas,
+    pdf_util,
+    csv_util,
+    bookkeeping_accounts,
+)
 from kulumasiina_backend.db import SessionLocal, engine
 from fastapi.security import HTTPBearer
 from fastapi_sso.sso.google import GoogleSSO
@@ -136,7 +143,7 @@ async def create_entry(
     created_entries = []
 
     # Create separate entries for mileages and items if both are present
-    if(entry.mileages):
+    if entry.mileages:
         entry_without_items = schemas.EntryCreate(
             name=entry.name,
             contact=entry.contact,
@@ -150,7 +157,7 @@ async def create_entry(
         created_mileages = crud.create_entry_full(entry=entry_without_items, db=db)
         created_entries.append(created_mileages)
 
-    if(entry.items):
+    if entry.items:
         entry_without_mileages = schemas.EntryCreate(
             name=entry.name,
             contact=entry.contact,
@@ -191,9 +198,11 @@ def create_attachment(file: UploadFile = File(), db: Session = Depends(get_db)) 
 
     return attachment_id
 
+
 @api_router.delete("/attachment/{attachment_id}")
 def del_attachment(attachment_id, db: Session = Depends(get_db)):
     return crud.delete_attachment(attachment_id, db)
+
 
 @api_router.get("/entries")
 def get_entry(db: Session = Depends(get_db), user=Depends(get_user)):
@@ -220,19 +229,28 @@ async def get_attachment(
     buffer.write(crud.get_attachment_data(attachment_id, db))
     return Response(buffer.getvalue())
 
+
 def generate_parts(entry: models.Entry):
     parts = []
     for item in entry.items:
         liitteet = []
         for liite in item.attachments:
-            liitteet.append(pdf_util.Attachment(
-                data=liite.data,
-                value_cents=liite.value_cents,
-                is_not_receipt=liite.is_not_receipt,
-            ))
+            liitteet.append(
+                pdf_util.Attachment(
+                    data=liite.data,
+                    value_cents=liite.value_cents,
+                    is_not_receipt=liite.is_not_receipt,
+                )
+            )
         part = pdf_util.Part(
             paivamaara=item.date,
-            hinta=sum([attachment.value_cents if attachment.value_cents else 0 for attachment in item.attachments]) / 100,
+            hinta=sum(
+                [
+                    attachment.value_cents if attachment.value_cents else 0
+                    for attachment in item.attachments
+                ]
+            )
+            / 100,
             selite=item.description,
             liitteet=liitteet,
         )
@@ -246,6 +264,7 @@ def generate_parts(entry: models.Entry):
         )
         parts.append(part)
     return parts
+
 
 @api_router.get("/entry/{entry_id}/pdf")
 async def get_entry_pdf(
@@ -283,6 +302,7 @@ async def get_entry_pdf(
         headers={"Content-Disposition": f"attachment; filename={document_name}"},
     )
 
+
 @api_router.get("/entry/multi/csv")
 async def get_multi_entry_csv(
     entry_ids: str,
@@ -301,21 +321,31 @@ async def get_multi_entry_csv(
     for entry in entries:
         rows = []
         for item in entry.items:
-            rows.append(csv_util.Row(
-                yksikkohinta=str(sum(attachment.value_cents if attachment.value_cents else 0 for attachment in item.attachments) / 100),
-                selite=item.description,
-                maara=1,
-                matkalasku=False,
-                kirjanpitotili=item.account
-            ))
+            rows.append(
+                csv_util.Row(
+                    yksikkohinta=str(
+                        sum(
+                            attachment.value_cents if attachment.value_cents else 0
+                            for attachment in item.attachments
+                        )
+                        / 100
+                    ),
+                    selite=item.description,
+                    maara=1,
+                    matkalasku=False,
+                    kirjanpitotili=item.account,
+                )
+            )
         for mileage in entry.mileages:
-            rows.append(csv_util.Row(
-                yksikkohinta=float(os.environ["MILEAGE_REIMBURSEMENT_RATE"]),
-                selite=f"Kilometrikorvaus: {mileage.description}",
-                maara=mileage.distance,
-                matkalasku=True,
-                kirjanpitotili=mileage.account
-            ))
+            rows.append(
+                csv_util.Row(
+                    yksikkohinta=float(os.environ["MILEAGE_REIMBURSEMENT_RATE"]),
+                    selite=f"Kilometrikorvaus: {mileage.description}",
+                    maara=mileage.distance,
+                    matkalasku=True,
+                    kirjanpitotili=mileage.account,
+                )
+            )
 
         parts = generate_parts(entry)
         pdf = pdf_util.generate_combined_pdf(
@@ -333,15 +363,17 @@ async def get_multi_entry_csv(
             rejection_date=entry.rejection_date,
         )
 
-        pdf_infos.append(csv_util.CsvInfo(
-            entry_id=entry.id,
-            name=entry.name,
-            IBAN=entry.iban,
-            HETU=entry.gov_id,
-            Pvm=entry.submission_date,
-            rows=rows,
-            pdf=pdf,
-        ))
+        pdf_infos.append(
+            csv_util.CsvInfo(
+                entry_id=entry.id,
+                name=entry.name,
+                IBAN=entry.iban,
+                HETU=entry.gov_id,
+                Pvm=entry.submission_date,
+                rows=rows,
+                pdf=pdf,
+            )
+        )
 
     document_name, csv = csv_util.generate_csv(pdf_infos)
 
@@ -352,8 +384,9 @@ async def get_multi_entry_csv(
     return Response(
         csv,
         media_type=media_type,
-        headers={"Content-Disposition": f"attachment; filename=\"{document_name}\""},
+        headers={"Content-Disposition": f'attachment; filename="{document_name}"'},
     )
+
 
 @api_router.get("/entry/{entry_id}/csv")
 async def get_entry_csv(
@@ -371,21 +404,31 @@ async def get_entry_csv(
     rows = []
 
     for item in entry.items:
-        rows.append(csv_util.Row(
-            yksikkohinta=str(sum(attachment.value_cents if attachment.value_cents else 0 for attachment in item.attachments) / 100),
-            selite=item.description,
-            maara=1,
-            matkalasku=False,
-            kirjanpitotili=item.account,
-        ))
+        rows.append(
+            csv_util.Row(
+                yksikkohinta=str(
+                    sum(
+                        attachment.value_cents if attachment.value_cents else 0
+                        for attachment in item.attachments
+                    )
+                    / 100
+                ),
+                selite=item.description,
+                maara=1,
+                matkalasku=False,
+                kirjanpitotili=item.account,
+            )
+        )
     for mileage in entry.mileages:
-        rows.append(csv_util.Row(
-            yksikkohinta=float(os.environ["MILEAGE_REIMBURSEMENT_RATE"]),
-            selite=f"Kilometrikorvaus: {mileage.description}",
-            maara=mileage.distance,
-            matkalasku=True,
-            kirjanpitotili=mileage.account,
-        ))
+        rows.append(
+            csv_util.Row(
+                yksikkohinta=float(os.environ["MILEAGE_REIMBURSEMENT_RATE"]),
+                selite=f"Kilometrikorvaus: {mileage.description}",
+                maara=mileage.distance,
+                matkalasku=True,
+                kirjanpitotili=mileage.account,
+            )
+        )
 
     pdf = None
     if entry.status == "paid":
@@ -405,15 +448,19 @@ async def get_entry_csv(
             rejection_date=entry.rejection_date,
         )
 
-    document_name, csv = csv_util.generate_csv([csv_util.CsvInfo(
-        entry_id=entry_id,
-        name=entry.name,
-        IBAN=entry.iban,
-        HETU=entry.gov_id,
-        Pvm=entry.submission_date,
-        rows=rows,
-        pdf=pdf,
-    )])
+    document_name, csv = csv_util.generate_csv(
+        [
+            csv_util.CsvInfo(
+                entry_id=entry_id,
+                name=entry.name,
+                IBAN=entry.iban,
+                HETU=entry.gov_id,
+                Pvm=entry.submission_date,
+                rows=rows,
+                pdf=pdf,
+            )
+        ]
+    )
 
     media_type = "text/csv"
     if document_name.endswith("zip"):
@@ -422,8 +469,9 @@ async def get_entry_csv(
     return Response(
         csv,
         media_type=media_type,
-        headers={"Content-Disposition": f"attachment; filename=\"{document_name}\""},
+        headers={"Content-Disposition": f'attachment; filename="{document_name}"'},
     )
+
 
 def assert_status_in(entry_id, statuses, db):
     entry = crud.get_entry_by_id(entry_id, db)
@@ -431,8 +479,8 @@ def assert_status_in(entry_id, statuses, db):
         raise HTTPException(404)
     if entry.status not in statuses:
         raise HTTPException(400, "Entry has wrong status for current operation")
-    
-    
+
+
 def assert_archived(entry_id, db):
     entry = crud.get_entry_by_id(entry_id, db)
     if entry is None:
@@ -440,22 +488,27 @@ def assert_archived(entry_id, db):
     if not entry.archived:
         raise HTTPException(400, "Entry not archived")
 
+
 @api_router.delete("/entry/{entry_id}")
 def del_entry(entry_id, db: Session = Depends(get_db), user=Depends(get_user)):
     assert_archived(entry_id, db)
     return crud.delete_entry(entry_id, db)
+
 
 @api_router.delete("/entries")
 def del_archived_old_entries(db: Session = Depends(get_db), user=Depends(get_user)):
     age_limit = int(os.environ["DELETE_ARCHIVED_AGE_LIMIT"])
     return crud.delete_archived_old_entries(age_limit, db)
 
+
 class ChangeStatusBody(BaseModel):
     ids: list[int]
+
 
 class ApproveBody(ChangeStatusBody):
     date: datetime
     approval_note: str
+
 
 @api_router.post("/approve")
 async def approve_entries(
@@ -469,6 +522,7 @@ async def approve_entries(
         crud.approve_entry(entry_id, data.date.date(), data.approval_note, db)
     return
 
+
 @api_router.post("/deny")
 def deny_entries(
     data: ChangeStatusBody,
@@ -480,6 +534,7 @@ def deny_entries(
     for entry_id in data.ids:
         crud.deny_entry(entry_id, db)
     return
+
 
 @api_router.post("/reset")
 def reset_entries(
@@ -493,8 +548,10 @@ def reset_entries(
         crud.reset_entry_status(entry_id, db)
     return
 
+
 class PayBody(ChangeStatusBody):
     date: datetime
+
 
 @api_router.post("/pay")
 def pay_entries(
@@ -505,8 +562,9 @@ def pay_entries(
     for entry_id in data.ids:
         assert_status_in(entry_id, ["approved"], db)
     for entry_id in data.ids:
-        crud.pay_entry(entry_id, data.date, db)
+        crud.pay_entry(entry_id, data.date.date(), db)
     return
+
 
 @api_router.post("/archive")
 def archive_entries(
@@ -520,6 +578,7 @@ def archive_entries(
         crud.archive_entry(entry_id, db)
     return
 
+
 @api_router.post("/item/{item_id}")
 def update_item(
     item_id: int,
@@ -528,6 +587,7 @@ def update_item(
     user=Depends(get_user),
 ):
     return crud.update_item(item_id, item, db)
+
 
 @api_router.post("/mileage/{mileage_id}")
 def update_mileage(
@@ -538,9 +598,11 @@ def update_mileage(
 ):
     return crud.update_mileage(mileage_id, mileage, db)
 
+
 class BookkeepingAccountBody(BaseModel):
     account: str
     is_mileage: bool
+
 
 @api_router.post("/bookkeeping/{item_or_mileage_id}")
 def update_bookkeeping(
@@ -603,18 +665,19 @@ async def logout(response: Response):
     response.delete_cookie("token")
     return {"success": True}
 
+
 @api_router.get("/config")
 async def get_config():
-    return {
-        "mileageReimbursementRate": os.environ["MILEAGE_REIMBURSEMENT_RATE"]
-    }
+    return {"mileageReimbursementRate": os.environ["MILEAGE_REIMBURSEMENT_RATE"]}
+
 
 @api_router.get("/config/admin")
 async def get_admin_config(user=Depends(get_user)):
     return {
         "mileageReimbursementRate": os.environ["MILEAGE_REIMBURSEMENT_RATE"],
         "deleteArchivedAgeLimit": os.environ["DELETE_ARCHIVED_AGE_LIMIT"],
-        "bookkeepingAccounts": bookkeeping_accounts.bookkeeping_accounts
+        "bookkeepingAccounts": bookkeeping_accounts.bookkeeping_accounts,
     }
+
 
 app.include_router(api_router)

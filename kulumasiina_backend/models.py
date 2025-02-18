@@ -2,6 +2,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, mapped_column, Mapped, DeclarativeBase
 from datetime import date, datetime
 
+
 class Base(DeclarativeBase):
     id: Mapped[int] = mapped_column(primary_key=True)
 
@@ -31,7 +32,9 @@ class Item(Base):
     entry_id: Mapped[int] = mapped_column(ForeignKey("entry.id"))
     description: Mapped[str]
     date: Mapped[date]
-    attachments: Mapped[list[Attachment]] = relationship(lazy="immediate", cascade="all, delete")
+    attachments: Mapped[list[Attachment]] = relationship(
+        lazy="immediate", cascade="all, delete"
+    )
     account: Mapped[str | None] = mapped_column(default=None)
 
 

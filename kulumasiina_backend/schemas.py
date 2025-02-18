@@ -14,29 +14,35 @@ class Attachment(AttachmentResponse):
     value_cents: int | None
     is_not_receipt: bool
 
+
 class AttachmentCreate(BaseModel):
     filename: str | None
     data: bytes
-    
+
+
 class AttachmentUpdate(BaseModel):
     id: int
     value_cents: int | None
     is_not_receipt: bool
+
 
 class ItemCreate(BaseModel):
     description: str
     date: date
     attachments: list[AttachmentUpdate]
 
+
 class Item(ItemCreate):
     model_config = ConfigDict(from_attributes=True)
     id: int
     attachments: list[AttachmentResponse]
 
+
 class ItemUpdate(BaseModel):
     description: str
     date: date
     attachments: list[AttachmentUpdate]
+
 
 class MileageCreate(BaseModel):
     description: str
@@ -49,6 +55,7 @@ class MileageCreate(BaseModel):
 class Mileage(MileageCreate):
     model_config = ConfigDict(from_attributes=True)
     id: int
+
 
 class MileageUpdate(MileageCreate):
     date: date

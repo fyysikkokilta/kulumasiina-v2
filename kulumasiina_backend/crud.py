@@ -20,8 +20,14 @@ from sqlalchemy.orm import Session, defer
 #     return db_entry
 
 
-def _get_attachments(attachments: list[schemas.AttachmentUpdate], db: Session) -> list[models.Attachment]:
-    return db.query(models.Attachment).where(models.Attachment.id.in_(attachment.id for attachment in attachments)).all()
+def _get_attachments(
+    attachments: list[schemas.AttachmentUpdate], db: Session
+) -> list[models.Attachment]:
+    return (
+        db.query(models.Attachment)
+        .where(models.Attachment.id.in_(attachment.id for attachment in attachments))
+        .all()
+    )
 
 
 def create_entry_full(entry: schemas.EntryCreate, db: Session) -> schemas.Entry:
@@ -46,22 +52,24 @@ def create_entry_full(entry: schemas.EntryCreate, db: Session) -> schemas.Entry:
     db.add(db_entry)
     db.commit()
     db.refresh(db_entry)
-    
+
     # Collect attachment updates
     attachment_updates = []
     for item in entry.items:
         for attachment in item.attachments:
-            attachment_updates.append({
-                "id": attachment.id,
-                "value_cents": attachment.value_cents,
-                "is_not_receipt": attachment.is_not_receipt,
-            })
+            attachment_updates.append(
+                {
+                    "id": attachment.id,
+                    "value_cents": attachment.value_cents,
+                    "is_not_receipt": attachment.is_not_receipt,
+                }
+            )
 
     # Perform bulk update for attachments
     if attachment_updates:
         db.bulk_update_mappings(models.Attachment, attachment_updates)
         db.commit()
-        
+
     return schemas.Entry.from_orm(db_entry)
 
 
@@ -71,7 +79,9 @@ def get_entries(db: Session) -> list[models.Entry]:
 
 def get_item_attachments(item_id: int, db: Session):
     attachments = (
-        db.query(models.Attachment.filename, models.Attachment.item_id, models.Attachment.id)
+        db.query(
+            models.Attachment.filename, models.Attachment.item_id, models.Attachment.id
+        )
         .where(models.Attachment.item_id == item_id)
         .all()
     )
@@ -80,6 +90,7 @@ def get_item_attachments(item_id: int, db: Session):
 
 def get_entry_by_id(id: int, db: Session) -> models.Entry | None:
     return db.query(models.Entry).filter(models.Entry.id == id).first()
+
 
 def get_entries_by_ids(ids: list[int], db: Session) -> list[models.Entry]:
     return db.query(models.Entry).where(models.Entry.id.in_(ids)).all()
@@ -108,6 +119,7 @@ def create_attachment(
     db.refresh(db_attachment)
     return schemas.AttachmentResponse.model_validate(db_attachment)
 
+
 def delete_attachment(id: int, db: Session):
     to_del = db.query(models.Attachment).filter(models.Attachment.id == id).first()
     db.delete(to_del)
@@ -115,7 +127,9 @@ def delete_attachment(id: int, db: Session):
 
 
 def get_attachment_data(id, db: Session):
-    return db.query(models.Attachment.data).filter(models.Attachment.id == id).first()[0]
+    return (
+        db.query(models.Attachment.data).filter(models.Attachment.id == id).first()[0]
+    )
 
 
 def delete_entry(id, db: Session):
@@ -125,13 +139,17 @@ def delete_entry(id, db: Session):
 
 
 def delete_archived_old_entries(age_limit: int, db: Session):
-    #Delete entries that have been paid and archived and are older than age_limit
+    # Delete entries that have been paid and archived and are older than age_limit
     archived_entries = db.query(models.Entry).filter(models.Entry.archived == True)
-    to_del = archived_entries.filter(models.Entry.paid_date < datetime.now() - timedelta(days = age_limit)).all()
+    to_del = archived_entries.filter(
+        models.Entry.paid_date < datetime.now() - timedelta(days=age_limit)
+    ).all()
     for entry in to_del:
         db.delete(entry)
-    #Delete entries that have been denied and archived and are older than age_limit
-    to_del = archived_entries.filter(models.Entry.rejection_date < datetime.now() - timedelta(days = age_limit)).all()
+    # Delete entries that have been denied and archived and are older than age_limit
+    to_del = archived_entries.filter(
+        models.Entry.rejection_date < datetime.now() - timedelta(days=age_limit)
+    ).all()
     for entry in to_del:
         db.delete(entry)
     db.commit()
@@ -162,7 +180,7 @@ def deny_entry(id: int, db: Session):
     db.commit()
 
 
-def pay_entry(id: int, date: datetime, db: Session):
+def pay_entry(id: int, date: date, db: Session):
     db.query(models.Entry).filter(models.Entry.id == id).update(
         {
             models.Entry.status: "paid",
@@ -172,6 +190,7 @@ def pay_entry(id: int, date: datetime, db: Session):
         }
     )
     db.commit()
+
 
 def archive_entry(id: int, db: Session):
     db.query(models.Entry).filter(models.Entry.id == id).update(
@@ -194,6 +213,7 @@ def reset_entry_status(id: int, db: Session):
     )
     db.commit()
 
+
 def update_item(id: int, item: schemas.ItemUpdate, db: Session):
     db.query(models.Item).filter(models.Item.id == id).update(
         {
@@ -201,27 +221,32 @@ def update_item(id: int, item: schemas.ItemUpdate, db: Session):
             models.Item.date: item.date,
         }
     )
-    db.query(models.Attachment).filter(models.Attachment.id.in_(attachment.id for attachment in item.attachments)).update(
+    db.query(models.Attachment).filter(
+        models.Attachment.id.in_(attachment.id for attachment in item.attachments)
+    ).update(
         {
             models.Attachment.item_id: id,
         }
     )
 
     db.commit()
-    
+
     # Collect attachment updates
     attachment_updates = []
     for attachment in item.attachments:
-        attachment_updates.append({
-            "id": attachment.id,
-            "value_cents": attachment.value_cents,
-            "is_not_receipt": attachment.is_not_receipt,
-        })
+        attachment_updates.append(
+            {
+                "id": attachment.id,
+                "value_cents": attachment.value_cents,
+                "is_not_receipt": attachment.is_not_receipt,
+            }
+        )
 
     # Perform bulk update for attachments
     if attachment_updates:
         db.bulk_update_mappings(models.Attachment, attachment_updates)
         db.commit()
+
 
 def update_mileage(id: int, mileage: schemas.MileageUpdate, db: Session):
     db.query(models.Mileage).filter(models.Mileage.id == id).update(
@@ -235,6 +260,7 @@ def update_mileage(id: int, mileage: schemas.MileageUpdate, db: Session):
     )
     db.commit()
 
+
 def update_mileage_bookkeeping(id: int, account: str, db: Session):
     db.query(models.Mileage).filter(models.Mileage.id == id).update(
         {
@@ -242,6 +268,7 @@ def update_mileage_bookkeeping(id: int, account: str, db: Session):
         }
     )
     db.commit()
+
 
 def update_item_bookkeeping(id: int, account: str, db: Session):
     db.query(models.Item).filter(models.Item.id == id).update(

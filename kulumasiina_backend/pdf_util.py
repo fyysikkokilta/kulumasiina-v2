@@ -11,10 +11,12 @@ from typing import Literal, TypedDict
 
 from PIL import Image, ImageOps
 
+
 class Attachment(TypedDict):
     data: bytes
     value_cents: int
     is_not_receipt: bool
+
 
 class Part(TypedDict):
     paivamaara: datetime.date
@@ -102,7 +104,7 @@ def generate_combined_pdf(
     piipath = "./kulumasiina_backend/assets/fii_2.svg"
 
     attachments = [liite for part in parts for liite in part["liitteet"]]
-    
+
     i = 1
     for part in parts:
         for liite in part["liitteet"]:
@@ -118,7 +120,7 @@ def generate_combined_pdf(
     y_loc = (a4_height_mm - height) / 2
 
     pdf.set_font("Lora", size=20)  # font and textsize
-    if HETU is not None: # HETU is included only in travel expenses
+    if HETU is not None:  # HETU is included only in travel expenses
         pdf.cell(text="FYYSIKKOKILTA RY - Matkakorvauslomake")
     else:
         pdf.cell(text="FYYSIKKOKILTA RY - Kulukorvauslomake")
@@ -174,7 +176,9 @@ def generate_combined_pdf(
     pdf.ln(20)
 
     # Generate table data from the data dict
-    table_data: list[tuple[str, str, str, str]] = [("Pvm","Selite", "Liitteet", "Hinta")]
+    table_data: list[tuple[str, str, str, str]] = [
+        ("Pvm", "Selite", "Liitteet", "Hinta")
+    ]
     if is_mileage:
         table_data = [("Pvm", "Selite", "Kilometrikorvaus", "Hinta")]
     for part in parts:
@@ -193,7 +197,7 @@ def generate_combined_pdf(
                     part["paivamaara"].strftime("%d.%m.%Y"),
                     part["selite"],
                     ", ".join(str(liite["numero"]) for liite in part["liitteet"]),
-                    "{:.2f} €".format(part['hinta']),
+                    "{:.2f} €".format(part["hinta"]),
                 )
             )
 
@@ -255,12 +259,14 @@ def generate_combined_pdf(
                 with BytesIO() as img_io:
                     im_width, im_height = image.size
                     ratio = im_width / im_height
-                    resized_width = round(width*ratio)
+                    resized_width = round(width * ratio)
                     resized_height = height
                     if resized_width < MIN_WIDTH:
                         resized_width = MIN_WIDTH
-                        resized_height = round(MIN_WIDTH/ratio)
-                    resized_image = image.resize((resized_width, resized_height), Image.Resampling.LANCZOS)
+                        resized_height = round(MIN_WIDTH / ratio)
+                    resized_image = image.resize(
+                        (resized_width, resized_height), Image.Resampling.LANCZOS
+                    )
                     resized_image.save(img_io, format=image.format, quality=100)
                     data = img_io.getvalue()
             new_pdf.image(
@@ -283,28 +289,30 @@ def generate_combined_pdf(
                     for img in page.images:
                         im_width, im_height = img.image.size
                         ratio = im_width / im_height
-                        resized_width = round(width*ratio)
+                        resized_width = round(width * ratio)
                         resized_height = height
                         if resized_width < MIN_WIDTH:
                             resized_width = MIN_WIDTH
-                            resized_height = round(MIN_WIDTH/ratio)
-                        new_img = img.image.resize((resized_width, resized_height), Image.Resampling.LANCZOS)
+                            resized_height = round(MIN_WIDTH / ratio)
+                        new_img = img.image.resize(
+                            (resized_width, resized_height), Image.Resampling.LANCZOS
+                        )
                         img.replace(new_img)
 
             for page in new_attachment.pages:
                 page_width = page.mediabox.width
                 page_height = page.mediabox.height
-                
+
                 if page_width > page_height:
-                    resized_width = height # Landscape
+                    resized_width = height  # Landscape
                     ratio = resized_width / page_width
                     resized_height = page_height * ratio
-                    
+
                 else:
-                    resized_height = height # Portrait
+                    resized_height = height  # Portrait
                     ratio = resized_height / page_height
                     resized_width = page_width * ratio
-                    
+
                 page.scale_to(width=resized_width, height=resized_height)
 
             io = BytesIO()
@@ -314,7 +322,9 @@ def generate_combined_pdf(
             raise ValueError("File format not supported")
 
         show_price = attachment["value_cents"] and not attachment["is_not_receipt"]
-        price_text = " : {:.2f} €".format(attachment["value_cents"]/100) if show_price else ""
+        price_text = (
+            " : {:.2f} €".format(attachment["value_cents"] / 100) if show_price else ""
+        )
         pdf_data = watermark(f"Liite {i+1}{price_text}", BytesIO(data)).getvalue()
 
         writer.append(BytesIO(pdf_data))

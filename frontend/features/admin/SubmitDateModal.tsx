@@ -19,7 +19,7 @@ export const SubmitDateModal: React.FC<{ entry_ids: number | number[] }> = ({
   const show = useAppSelector((state) => state.admin.dateModal)
 
   const handleSubmit = (values: { date: Dayjs; approvalNote: string }) => {
-    const date = values.date.utcOffset(0).startOf('day').toISOString()
+    const date = values.date.utc(true).startOf('day').toISOString()
     const note = values.approvalNote
     const promise = Array.isArray(entry_ids)
       ? approveEntries(entry_ids, date, note)
