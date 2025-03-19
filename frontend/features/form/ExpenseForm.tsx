@@ -271,18 +271,19 @@ export function ExpenseForm() {
       items,
       mileages,
     }
-    const submitResponse = await postForm(data)
-    console.log(submitResponse.data)
 
-    mainForm.resetFields()
-    expenseForm.resetFields()
-    mileageForm.resetFields()
-    setExpenseFileList([])
-    dispatch(resetForm())
-    if (submitResponse?.status !== 200) {
-      setStatus('failure')
-    } else {
+    try {
+      await postForm(data)
+
+      mainForm.resetFields()
+      expenseForm.resetFields()
+      mileageForm.resetFields()
+      setExpenseFileList([])
+      dispatch(resetForm())
       setStatus('success')
+    } catch (error) {
+      console.error(error)
+      setStatus('failure')
     }
   }
 

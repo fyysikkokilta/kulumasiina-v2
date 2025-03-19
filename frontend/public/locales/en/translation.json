@@ -37,7 +37,7 @@
         "send_another": "Send another claim"
       },
       "failure": {
-        "title": "Error",
+        "title": "Failed to submit the expense claim!",
         "sub_title": "Something went wrong. Please try again later. If the problem persists, contact the treasurer.",
         "try_again": "Try again"
       }

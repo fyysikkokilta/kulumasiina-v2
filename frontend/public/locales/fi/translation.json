@@ -37,7 +37,7 @@
         "send_another": "Lähetä toinen korvaushakemus"
       },
       "failure": {
-        "title": "Virhe",
+        "title": "Korvaushakemuksen lähettäminen epäonnistui!",
         "sub_title": "Jotain meni pieleen. Yritä lähetystä uudelleen. Jos ongelma toistuu, ota yhteyttä rahastonhoitajaan.",
         "try_again": "Yritä uudelleen"
       }
