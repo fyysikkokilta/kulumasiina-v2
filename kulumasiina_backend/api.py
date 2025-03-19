@@ -132,7 +132,7 @@ def create_access_token(username: str, expires_delta: timedelta):
     return jwt.encode(data, os.environ["JWT_SECRET"])
 
 
-@api_router.post("/entry/")
+@api_router.post("/entry")
 async def create_entry(
     entry: schemas.EntryCreate, db: Session = Depends(get_db)
 ) -> list[schemas.Entry]:
