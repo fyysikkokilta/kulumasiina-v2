@@ -227,7 +227,27 @@ async def get_attachment(
     buffer = io.BytesIO()  # BytesIO stream containing the pdf data
     background_tasks.add_task(buffer.close)
     buffer.write(crud.get_attachment_data(attachment_id, db))
-    return Response(buffer.getvalue())
+
+    data = buffer.getvalue()
+
+    # Check the file type
+    file_type = None
+    if data.startswith(b"%PDF"):
+        file_type = "application/pdf"
+    elif data.startswith(b"\x89PNG"):
+        file_type = "image/png"
+    elif data.startswith(b"\x47\x49\x46\x38"):
+        file_type = "image/gif"
+    elif data.startswith(b"\xff\xd8\xff"):
+        file_type = "image/jpeg"
+    else:
+        file_type = "application/octet-stream"
+
+    return Response(
+        data,
+        media_type=file_type,
+        headers={"Content-Disposition": "attachment"},
+    )
 
 
 def generate_parts(entry: models.Entry):
