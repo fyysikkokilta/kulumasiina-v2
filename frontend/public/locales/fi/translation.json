@@ -30,7 +30,17 @@
       "privacy_policy_text_1": "Tietosuojaseloste löytyy",
       "privacy_policy_text_link": "täältä",
       "privacy_policy_link": "https://drive.google.com/drive/u/1/folders/12VBoHzXG7vEYGul87egYQZ3QN_-CKpBa",
-      "privacy_policy_text_2": "(tällä hetkellä vain suomeksi)."
+      "privacy_policy_text_2": "(tällä hetkellä vain suomeksi).",
+      "success": {
+        "title": "Korvaushakemus lähetetty onnistuneesti!",
+        "sub_title": "Korvaushakemus on lähetetty hyväksyttäväksi. Voit nyt sulkea tämän ikkunan.",
+        "send_another": "Lähetä toinen korvaushakemus"
+      },
+      "failure": {
+        "title": "Virhe",
+        "sub_title": "Jotain meni pieleen. Yritä lähetystä uudelleen. Jos ongelma toistuu, ota yhteyttä rahastonhoitajaan.",
+        "try_again": "Yritä uudelleen"
+      }
     },
     "expense": {
       "add": "Lisää kulu",

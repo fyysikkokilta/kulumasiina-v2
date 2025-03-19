@@ -45,18 +45,47 @@ interface SuccessConfirmProps {
   onConfirm: () => void
 }
 
-const SuccessConfirm = ({ onConfirm }: SuccessConfirmProps) => (
-  <Result
-    status="success"
-    title="Successfully submitted!"
-    subTitle="Your expense report has been submitted for approval. You may now close this window."
-    extra={[
-      <Button type="primary" key="again" onClick={onConfirm}>
-        Submit a new expense report
-      </Button>,
-    ]}
-  />
-)
+const SuccessConfirm = ({ onConfirm }: SuccessConfirmProps) => {
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'form.main.success',
+  })
+
+  return (
+    <Result
+      status="success"
+      title={t('title')}
+      subTitle={t('sub_title')}
+      extra={[
+        <Button type="primary" key="again" onClick={onConfirm}>
+          {t('send_another')}
+        </Button>,
+      ]}
+    />
+  )
+}
+
+interface SubmitFailureProps {
+  onConfirm: () => void
+}
+
+const SubmitFailure = ({ onConfirm }: SubmitFailureProps) => {
+  const { t } = useTranslation('translation', {
+    keyPrefix: 'form.main.failure',
+  })
+
+  return (
+    <Result
+      status="error"
+      title={t('title')}
+      subTitle={t('sub_title')}
+      extra={[
+        <Button type="primary" key="again" onClick={onConfirm}>
+          {t('try_again')}
+        </Button>,
+      ]}
+    />
+  )
+}
 
 // interface expenseFormInterface extends Omit<addItemInterface, 'date'> {
 //   date: Dayjs,
@@ -65,8 +94,9 @@ const SuccessConfirm = ({ onConfirm }: SuccessConfirmProps) => (
 export function ExpenseForm() {
   const [modal, setModal] = useState<null | 'expense' | 'mileage'>(null)
   const [editTarget, setEditTarget] = useState<null | number>(null)
-  const [submitting, setSubmitting] = useState(false)
-  const [success, setSuccess] = useState(false)
+  const [status, setStatus] = useState<
+    null | 'submitting' | 'success' | 'failure'
+  >(null)
   const [config, setConfig] = useState({ mileageReimbursementRate: 0.25 })
   const dispatch = useAppDispatch()
   const entries = useAppSelector((state) => state.form.entries)
@@ -230,11 +260,10 @@ export function ExpenseForm() {
       console.log(err)
       return
     }
-    setSubmitting(true)
+    setStatus('submitting')
     const formData = mainForm.getFieldsValue()
     const items = entries.filter((e) => e.kind === 'item')
     const mileages = entries.filter((e) => e.kind === 'mileage')
-    // const value_cents =
     const data: postInterface = {
       ...formData,
       gov_id: hasMileages ? formData.gov_id : null,
@@ -242,17 +271,19 @@ export function ExpenseForm() {
       items,
       mileages,
     }
-    postForm(data).then((res) => {
-      console.log(res)
+    const submitResponse = await postForm(data)
+    console.log(submitResponse.data)
 
-      mainForm.resetFields()
-      expenseForm.resetFields()
-      mileageForm.resetFields()
-      setExpenseFileList([])
-      dispatch(resetForm())
-      setSubmitting(false)
-    })
-    setSuccess(true)
+    mainForm.resetFields()
+    expenseForm.resetFields()
+    mileageForm.resetFields()
+    setExpenseFileList([])
+    dispatch(resetForm())
+    if (submitResponse?.status !== 200) {
+      setStatus('failure')
+    } else {
+      setStatus('success')
+    }
   }
 
   const total = entries.reduce((acc, entry) => {
@@ -274,8 +305,11 @@ export function ExpenseForm() {
 
   console.log({ entries, total, editTarget })
 
-  if (success) {
-    return <SuccessConfirm onConfirm={() => setSuccess(false)} />
+  if (status === 'success') {
+    return <SuccessConfirm onConfirm={() => setStatus(null)} />
+  }
+  if (status === 'failure') {
+    return <SubmitFailure onConfirm={() => setStatus(null)} />
   }
   return (
     <>
@@ -418,7 +452,7 @@ export function ExpenseForm() {
             type="primary"
             htmlType="submit"
             style={{ float: 'right' }}
-            loading={submitting}
+            loading={status === 'submitting'}
             onClick={handleSubmit}
             disabled={entries.length === 0}
           >

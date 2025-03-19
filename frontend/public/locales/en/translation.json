@@ -30,7 +30,17 @@
       "privacy_policy_text_1": "The privacy policy can be found",
       "privacy_policy_text_link": "here",
       "privacy_policy_link": "https://drive.google.com/drive/u/1/folders/12VBoHzXG7vEYGul87egYQZ3QN_-CKpBa",
-      "privacy_policy_text_2": "(currently only available in Finnish)."
+      "privacy_policy_text_2": "(currently only available in Finnish).",
+      "success": {
+        "title": "Expense claim submitted successfully!",
+        "sub_title": "Your expense claim has been sent for approval. You can now close this window.",
+        "send_another": "Send another claim"
+      },
+      "failure": {
+        "title": "Error",
+        "sub_title": "Something went wrong. Please try again later. If the problem persists, contact the treasurer.",
+        "try_again": "Try again"
+      }
     },
     "expense": {
       "add": "Add an expense",
