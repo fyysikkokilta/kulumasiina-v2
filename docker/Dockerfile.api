@@ -1,4 +1,4 @@
-ARG PY_VER=3.13-alpine
+ARG PY_VER=3.13
 FROM python:${PY_VER} AS builder
 
 RUN pip install -U pip setuptools wheel && pip install pdm
