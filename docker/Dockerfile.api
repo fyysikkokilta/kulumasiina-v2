@@ -6,7 +6,7 @@ COPY pyproject.toml pdm.lock /project/
 WORKDIR /project
 RUN mkdir __pypackages__ && pdm sync --prod --no-editable
 
-FROM python:${PYTHON_VERSION}
+FROM python:3.13-slim
 ENV PYTHONPATH=/pythonpkgs
 COPY --from=builder /project/__pypackages__/*/lib /pythonpkgs
 COPY --from=builder /project/__pypackages__/*/bin/* /bin/
