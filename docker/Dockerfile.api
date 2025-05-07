@@ -1,4 +1,4 @@
-FROM python:3.13-slim AS builder
+FROM python:3.13-alpine AS builder
 
 RUN pip install -U pip setuptools wheel && pip install pdm
 
@@ -6,7 +6,7 @@ COPY pyproject.toml pdm.lock /project/
 WORKDIR /project
 RUN mkdir __pypackages__ && pdm sync --prod --no-editable
 
-FROM python:3.13-slim
+FROM python:3.13-alpine
 ENV PYTHONPATH=/pythonpkgs
 COPY --from=builder /project/__pypackages__/*/lib /pythonpkgs
 COPY --from=builder /project/__pypackages__/*/bin/* /bin/
