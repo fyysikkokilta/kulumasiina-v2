@@ -1,5 +1,4 @@
-ARG PYTHON_VERSION=3.11
-FROM python:${PYTHON_VERSION} AS builder
+FROM python:3.13-slim AS builder
 
 RUN pip install -U pip setuptools wheel && pip install pdm
 
