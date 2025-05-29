@@ -1,0 +1,26 @@
+services:
+  database:
+    image: postgres:latest
+    environment:
+      - POSTGRES_DB=$DB_NAME
+      - POSTGRES_USER=$DB_USERNAME
+      - POSTGRES_PASSWORD=$DB_PASSWORD
+    ports:
+      - '127.0.0.1:5432:5432'
+    volumes:
+      - ./data:/var/lib/postgresql/data
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - database
+    env_file:
+      - .env
+    ports:
+      - '127.0.0.1:8024:80'
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '20m'
