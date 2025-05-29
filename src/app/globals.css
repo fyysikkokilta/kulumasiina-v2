@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+.main-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.grower {
+  flex-grow: 1;
+} 
