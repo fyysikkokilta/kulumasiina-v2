@@ -10,5 +10,6 @@
     "typescript",
     "typescriptreact"
   ],
-  "eslint.codeActionsOnSave.mode": "all"
+  "eslint.codeActionsOnSave.mode": "all",
+  "postman.settings.dotenv-detection-notification-visibility": false
 }
