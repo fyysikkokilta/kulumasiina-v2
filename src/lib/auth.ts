@@ -1,5 +1,6 @@
 import { jwtVerify, SignJWT } from 'jose'
 import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 
 import { env } from './env'
 
@@ -62,7 +63,7 @@ export async function deleteSession(): Promise<void> {
 export async function requireAuth(): Promise<User> {
   const user = await getUserFromCookies()
   if (!user) {
-    throw new Error('Authentication required')
+    redirect('/')
   }
   return user
 }
