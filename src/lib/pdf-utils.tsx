@@ -398,7 +398,7 @@ const ExpensePDF = ({
           const label = `Liite ${attachment.attachmentNum}${priceText}`
 
           return attachment.data.map((pageData, pageIndex) => {
-            const imageData = `data:${getMimeType(pageData.toString('base64'))};base64,${pageData.toString('base64')}`
+            const imageData = `data:${attachment.mimeType};base64,${pageData.toString('base64')}`
 
             return (
               <Page
@@ -459,6 +459,7 @@ export async function generateCombinedPDF(
         }
         processedAttachments.push({
           ...att,
+          mimeType: 'image/jpeg',
           attachmentNum: attachmentNum++,
           data: optimizedPages
         })
