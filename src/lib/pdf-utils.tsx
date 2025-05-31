@@ -434,6 +434,8 @@ export async function generateCombinedPDF(
   paidDate: Date | null,
   rejectionDate: Date | null
 ) {
+  // @ts-expect-error: pdf.worker.min.mjs is not typed
+  await import('pdfjs-dist/build/pdf.worker.min.mjs')
   // Process images for parts, and convert PDF attachments to images
   let attachmentNum = 1
   const processedParts: ProcessedPartData[] = []
