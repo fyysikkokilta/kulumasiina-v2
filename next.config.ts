@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['antd', '@ant-design/icons', 'drizzle-orm']
   },
   transpilePackages: ['@t3-oss/env-nextjs', '@t3-oss/env-core'],
-  serverExternalPackages: ['pdf-to-png-converter'],
+  serverExternalPackages: ['pdf-to-png-converter', 'pdfjs-dist'],
   // eslint-disable-next-line @typescript-eslint/require-await
   async headers() {
     return [

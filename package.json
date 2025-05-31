@@ -38,6 +38,7 @@
     "next-intl": "^4.1.0",
     "next-safe-action": "^7.10.8",
     "pdf-to-png-converter": "^3.6.5",
+    "pdfjs-dist": "4.10.38",
     "pg": "^8.16.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
