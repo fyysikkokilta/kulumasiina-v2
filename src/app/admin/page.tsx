@@ -1,6 +1,4 @@
-import { redirect } from 'next/navigation'
-
-import { AdminEntryView } from '@/components/AdminEntryView'
+import { AdminEntryView } from '@/components/admin/AdminEntryView'
 import { Container } from '@/components/Container'
 import { requireAuth } from '@/lib/auth'
 
