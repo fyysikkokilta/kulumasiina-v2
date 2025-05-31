@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation'
 import { MiddlewareResult } from 'next-safe-action'
 
 import { requireAuth } from '../auth'
@@ -10,10 +9,6 @@ export const isAuthorizedMiddleware = async ({
     ctx?: NC | undefined
   }) => Promise<MiddlewareResult<string, NC>>
 }) => {
-  const authorized = await requireAuth()
-
-  if (!authorized) {
-    redirect('/login')
-  }
+  await requireAuth()
   return next()
 }

@@ -8,10 +8,9 @@ import { entries } from '@/lib/db/schema'
 import { generateCombinedPDF, generatePartsFromEntry } from '@/lib/pdf-utils'
 
 export async function GET(request: NextRequest) {
+  // Check authentication
+  await requireAuth()
   try {
-    // Check authentication
-    await requireAuth()
-
     const { searchParams } = new URL(request.url)
     const entryIdsParam = searchParams.get('entry_ids')
 

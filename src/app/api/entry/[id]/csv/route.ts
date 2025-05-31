@@ -8,10 +8,9 @@ import { entries } from '@/lib/db/schema'
 import { generateCombinedPDF, generatePartsFromEntry } from '@/lib/pdf-utils'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  // Check authentication
+  await requireAuth()
   try {
-    // Check authentication
-    await requireAuth()
-
     const { id } = await params
     const entryId = parseInt(id)
 
