@@ -391,7 +391,7 @@ export function AdminEntryTable({ entries }: AdminEntryTableProps) {
                               className="h-auto p-0 text-blue-600 hover:text-blue-800"
                               onClick={() =>
                                 handlePreviewAttachment(
-                                  attachment.data,
+                                  attachment.id,
                                   attachment.filename,
                                   attachment.isNotReceipt,
                                   attachment.value
@@ -494,10 +494,24 @@ export function AdminEntryTable({ entries }: AdminEntryTableProps) {
     )
   }
 
-  const handleEditItem = (item: Item & { attachments: Attachment[] }, entryId: number) => {
+  const handleEditItem = async (item: Item & { attachments: Attachment[] }, entryId: number) => {
+    // Fetch the attachments data since we don't have it loaded
+    const attachments = await Promise.all(
+      item.attachments.map(async (attachment) => ({
+        ...attachment,
+        data: await fetch(`/api/attachment/${attachment.id}`, {
+          next: {
+            revalidate: 60 * 60 * 24 // 24 hours
+          }
+        }).then((res) => res.text())
+      }))
+    )
     setEditState({
       type: 'item',
-      data: item,
+      data: {
+        ...item,
+        attachments
+      },
       entryId
     })
   }
@@ -548,17 +562,22 @@ export function AdminEntryTable({ entries }: AdminEntryTableProps) {
     })
   }
 
-  const handlePreviewAttachment = (
-    attachmentData: string,
+  const handlePreviewAttachment = async (
+    attachmentId: number,
     filename: string,
     isNotReceipt: boolean,
     value: number | null
   ) => {
+    const attachment = await fetch(`/api/attachment/${attachmentId}`, {
+      next: {
+        revalidate: 60 * 60 * 24 // 24 hours
+      }
+    }).then((res) => res.text())
     setPreviewState({
       open: true,
-      url: attachmentData,
+      url: attachment,
       title: filename,
-      isImage: isImage(attachmentData),
+      isImage: isImage(attachment),
       isNotReceipt,
       value
     })
