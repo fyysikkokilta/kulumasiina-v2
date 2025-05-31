@@ -7,7 +7,11 @@ export async function AdminEntryView() {
     with: {
       items: {
         with: {
-          attachments: true
+          attachments: {
+            columns: {
+              data: false
+            }
+          }
         }
       },
       mileages: true
