@@ -1,0 +1,32 @@
+import type { Attachment, Entry, Item, ItemWithAttachments, Mileage } from '@/lib/db/schema'
+
+export type ItemWithoutAttachmentData = Item & {
+  attachments: Omit<Attachment, 'data'>[]
+}
+
+export type PopulatedEntryWithAttachmentData = Entry & {
+  items: ItemWithoutAttachmentData[]
+  mileages: Mileage[]
+}
+
+export type EditState = {
+  entryId: number
+} & (
+  | {
+      type: 'item'
+      data: ItemWithAttachments
+    }
+  | {
+      type: 'mileage'
+      data: Mileage
+    }
+)
+
+export interface PreviewState {
+  open: boolean
+  url: string
+  title: string
+  isImage: boolean
+  isNotReceipt: boolean
+  value: number | null
+}
