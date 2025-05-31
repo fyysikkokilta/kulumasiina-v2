@@ -42,24 +42,36 @@ export function AdminEntryExpandedRow({
 }: AdminEntryExpandedRowProps) {
   const t = useTranslations('admin')
   return (
-    <div className="bg-gray-50 p-4">
-      <div className="mb-4">
-        <Typography.Text strong>{t('table.contact')}: </Typography.Text>
+    <div className="rounded border border-gray-200 bg-white p-4 shadow">
+      <div className="mb-4 flex flex-col md:flex-row md:items-center md:gap-8">
+        <Typography.Text className="text-nowrap" strong>
+          {t('table.title')}:{' '}
+        </Typography.Text>
+        <Typography.Text>{record.title}</Typography.Text>
+      </div>
+      <div className="mb-4 flex flex-col md:flex-row md:items-center md:gap-8">
+        <Typography.Text className="text-nowrap" strong>
+          {t('table.contact')}:{' '}
+        </Typography.Text>
         <Typography.Text>{record.contact}</Typography.Text>
       </div>
 
-      <div className="mb-4">
-        <Typography.Text strong>{t('table.iban')}: </Typography.Text>
+      <div className="mb-4 flex flex-col md:flex-row md:items-center md:gap-8">
+        <Typography.Text className="text-nowrap" strong>
+          {t('table.iban')}:{' '}
+        </Typography.Text>
         <Typography.Text>{record.iban}</Typography.Text>
       </div>
 
       {record.items.length > 0 && (
         <div className="mb-4">
-          <Typography.Text strong>{t('table.items')}:</Typography.Text>
+          <Typography.Text className="text-nowrap" strong>
+            {t('table.items')}:
+          </Typography.Text>
           {record.items.map((item) => (
-            <div key={item.id} className="mt-2 ml-4 rounded bg-white p-2">
+            <div key={item.id} className="mt-2 ml-4 rounded border border-gray-100 bg-gray-50 p-2">
               <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <Typography.Text className="text-gray-600">
                     {dayjs(item.date).format('DD.MM.YYYY')} -{' '}
                     {item.attachments
@@ -72,7 +84,7 @@ export function AdminEntryExpandedRow({
                       .toFixed(2)}{' '}
                     €
                   </Typography.Text>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <Select
                       size="small"
                       value={item.account || undefined}
@@ -103,13 +115,16 @@ export function AdminEntryExpandedRow({
                   {t('table.description')}: {item.description}
                 </Typography.Text>
                 {item.attachments.length > 0 && (
-                  <div className="mt-2">
-                    <Typography.Text className="text-sm text-gray-600">
+                  <div className="mt-2 flex items-start gap-2">
+                    <Typography.Text className="text-sm whitespace-nowrap text-gray-600">
                       {t('table.attachments')}:
                     </Typography.Text>
-                    <div className="mt-1 flex flex-col gap-1">
+                    <div className="flex flex-wrap gap-3">
                       {item.attachments.map((attachment) => (
-                        <div key={attachment.id} className="flex items-center gap-2">
+                        <div
+                          key={attachment.id}
+                          className="flex items-center gap-2 whitespace-nowrap"
+                        >
                           <Button
                             type="link"
                             size="small"
@@ -143,16 +158,21 @@ export function AdminEntryExpandedRow({
 
       {record.mileages.length > 0 && (
         <div className="mb-4">
-          <Typography.Text strong>{t('table.mileages')}:</Typography.Text>
+          <Typography.Text className="text-nowrap" strong>
+            {t('table.mileages')}:
+          </Typography.Text>
           {record.mileages.map((mileage) => (
-            <div key={mileage.id} className="mt-2 ml-4 rounded bg-white p-2">
+            <div
+              key={mileage.id}
+              className="mt-2 ml-4 rounded border border-gray-100 bg-gray-50 p-2"
+            >
               <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <Typography.Text className="text-gray-600">
                     {dayjs(mileage.date).format('DD.MM.YYYY')} - {mileage.distance} km -{' '}
                     {(mileage.distance * env.NEXT_PUBLIC_MILEAGE_REIMBURSEMENT_RATE).toFixed(2)} €
                   </Typography.Text>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <Select
                       size="small"
                       value={mileage.account || undefined}

@@ -129,7 +129,7 @@
       "plate_number": "Rekisterinumero"
     },
     "status": {
-      "submitted": "VASTANOTETTU",
+      "submitted": "VASTAANOTETTU",
       "approved": "HYVÄKSYTTY",
       "paid": "MAKSETTU",
       "denied": "HYLÄTTY",

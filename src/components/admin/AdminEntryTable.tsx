@@ -125,32 +125,38 @@ export function AdminEntryTable({ entries }: AdminEntryTableProps) {
         </Space>
       </div>
 
-      <Table
-        rowSelection={rowSelection}
-        columns={columns}
-        dataSource={tableData}
-        expandable={{
-          expandedRowRender: (record: PopulatedEntryWithAttachmentData) => (
-            <AdminEntryExpandedRow
-              record={record}
-              handleAccountUpdate={handleAccountUpdate}
-              handleEditItem={handleEditItem}
-              handleEditMileage={handleEditMileage}
-              handleArchive={handleArchive}
-              handleApprove={handleApprove}
-              handleDeny={handleDeny}
-              handlePay={handlePay}
-              handleReset={handleReset}
-              handlePreviewAttachment={handlePreviewAttachment}
-            />
-          )
-        }}
-        pagination={{
-          pageSize: 20,
-          showSizeChanger: true,
-          showQuickJumper: true
-        }}
-      />
+      <div
+        className="overflow-x-auto rounded bg-white p-2 shadow"
+        style={{ scrollbarGutter: 'stable' }}
+      >
+        <Table
+          rowSelection={rowSelection}
+          columns={columns}
+          dataSource={tableData}
+          expandable={{
+            expandedRowRender: (record: PopulatedEntryWithAttachmentData) => (
+              <AdminEntryExpandedRow
+                record={record}
+                handleAccountUpdate={handleAccountUpdate}
+                handleEditItem={handleEditItem}
+                handleEditMileage={handleEditMileage}
+                handleArchive={handleArchive}
+                handleApprove={handleApprove}
+                handleDeny={handleDeny}
+                handlePay={handlePay}
+                handleReset={handleReset}
+                handlePreviewAttachment={handlePreviewAttachment}
+              />
+            )
+          }}
+          pagination={{
+            pageSize: 20,
+            showSizeChanger: true,
+            showQuickJumper: true
+          }}
+          style={{ minWidth: 900 }}
+        />
+      </div>
 
       <AdminEntryModals
         approveModalVisible={approveModalVisible}

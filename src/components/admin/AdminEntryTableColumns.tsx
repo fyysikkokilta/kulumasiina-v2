@@ -19,7 +19,8 @@ export function getAdminEntryTableColumns(
       dataIndex: 'id',
       key: 'id',
       sorter: (a, b) => a.id - b.id,
-      defaultSortOrder: 'descend'
+      defaultSortOrder: 'descend',
+      width: 70
     },
     {
       title: t('table.date'),
@@ -57,7 +58,8 @@ export function getAdminEntryTableColumns(
         const date = new Date(record.submissionDate)
         const dates = value as unknown as [string, string]
         return date >= new Date(dates[0]) && date <= new Date(dates[1])
-      }
+      },
+      width: 120
     },
     {
       title: t('table.name'),
@@ -68,18 +70,22 @@ export function getAdminEntryTableColumns(
         text: name,
         value: name
       })),
-      onFilter: (value, record) => record.name === value
+      onFilter: (value, record) => record.name === value,
+      width: 180
     },
     {
       title: t('table.title'),
       dataIndex: 'title',
-      key: 'title'
+      key: 'title',
+      render: (title: string) => (title.length > 24 ? title.slice(0, 24) + '…' : title),
+      width: 220
     },
     {
       title: t('table.total'),
       dataIndex: 'total',
       key: 'total',
-      render: (total: number) => `${total.toFixed(2)} €`
+      render: (total: number) => `${total.toFixed(2)} €`,
+      width: 110
     },
     {
       title: t('table.status'),
@@ -92,7 +98,8 @@ export function getAdminEntryTableColumns(
         { text: t('filter.paid'), value: 'paid' },
         { text: t('filter.denied'), value: 'denied' }
       ],
-      onFilter: (value, record) => record.status === value
+      onFilter: (value, record) => record.status === value,
+      width: 120
     },
     {
       title: t('table.archived'),
@@ -108,7 +115,8 @@ export function getAdminEntryTableColumns(
         { text: t('status.active'), value: false }
       ],
       onFilter: (value, record) => record.archived === value,
-      defaultFilteredValue: [false]
+      defaultFilteredValue: [false],
+      width: 110
     },
     {
       title: t('table.actions'),
@@ -124,7 +132,8 @@ export function getAdminEntryTableColumns(
             </Button>
           )}
         </Space>
-      )
+      ),
+      width: 140
     }
   ]
   return columns
