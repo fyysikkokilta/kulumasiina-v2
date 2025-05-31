@@ -14,6 +14,7 @@ import { resetEntriesAction } from '@/lib/actions/resetEntries'
 import { updateBookkeepingAccountAction } from '@/lib/actions/updateBookkeepingAccount'
 import { updateItemAction } from '@/lib/actions/updateItem'
 import { updateMileageAction } from '@/lib/actions/updateMileage'
+import { bookkeepingAccounts } from '@/lib/bookkeeping-accounts'
 import type {
   ItemWithAttachments,
   Mileage,
@@ -321,6 +322,30 @@ export function useAdminEntryTableState(entries: PopulatedEntryWithAttachmentDat
     window.open(url)
   }
 
+  const handleCopyClipboardText = () => {
+    const clipboardText = tableData
+      .filter((entry) => selectedRowKeys.includes(entry.id))
+      .map((entry) => {
+        const accounts = entry.items
+          .map((item) => item.account)
+          .concat(entry.mileages.map((mileage) => mileage.account))
+        const uniqueAccounts = accounts
+          .filter((value, index, self) => self.indexOf(value) === index && value)
+          .map((account) => bookkeepingAccounts.find((a) => a.value === account)?.label)
+          .sort()
+          .join(', ')
+        if (entry.mileages.length > 0) {
+          const totalDistance = entry.mileages.reduce((acc, mileage) => acc + mileage.distance, 0)
+          return `${entry.name}, ${
+            entry.title
+          } (${totalDistance} km); ${entry.total.toFixed(2)} € (${uniqueAccounts})`
+        }
+        return `${entry.name}, ${entry.title}; ${entry.total.toFixed(2)} € (${uniqueAccounts})`
+      })
+      .join('\n')
+    void navigator.clipboard.writeText(clipboardText)
+  }
+
   // Get the status of selected entries to determine which actions are available
   const selectedEntries = tableData.filter((entry) => selectedRowKeys.includes(entry.key))
   const selectedStatuses = [...new Set(selectedEntries.map((entry) => entry.status))]
@@ -372,6 +397,7 @@ export function useAdminEntryTableState(entries: PopulatedEntryWithAttachmentDat
     handleArchive,
     handleReset,
     handleMultiZipDownload,
+    handleCopyClipboardText,
     allSelectedPaid,
     allSelectedSubmitted,
     allSelectedApproved,
