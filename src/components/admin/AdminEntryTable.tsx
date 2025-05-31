@@ -46,6 +46,7 @@ export function AdminEntryTable({ entries }: AdminEntryTableProps) {
     handleArchive,
     handleReset,
     handleMultiZipDownload,
+    handleCopyClipboardText,
     allSelectedPaid,
     allSelectedSubmitted,
     allSelectedApproved,
@@ -120,6 +121,11 @@ export function AdminEntryTable({ entries }: AdminEntryTableProps) {
           {toBeDeleted > 0 && (
             <Button danger onClick={() => setDeleteOldArchivedModalVisible(true)}>
               {t('bulk_actions.remove_old_archived')} ({toBeDeleted})
+            </Button>
+          )}
+          {selectedRowKeys.length > 0 && (
+            <Button onClick={handleCopyClipboardText}>
+              {t('bulk_actions.copy_clipboard_text')} ({selectedRowKeys.length})
             </Button>
           )}
         </Space>

@@ -167,7 +167,8 @@
       "reset_selected": "Reset Selected",
       "archive_selected": "Archive Selected",
       "download_zip": "Download ZIP",
-      "remove_old_archived": "Remove Old Archived Entries"
+      "remove_old_archived": "Remove Old Archived Entries",
+      "copy_clipboard_text": "Copy to clipboard"
     },
     "messages": {
       "entries_approved": "Entries approved successfully",

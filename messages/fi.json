@@ -167,7 +167,8 @@
       "reset_selected": "Nollaa valitut",
       "archive_selected": "Arkistoi valitut",
       "download_zip": "Lataa ZIP",
-      "remove_old_archived": "Poista vanhat arkistoidut hakemukset"
+      "remove_old_archived": "Poista vanhat arkistoidut hakemukset",
+      "copy_clipboard_text": "Kopioi leikepöydälle"
     },
     "messages": {
       "entries_approved": "Hakemukset hyväksytty onnistuneesti",
