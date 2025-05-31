@@ -45,7 +45,7 @@ export function useItemForm(form: FormInstance<ItemFormData>) {
 
   // Handle file list change
   const handleChange = useCallback<NonNullable<UploadProps['onChange']>>(async (info) => {
-    if (!isSupportedFile(info.file.name)) {
+    if (!isSupportedFile(info.file.type || '')) {
       return
     }
 
@@ -93,7 +93,7 @@ export function useItemForm(form: FormInstance<ItemFormData>) {
 
   // Before upload handler
   const beforeUpload = useCallback(async (file: RcFile) => {
-    if (!isSupportedFile(file.name)) {
+    if (!isSupportedFile(file.type)) {
       return false
     }
 
@@ -122,7 +122,7 @@ export function useItemForm(form: FormInstance<ItemFormData>) {
     (editData: Omit<ItemWithAttachments | NewItemWithAttachments, 'entryId'>) => {
       try {
         const files = editData.attachments.map((attachment) => {
-          const mimeType = getMimeType(attachment.filename)
+          const mimeType = getMimeType(attachment.data)
           return {
             uid: attachment.filename,
             name: attachment.filename,
