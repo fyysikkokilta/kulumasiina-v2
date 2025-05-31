@@ -37,6 +37,7 @@
     "next": "^15.3.2",
     "next-intl": "^4.1.0",
     "next-safe-action": "^7.10.8",
+    "pdf-lib": "^1.17.1",
     "pdf-to-png-converter": "^3.6.5",
     "pdfjs-dist": "4.10.38",
     "pg": "^8.16.0",

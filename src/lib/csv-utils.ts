@@ -1,4 +1,5 @@
 import archiver from 'archiver'
+import { PDFDocument } from 'pdf-lib'
 
 import type { Attachment, Entry, Item, Mileage } from './db/schema'
 import { env } from './env'
@@ -45,7 +46,7 @@ export function removeAllWhitespace(str: string): string {
   return str.replace(/\s/g, '')
 }
 
-export function mergeCsvInfos(csvInfos: CsvInfo[]): CsvInfo[] {
+export async function mergeCsvInfos(csvInfos: CsvInfo[]) {
   const mergedCsvInfos: CsvInfo[] = []
 
   for (const csvInfo of csvInfos) {
@@ -57,8 +58,30 @@ export function mergeCsvInfos(csvInfos: CsvInfo[]): CsvInfo[] {
 
       if (sameIban && sameGovId) {
         mergedCsvInfo.rows.push(...csvInfo.rows)
-        // Remove pdf from merged_csv_info, zip can have only one pdf per entry
-        mergedCsvInfo.pdf = null
+
+        // Merge PDFs
+        if (csvInfo.pdf) {
+          if (mergedCsvInfo.pdf) {
+            const pdf1 = await PDFDocument.load(mergedCsvInfo.pdf.data)
+            const pdf2 = await PDFDocument.load(csvInfo.pdf.data)
+
+            const pdf2Pages = await pdf1.copyPages(pdf2, pdf2.getPageIndices())
+
+            for (const page of pdf2Pages) {
+              pdf1.addPage(page)
+            }
+
+            const entries = [mergedCsvInfo.entryId, csvInfo.entryId].sort().join('-')
+            const pdfBytes = await pdf1.save()
+
+            mergedCsvInfo.pdf = {
+              filename: `${mergedCsvInfo.name}-${entries}.pdf`,
+              data: Buffer.from(pdfBytes)
+            }
+          } else {
+            mergedCsvInfo.pdf = csvInfo.pdf
+          }
+        }
         mergedCsvInfo.submissionDate = new Date(
           Math.min(mergedCsvInfo.submissionDate.getTime(), csvInfo.submissionDate.getTime())
         )
@@ -75,13 +98,11 @@ export function mergeCsvInfos(csvInfos: CsvInfo[]): CsvInfo[] {
   return mergedCsvInfos
 }
 
-export async function generateCsv(
-  csvInfos: CsvInfo[]
-): Promise<{ filename: string; data: Buffer }> {
+export async function generateCsv(csvInfos: CsvInfo[]) {
   const lines: string[] = []
 
   // Merge CSV infos with the same IBAN and HETU
-  const mergedCsvInfos = mergeCsvInfos(csvInfos)
+  const mergedCsvInfos = await mergeCsvInfos(csvInfos)
 
   for (const csvInfo of mergedCsvInfos) {
     const { entryId, name, iban, govId, submissionDate, rows, pdf } = csvInfo
@@ -254,11 +275,11 @@ export async function generateCsv(
 
   // Create ZIP file with CSV and PDFs
   const archiveName = csvInfos.length === 1 ? documentName : multiName
-  const zipData = await createZipArchive(
+  const zipData = (await createZipArchive(
     csvContent,
     multiName,
     mergedCsvInfos.filter((info) => info.pdf)
-  )
+  )) as Buffer
 
   return {
     filename: `${archiveName}.zip`,
@@ -266,11 +287,7 @@ export async function generateCsv(
   }
 }
 
-function createZipArchive(
-  csvContent: string,
-  csvFilename: string,
-  pdfInfos: CsvInfo[]
-): Promise<Buffer> {
+function createZipArchive(csvContent: string, csvFilename: string, pdfInfos: CsvInfo[]) {
   return new Promise((resolve, reject) => {
     const archive = archiver('zip', { zlib: { level: 9 } })
     const chunks: Buffer[] = []
@@ -299,7 +316,7 @@ export function generateCsvInfoFromEntry(
     mileages: Mileage[]
   },
   pdf?: { filename: string; data: Buffer }
-): CsvInfo {
+) {
   const rows: CsvRow[] = []
 
   // Add items
