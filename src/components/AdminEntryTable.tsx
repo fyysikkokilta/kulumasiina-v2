@@ -558,7 +558,7 @@ export function AdminEntryTable({ entries }: AdminEntryTableProps) {
       open: true,
       url: attachmentData,
       title: filename,
-      isImage: isImage(filename),
+      isImage: isImage(attachmentData),
       isNotReceipt,
       value
     })

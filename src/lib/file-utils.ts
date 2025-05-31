@@ -1,34 +1,16 @@
-export const getMimeType = (filename: string) => {
-  const extension = filename.split('.').pop()?.toLowerCase()
-  switch (extension) {
-    case 'pdf':
-      return 'application/pdf'
-    case 'jpg':
-      return 'image/jpeg'
-    case 'jpeg':
-      return 'image/jpeg'
-    case 'png':
-      return 'image/png'
-    default:
-      return 'application/octet-stream'
-  }
+export const getMimeType = (data: string) => {
+  return data.split(';')[0].split(':')[1]
 }
 
-export const supportedFileMimeTypes = ['application/pdf', 'image/jpeg', 'image/png']
+export const SUPPORTED_FILE_MIME_TYPES = ['application/pdf', 'image/jpeg', 'image/png']
 
-export const isSupportedFile = (filename: string) => {
-  const mimeType = getMimeType(filename)
-  return supportedFileMimeTypes.includes(mimeType)
+export const isSupportedFile = (mimeType: string) => {
+  return SUPPORTED_FILE_MIME_TYPES.includes(mimeType)
 }
 
-export const isImage = (filename: string) => {
-  const mimeType = getMimeType(filename)
+export const isImage = (data: string) => {
+  const mimeType = getMimeType(data)
   return mimeType.startsWith('image/')
-}
-
-export const getFileExtension = (filename: string) => {
-  const extension = filename.split('.').pop()?.toLowerCase()
-  return extension || ''
 }
 
 export const getBase64Data = (base64: string) => {

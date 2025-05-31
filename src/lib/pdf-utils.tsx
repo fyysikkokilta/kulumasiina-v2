@@ -5,12 +5,13 @@ import { pdfToPng } from 'pdf-to-png-converter'
 import React from 'react'
 import sharp from 'sharp'
 
-import type { Attachment, Entry, Item, Mileage } from './db/schema'
+import type { EntryWithItemsAndMileages } from './db/schema'
 import { env } from './env'
-import { getBase64Data, getFileExtension, getMimeType } from './file-utils'
+import { getBase64Data, getMimeType } from './file-utils'
 
 interface AttachmentData {
   data: Buffer
+  mimeType: string
   value: number | null
   isNotReceipt: boolean
   filename: string | null
@@ -18,6 +19,7 @@ interface AttachmentData {
 
 interface ProcessedAttachmentData {
   data: Buffer[]
+  mimeType: string
   value: number | null
   isNotReceipt: boolean
   filename: string | null
@@ -396,7 +398,7 @@ const ExpensePDF = ({
           const label = `Liite ${attachment.attachmentNum}${priceText}`
 
           return attachment.data.map((pageData, pageIndex) => {
-            const imageData = `data:${getMimeType(attachment.filename || '')};base64,${pageData.toString('base64')}`
+            const imageData = `data:${getMimeType(pageData.toString('base64'))};base64,${pageData.toString('base64')}`
 
             return (
               <Page
@@ -438,11 +440,10 @@ export async function generateCombinedPDF(
   for (const part of parts) {
     const processedAttachments: ProcessedAttachmentData[] = []
     for (const att of part.attachments) {
-      const ext = getFileExtension(att.filename || '')
       if (Array.isArray(att.data)) {
         throw new Error('Attachment data is an array, but expected a single buffer')
       }
-      if (att.data && ext === 'pdf') {
+      if (att.data && att.mimeType === 'application/pdf') {
         // Convert PDF to images
         const pages = await pdfToPng(att.data, {
           viewportScale: 1.5
@@ -457,12 +458,11 @@ export async function generateCombinedPDF(
         processedAttachments.push({
           ...att,
           attachmentNum: attachmentNum++,
-          filename: `${att.filename?.replace(/\.pdf$/i, '')}.png`,
           data: optimizedPages
         })
         continue
       }
-      if (att.data && ['png', 'jpg', 'jpeg'].includes(ext)) {
+      if (att.data && ['image/png', 'image/jpeg'].includes(att.mimeType)) {
         processedAttachments.push({
           ...att,
           attachmentNum: attachmentNum++,
@@ -525,18 +525,14 @@ export function formatCurrency(amount: number): string {
   return amount.toFixed(2).replace('.', ',')
 }
 
-export function generatePartsFromEntry(
-  entry: Entry & {
-    items: (Item & { attachments: Attachment[] })[]
-    mileages: Mileage[]
-  }
-) {
+export function generatePartsFromEntry(entry: EntryWithItemsAndMileages) {
   const parts: PartData[] = []
 
   // Add items
   for (const item of entry.items) {
     const attachments: AttachmentData[] = item.attachments.map((att) => ({
       data: Buffer.from(getBase64Data(att.data), 'base64'),
+      mimeType: getMimeType(att.data),
       value: att.value,
       isNotReceipt: att.isNotReceipt ?? false,
       filename: att.filename
