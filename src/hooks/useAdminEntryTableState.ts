@@ -8,6 +8,7 @@ import {
   ItemWithoutAttachmentData,
   PopulatedEntryWithAttachmentData
 } from '@/components/admin/admin-types'
+import { EditState, PreviewState } from '@/components/admin/admin-types'
 import { archiveEntriesAction } from '@/lib/actions/archiveEntries'
 import { denyEntriesAction } from '@/lib/actions/denyEntries'
 import { resetEntriesAction } from '@/lib/actions/resetEntries'
@@ -15,36 +16,8 @@ import { updateBookkeepingAccountAction } from '@/lib/actions/updateBookkeepingA
 import { updateItemAction } from '@/lib/actions/updateItem'
 import { updateMileageAction } from '@/lib/actions/updateMileage'
 import { bookkeepingAccounts } from '@/lib/bookkeeping-accounts'
-import type {
-  ItemWithAttachments,
-  Mileage,
-  NewItemWithAttachments,
-  NewMileage
-} from '@/lib/db/schema'
+import type { Mileage, NewItemWithAttachments, NewMileage } from '@/lib/db/schema'
 import { env } from '@/lib/env'
-import { isImage } from '@/lib/file-utils'
-
-export type EditState = {
-  entryId: number
-} & (
-  | {
-      type: 'item'
-      data: ItemWithAttachments
-    }
-  | {
-      type: 'mileage'
-      data: Mileage
-    }
-)
-
-export interface PreviewState {
-  open: boolean
-  url: string
-  title: string
-  isImage: boolean
-  isNotReceipt: boolean
-  value: number | null
-}
 
 export function useAdminEntryTableState(entries: PopulatedEntryWithAttachmentData[]) {
   const t = useTranslations('admin')
@@ -194,7 +167,7 @@ export function useAdminEntryTableState(entries: PopulatedEntryWithAttachmentDat
     const attachments = await Promise.all(
       item.attachments.map(async (attachment) => ({
         ...attachment,
-        data: await fetch(`/api/attachment/${attachment.id}`, {
+        data: await fetch(`/api/attachment/${attachment.fileId}`, {
           next: {
             revalidate: 60 * 60 * 24 // 24 hours
           }
@@ -258,21 +231,24 @@ export function useAdminEntryTableState(entries: PopulatedEntryWithAttachmentDat
   }
 
   const handlePreviewAttachment = async (
-    attachmentId: number,
+    fileId: string,
     filename: string,
     isNotReceipt: boolean,
     value: number | null
   ) => {
-    const attachment = await fetch(`/api/attachment/${attachmentId}`, {
+    const res = await fetch(`/api/attachment/${fileId}`, {
       next: {
         revalidate: 60 * 60 * 24 // 24 hours
       }
-    }).then((res) => res.text())
+    })
+    const attachment = await res.blob()
+    const mimeType = res.headers.get('content-type')
+    const url = URL.createObjectURL(attachment)
     setPreviewState({
       open: true,
-      url: attachment,
+      url,
       title: filename,
-      isImage: isImage(attachment),
+      isImage: mimeType?.startsWith('image/') ?? false,
       isNotReceipt,
       value
     })

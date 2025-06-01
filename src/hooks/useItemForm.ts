@@ -1,71 +1,92 @@
 import type { FormInstance } from 'antd'
+import { message } from 'antd'
 import type { RcFile } from 'antd/es/upload'
 import type { UploadFile, UploadProps } from 'antd/es/upload/interface'
 import imageCompression from 'browser-image-compression'
 import dayjs from 'dayjs'
+import type { UploadRequestOption } from 'rc-upload/lib/interface'
 import { useCallback, useState } from 'react'
 
 import type { ItemFormData } from '@/components/ItemForm'
 import type { ItemWithAttachments, NewItemWithAttachments } from '@/lib/db/schema'
-import { getMimeType, isSupportedFile } from '@/lib/file-utils'
 
 interface PreviewState {
   open: boolean
-  image: string
+  url: string
   title: string
+  isImage: boolean
 }
-
-const getBase64 = (file: RcFile): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.readAsDataURL(file)
-    reader.onload = () => resolve(reader.result as string)
-    reader.onerror = () => reject(new Error('Failed to read file'))
-  })
 
 export function useItemForm(form: FormInstance<ItemFormData>) {
   const [fileList, setFileList] = useState<UploadFile[]>([])
   const [previewState, setPreviewState] = useState<PreviewState>({
     open: false,
-    image: '',
-    title: ''
+    url: '',
+    title: '',
+    isImage: false
   })
+
+  // Custom upload handler for Ant Design Upload
+  const customRequest = async (options: UploadRequestOption) => {
+    const { file, filename, onSuccess, onError } = options
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('filename', filename || '')
+    try {
+      const res = await fetch('/api/attachment', {
+        method: 'POST',
+        body: formData
+      })
+      if (!res.ok) throw new Error('Upload failed')
+      const data = (await res.json()) as { fileId: string; filename: string }
+      if (onSuccess) {
+        onSuccess({ fileId: data.fileId, filename: data.filename }, file)
+      }
+    } catch (err) {
+      message.error('File upload failed')
+      if (onError) {
+        onError(err as Error)
+      }
+    }
+  }
 
   // Handle preview
   const handlePreview = useCallback(async (file: UploadFile) => {
     if (!file.url && !file.preview) {
-      file.preview = await getBase64(file.originFileObj as RcFile)
+      // For preview, use the download API
+      file.url = `/api/attachment/${file.uid}`
     }
+    const res = await fetch(`/api/attachment/${file.uid}`, {
+      next: {
+        revalidate: 60 * 60 * 24 // 24 hours
+      }
+    })
+    const attachment = await res.blob()
+    const mimeType = res.headers.get('content-type')
+    const url = URL.createObjectURL(attachment)
     setPreviewState({
       open: true,
-      image: file.url || (file.preview as string),
-      title: file.name || file.url!.substring(file.url!.lastIndexOf('/') + 1)
+      url,
+      title: file.name,
+      isImage: mimeType?.startsWith('image/') ?? false
     })
   }, [])
 
   // Handle file list change
-  const handleChange = useCallback<NonNullable<UploadProps['onChange']>>(async (info) => {
-    if (!isSupportedFile(info.file.type || '')) {
-      return
-    }
-
-    const newFileList = [...info.fileList]
-
-    const uniqueSet = new Set(newFileList.map((f) => f.name))
-
-    if (uniqueSet.size !== newFileList.length) {
-      return
-    }
-
-    // Convert new files to base64
-    for (const file of newFileList) {
-      if (file.originFileObj && !file.preview) {
-        file.preview = await getBase64(file.originFileObj)
-        file.status = 'done'
+  const handleChange = useCallback<NonNullable<UploadProps['onChange']>>((info) => {
+    // Patch fileList to store fileId in uid and for preview/download
+    const patchedList = info.fileList.map((file) => {
+      const response = file.response as { fileId?: string } | undefined
+      if (response?.fileId) {
+        return {
+          ...file,
+          uid: response.fileId,
+          url: `/api/attachment/${response.fileId}`
+        }
       }
-    }
-
-    setFileList(newFileList)
+      return file
+    })
+    setFileList(patchedList)
   }, [])
 
   // Handle file removal
@@ -93,22 +114,18 @@ export function useItemForm(form: FormInstance<ItemFormData>) {
 
   // Before upload handler
   const beforeUpload = useCallback(async (file: RcFile) => {
-    if (!isSupportedFile(file.type)) {
-      return false
-    }
-
     if (file.size > 4 * 1024 * 1024) {
       if (file.type === 'application/pdf') {
         return false
       }
-      // Compress large image files
-      const options = {
-        maxSizeMB: 4,
-        maxWidthOrHeight: 1920,
-        useWebWorker: true
-      }
+
       try {
-        return await imageCompression(file, options)
+        // Compress large image files
+        return await imageCompression(file, {
+          maxSizeMB: 4,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true
+        })
       } catch (error) {
         console.error('Failed to compress image:', error)
         return false
@@ -122,14 +139,15 @@ export function useItemForm(form: FormInstance<ItemFormData>) {
     (editData: Omit<ItemWithAttachments | NewItemWithAttachments, 'entryId'>) => {
       try {
         const files = editData.attachments.map((attachment) => {
-          const mimeType = getMimeType(attachment.data)
+          const id = attachment.fileId
+          const ext = attachment.filename.split('.').pop()
           return {
-            uid: attachment.filename,
+            uid: id,
             name: attachment.filename,
             status: 'done' as const,
-            preview: attachment.data,
-            type: mimeType,
-            thumbUrl: attachment.data
+            url: `/api/attachment/${id}`,
+            type: ext === 'pdf' ? 'application/pdf' : 'image/webp',
+            thumbUrl: undefined
           }
         })
 
@@ -162,43 +180,34 @@ export function useItemForm(form: FormInstance<ItemFormData>) {
   // Save item
   const saveItem = useCallback(async () => {
     try {
-      // First validate basic form fields
       await form.validateFields()
       const values = form.getFieldsValue()
-
-      // Check if there are any attachments
       if (fileList.length === 0) {
         return null
       }
-
-      // Check if at least one attachment has a value
       const hasAtLeastOneValue = fileList.some((file) => {
         const isNotReceipt = values.isNotReceiptValues?.[file.name]
         const hasValue = values.valueValues?.[file.name]
         return !isNotReceipt && hasValue
       })
-
       if (!hasAtLeastOneValue) {
         return null
       }
-
       const attachments = fileList.map((file) => {
         const shouldHaveValue = !values.isNotReceiptValues?.[file.name]
         return {
-          filename: file.name,
-          data: file.preview as string,
+          fileId: file.uid, // random filename for storage
+          filename: file.name, // original filename for display
           value: shouldHaveValue ? values.valueValues?.[file.name] : null,
           isNotReceipt: values.isNotReceiptValues?.[file.name] || false
         }
       })
-
       const itemData = {
         description: values.description,
         date: values.date.toDate(),
         account: values.account || null,
         attachments
       }
-
       return itemData
     } catch (error) {
       console.error('Form validation failed:', error)
@@ -210,7 +219,7 @@ export function useItemForm(form: FormInstance<ItemFormData>) {
   const handleCancel = useCallback(() => {
     form.resetFields()
     setFileList([])
-    setPreviewState({ open: false, image: '', title: '' })
+    setPreviewState({ open: false, url: '', title: '', isImage: false })
   }, [form])
 
   // Close preview
@@ -225,6 +234,7 @@ export function useItemForm(form: FormInstance<ItemFormData>) {
     handleChange,
     handleRemove,
     beforeUpload,
+    customRequest,
     handleCancel,
     closePreview,
     prepareEditState,

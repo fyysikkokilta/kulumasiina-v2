@@ -11,7 +11,6 @@ const nextConfig: NextConfig = {
     reactCompiler: true,
     useCache: true,
     serverActions: {
-      bodySizeLimit: '10mb',
       allowedOrigins: ['localhost:8010', 'localhost:3000', env.BASE_URL.replace(/^https?:\/\//, '')]
     },
     optimizePackageImports: ['antd', '@ant-design/icons', 'drizzle-orm']

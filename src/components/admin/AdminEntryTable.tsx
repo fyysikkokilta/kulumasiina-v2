@@ -1,7 +1,6 @@
 'use client'
 
 import { Button, Space, Table, Tag, Typography } from 'antd'
-import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { useAdminEntryTableState } from '../../hooks/useAdminEntryTableState'

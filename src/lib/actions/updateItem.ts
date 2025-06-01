@@ -16,8 +16,8 @@ const ItemUpdateSchema = z.object({
   account: z.string(),
   attachments: z.array(
     z.object({
+      fileId: z.string(),
       filename: z.string(),
-      data: z.string(),
       value: z
         .number()
         .nullable()
@@ -45,7 +45,10 @@ export const updateItemAction = actionClient
       await tx.insert(attachments).values(
         attachmentUpdates.map((attachment) => ({
           itemId: id,
-          ...attachment,
+          fileId: attachment.fileId,
+          filename: attachment.filename,
+          value: attachment.value,
+          isNotReceipt: attachment.isNotReceipt,
           createdAt: now,
           updatedAt: now
         }))

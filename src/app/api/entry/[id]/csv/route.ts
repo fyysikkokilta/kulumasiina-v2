@@ -44,7 +44,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     // Generate PDF if entry is paid
     let pdf: { filename: string; data: Buffer } | undefined
     if (entry.status === 'paid') {
-      const parts = generatePartsFromEntry(entry)
+      const parts = await generatePartsFromEntry(entry)
       const pdfResult = await generateCombinedPDF(
         entryId,
         entry.status,

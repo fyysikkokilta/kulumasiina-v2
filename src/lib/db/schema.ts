@@ -65,10 +65,10 @@ export const attachments = pgTable('attachment', {
   id: serial('id').primaryKey(),
   itemId: integer('item_id').references(() => items.id, {
     onDelete: 'cascade'
-  }), // Nullable - attachments can exist before items
-  filename: text('filename').notNull(),
-  data: text('data').notNull(), // File data as base64 string
-  value: real('value'), // Value in euros
+  }),
+  fileId: text('file_id').notNull(), // random filename for storage
+  filename: text('filename').notNull(), // original filename for display
+  value: real('value'),
   isNotReceipt: boolean('is_not_receipt').notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow()

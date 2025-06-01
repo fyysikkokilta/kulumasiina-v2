@@ -54,6 +54,7 @@ export function ItemForm({ visible, onOk, onCancel, editData }: ItemFormProps) {
     handleChange,
     handleRemove,
     beforeUpload,
+    customRequest,
     handleCancel: handleModalCancel,
     closePreview,
     prepareEditState,
@@ -170,7 +171,8 @@ export function ItemForm({ visible, onOk, onCancel, editData }: ItemFormProps) {
                 onPreview={handlePreview}
                 onChange={handleChange}
                 onRemove={handleRemove}
-                accept="image/jpeg,image/png,image/jpg,application/pdf"
+                accept="image/*,application/pdf"
+                customRequest={customRequest}
                 beforeUpload={beforeUpload}
                 itemRender={(originNode, file) => (
                   <Col key={file.name} className="flex flex-col gap-2.5">
@@ -231,14 +233,22 @@ export function ItemForm({ visible, onOk, onCancel, editData }: ItemFormProps) {
         onCancel={closePreview}
         width="80%"
       >
-        <div className="relative h-[80vh] w-full">
-          <Image
-            alt="preview"
-            src={previewState.image}
-            className="h-full w-full max-w-[1200px] object-contain"
-            fill
+        {previewState.isImage ? (
+          <div className="relative h-[80vh] w-full">
+            <Image
+              alt="preview"
+              src={previewState.url}
+              className="h-full w-full max-w-[1200px] object-contain"
+              fill
+            />
+          </div>
+        ) : (
+          <iframe
+            src={previewState.url}
+            style={{ width: '100%', height: '70vh', border: 'none' }}
+            title={previewState.title}
           />
-        </div>
+        )}
       </Modal>
     </>
   )

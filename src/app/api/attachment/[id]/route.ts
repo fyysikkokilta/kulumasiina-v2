@@ -1,34 +1,40 @@
 import { eq } from 'drizzle-orm'
+import mime from 'mime-types'
 import { NextRequest, NextResponse } from 'next/server'
 
 import { requireAuth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { attachments } from '@/lib/db/schema'
-import { getMimeType } from '@/lib/file-utils'
+import { getFile } from '@/lib/storage'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  await requireAuth()
-  const attachmentId = parseInt(id)
-  if (isNaN(attachmentId)) {
-    return new NextResponse('Invalid attachment ID', { status: 400 })
-  }
-
   const attachment = await db.query.attachments.findFirst({
-    where: eq(attachments.id, attachmentId)
+    where: eq(attachments.fileId, id)
   })
 
-  if (!attachment) {
-    return new NextResponse('Attachment not found', { status: 404 })
+  // Prevent public access to sent submissions
+  // requireAuth() redirects to root if not authenticated
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+  !!attachment && !(await requireAuth())
+
+  // Fetch file from storage
+  let fileBuffer: Buffer
+  try {
+    fileBuffer = await getFile(id)
+  } catch (e) {
+    console.error(e)
+    return new NextResponse('File not found', { status: 404 })
   }
 
-  const mimeType = getMimeType(attachment.data)
+  // Guess mime type from filename extension
+  const mimeType = mime.lookup(id) || 'application/octet-stream'
 
-  return new NextResponse(attachment.data, {
+  return new NextResponse(fileBuffer, {
     status: 200,
     headers: {
       'Content-Type': mimeType,
-      'Content-Disposition': `attachment; filename="${encodeURIComponent(attachment.filename)}"`
+      'Content-Disposition': `attachment; filename="${encodeURIComponent(id)}"`
     }
   })
 }

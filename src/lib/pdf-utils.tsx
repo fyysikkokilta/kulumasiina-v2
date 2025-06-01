@@ -1,5 +1,6 @@
 import { Document, Image, Page, renderToBuffer, StyleSheet, Text, View } from '@react-pdf/renderer'
 import fs from 'fs/promises'
+import mime from 'mime-types'
 import path from 'path'
 import { pdfToPng } from 'pdf-to-png-converter'
 import React from 'react'
@@ -7,7 +8,7 @@ import sharp from 'sharp'
 
 import type { EntryWithItemsAndMileages } from './db/schema'
 import { env } from './env'
-import { getBase64Data, getMimeType } from './file-utils'
+import { getFile } from './storage'
 
 interface AttachmentData {
   data: Buffer
@@ -194,38 +195,8 @@ const styles = StyleSheet.create({
   }
 })
 
-async function optimizeImage(imageData: Buffer) {
-  const image = sharp(imageData)
-  const metadata = await image.metadata()
-
-  if (!metadata.width || !metadata.height) {
-    return imageData
-  }
-
-  if (metadata.size && metadata.size > 256 * 1024) {
-    const ratio = metadata.width / metadata.height
-    let resizedWidth = Math.round(595 * ratio)
-    let resizedHeight = Math.round(842 * ratio)
-
-    if (resizedWidth > 515) {
-      resizedWidth = 515
-      resizedHeight = Math.round(515 / ratio)
-    }
-    if (resizedHeight > 700) {
-      resizedHeight = 700
-      resizedWidth = Math.round(700 * ratio)
-    }
-
-    return await image
-      .resize(resizedWidth, resizedHeight, {
-        fit: 'inside',
-        withoutEnlargement: true
-      })
-      .jpeg({ quality: 85 })
-      .toBuffer()
-  }
-
-  return imageData
+async function convertToPng(imageData: Buffer) {
+  return await sharp(imageData).toFormat('png').toBuffer()
 }
 
 const LOGO_SVG_PATH = path.join(process.cwd(), 'src/assets/fii_2.svg')
@@ -398,7 +369,8 @@ const ExpensePDF = ({
           const label = `Liite ${attachment.attachmentNum}${priceText}`
 
           return attachment.data.map((pageData, pageIndex) => {
-            const imageData = `data:${attachment.mimeType};base64,${pageData.toString('base64')}`
+            // Here every attachment is a PNG
+            const imageData = `data:image/png;base64,${pageData.toString('base64')}`
 
             return (
               <Page
@@ -455,7 +427,7 @@ export async function generateCombinedPDF(
           if (!imgBuf.content) {
             throw new Error('PDF to PNG conversion failed')
           }
-          optimizedPages.push(await optimizeImage(imgBuf.content))
+          optimizedPages.push(await convertToPng(imgBuf.content))
         }
         processedAttachments.push({
           ...att,
@@ -465,11 +437,11 @@ export async function generateCombinedPDF(
         })
         continue
       }
-      if (att.data && ['image/png', 'image/jpeg'].includes(att.mimeType)) {
+      if (att.data && att.mimeType.startsWith('image/')) {
         processedAttachments.push({
           ...att,
           attachmentNum: attachmentNum++,
-          data: [await optimizeImage(att.data)]
+          data: [await convertToPng(att.data)]
         })
         continue
       }
@@ -528,26 +500,37 @@ export function formatCurrency(amount: number): string {
   return amount.toFixed(2).replace('.', ',')
 }
 
-export function generatePartsFromEntry(entry: EntryWithItemsAndMileages) {
+export async function generatePartsFromEntry(entry: EntryWithItemsAndMileages) {
   const parts: PartData[] = []
 
   // Add items
   for (const item of entry.items) {
-    const attachments: AttachmentData[] = item.attachments.map((att) => ({
-      data: Buffer.from(getBase64Data(att.data), 'base64'),
-      mimeType: getMimeType(att.data),
-      value: att.value,
-      isNotReceipt: att.isNotReceipt ?? false,
-      filename: att.filename
-    }))
-
+    const attachments: AttachmentData[] = []
+    for (const att of item.attachments) {
+      let data: Buffer | null = null
+      if (att.fileId) {
+        try {
+          data = await getFile(att.fileId)
+        } catch (e) {
+          console.error('Error getting file:', e)
+          data = null
+        }
+      }
+      const mimeType = mime.lookup(att.fileId) || 'application/octet-stream'
+      attachments.push({
+        data: data || Buffer.alloc(0),
+        mimeType: mimeType.toString(),
+        value: att.value,
+        isNotReceipt: att.isNotReceipt ?? false,
+        filename: att.filename
+      })
+    }
     const price = attachments.reduce((sum, att) => {
       if (!att.isNotReceipt && att.value) {
         return sum + att.value
       }
       return sum
     }, 0)
-
     parts.push({
       date: new Date(item.date),
       description: item.description,

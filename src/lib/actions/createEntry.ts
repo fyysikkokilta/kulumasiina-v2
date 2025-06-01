@@ -24,8 +24,8 @@ const EntryCreateSchema = z.object({
       account: z.string().nullish(),
       attachments: z.array(
         z.object({
+          fileId: z.string(),
           filename: z.string(),
-          data: z.string(),
           value: z
             .number()
             .nullish()
@@ -92,8 +92,8 @@ export const createEntryAction = actionClient
             for (const attachment of itemData.attachments) {
               await tx.insert(attachments).values({
                 itemId: item.id,
+                fileId: attachment.fileId,
                 filename: attachment.filename,
-                data: attachment.data,
                 value: attachment.value,
                 isNotReceipt: attachment.isNotReceipt,
                 createdAt: now,
@@ -181,8 +181,8 @@ export const createEntryAction = actionClient
             for (const attachment of itemData.attachments) {
               await tx.insert(attachments).values({
                 itemId: item.id,
+                fileId: attachment.fileId,
                 filename: attachment.filename,
-                data: attachment.data,
                 value: attachment.value,
                 isNotReceipt: attachment.isNotReceipt,
                 createdAt: now,

@@ -21,7 +21,7 @@ interface AdminEntryExpandedRowProps {
   handlePay: (ids?: number[]) => void
   handleReset: (ids?: number[]) => void
   handlePreviewAttachment: (
-    attachmentId: number,
+    fileId: string,
     filename: string,
     isNotReceipt: boolean,
     value: number | null
@@ -131,7 +131,7 @@ export function AdminEntryExpandedRow({
                             className="h-auto p-0 text-blue-600 hover:text-blue-800"
                             onClick={() =>
                               handlePreviewAttachment(
-                                attachment.id,
+                                attachment.fileId,
                                 attachment.filename,
                                 attachment.isNotReceipt,
                                 attachment.value
