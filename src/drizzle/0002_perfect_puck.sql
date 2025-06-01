@@ -1,0 +1,1 @@
+ALTER TABLE "attachment" ADD COLUMN "file_id" text NOT NULL;

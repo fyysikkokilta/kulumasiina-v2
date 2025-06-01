@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     // Generate CSV infos with PDFs
     const csvInfos = await Promise.all(
       entriesData.map(async (entry) => {
-        const parts = generatePartsFromEntry(entry)
+        const parts = await generatePartsFromEntry(entry)
         const pdf = await generateCombinedPDF(
           entry.id,
           'paid',

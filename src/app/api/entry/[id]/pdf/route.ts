@@ -41,7 +41,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     // Generate parts from entry data
-    const parts = generatePartsFromEntry(entry)
+    const parts = await generatePartsFromEntry(entry)
 
     // Generate PDF
     const { filename, data } = await generateCombinedPDF(

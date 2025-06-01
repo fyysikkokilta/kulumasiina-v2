@@ -8,3 +8,6 @@ out/
 next-env.d.ts
 *.tsbuildinfo
 **/.DS_Store
+
+# Local storage
+data/
