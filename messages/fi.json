@@ -1,7 +1,7 @@
 {
   "form": {
     "main": {
-      "title": "Kulumasiina",
+      "title": "FK-Kulut",
       "submit": "Lähetä",
       "payee_name": "Maksun saajan nimi",
       "payee_name_placeholder": "Syötä maksun saajan nimi",
