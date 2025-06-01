@@ -1,7 +1,7 @@
 {
   "form": {
     "main": {
-      "title": "Expense Management",
+      "title": "FK-Expenses",
       "submit": "Submit",
       "payee_name": "Payee Name",
       "payee_name_placeholder": "Enter payee name",
