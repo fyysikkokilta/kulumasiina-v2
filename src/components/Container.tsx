@@ -17,7 +17,7 @@ export function Container({ children, width, user }: ContainerProps) {
   }
 
   return (
-    <div className="min-h-screen px-4">
+    <div className="m-8 min-h-screen px-4">
       <div className={`${widthClasses[width]} w-full`}>
         <Header user={user} />
         <Divider />
