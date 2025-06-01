@@ -61,7 +61,7 @@
       "upload": "Upload",
       "upload_error": "PDF needs to be under 4MB!",
       "compression_error": "Failed to compress image!",
-      "unsupported_file_error": "Unsupported file type! Only PDF, JPG, and PNG are allowed.",
+      "unsupported_file_error": "Unsupported file type! Only image files and PDF files are allowed.",
       "value_placeholder": "0.00",
       "value_unit": "€",
       "value_error_1": "Please provide the price!",
@@ -72,7 +72,7 @@
       "save_error": "Failed to save item",
       "account": "Bookkeeping Account",
       "account_placeholder": "You can specify the account if you know it. Leave it blank otherwise.",
-      "upload_note": "Only PDF, PNG and JPEG/JPG files are supported."
+      "upload_note": "Most common image file types and PDF files are supported."
     },
     "mileage": {
       "add": "Add a mileage",
