@@ -60,6 +60,10 @@ All mutating operations are handled by server actions:
 1. **PostgreSQL** database (local or cloud-hosted)
    - Local: Install PostgreSQL and create a database
    - Cloud: Use services like [Neon](https://neon.tech/), [Supabase](https://supabase.com/), or [Railway](https://railway.app/)
+2. **Ghostscript** (required for PDF compression)
+   - Install Ghostscript and ensure it is available in your system PATH.
+   - [Instructions](https://github.com/victorsoares96/compress-pdf)
+   - This is required for PDF compression to work (used by the `compress-pdf` library).
 
 ### Setup
 
