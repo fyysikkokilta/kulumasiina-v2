@@ -61,7 +61,7 @@
       "upload": "Lataa tiedosto",
       "upload_error": "PDF-tiedoston tulee olla alle 4MB!",
       "compression_error": "Kuvan pakkaaminen epäonnistui!",
-      "unsupported_file_error": "Tiedostotyyppi ei ole tuettu! Vain PDF-, JPG- ja PNG-tiedostot sallittu.",
+      "unsupported_file_error": "Tiedostotyyppi ei ole tuettu! Vain kuvatiedostot ja PDF-tiedostot sallittu.",
       "value_placeholder": "0.00",
       "value_unit": "€",
       "value_error_1": "Anna summa!",
@@ -72,7 +72,7 @@
       "save_error": "Kulun tallentaminen epäonnistui",
       "account": "Kirjanpito-tili",
       "account_placeholder": "Voit määrittää tilin, jos tiedät sen. Muussa tapauksessa jätä kohta tyhjäksi.",
-      "upload_note": "Vain PDF-, PNG- ja JPEG/JPG-tiedostot ovat tuettuja."
+      "upload_note": "Yleisimmät kuvatiedostotyypit ja PDF-tiedostot ovat tuettuja."
     },
     "mileage": {
       "add": "Lisää matka",
