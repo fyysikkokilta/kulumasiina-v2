@@ -115,7 +115,7 @@ export function getAdminEntryTableColumns(
         { text: t('status.active'), value: false }
       ],
       onFilter: (value, record) => record.archived === value,
-      defaultFilteredValue: [false],
+      defaultFilteredValue: ['false'],
       width: 110
     },
     {
