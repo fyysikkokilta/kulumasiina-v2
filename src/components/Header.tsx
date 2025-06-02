@@ -1,6 +1,6 @@
 'use client'
 
-import { Space, Typography } from 'antd'
+import { Button, Space, Typography } from 'antd'
 import { useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import { useEffect } from 'react'
@@ -26,6 +26,8 @@ export function Header({ user }: HeaderProps) {
     router.refresh()
   }
 
+  const otherLocale = locale === 'fi' ? 'en' : 'fi'
+
   return (
     <div className="flex items-baseline justify-between">
       <Typography.Title level={1} className="!text-2xl">
@@ -33,27 +35,15 @@ export function Header({ user }: HeaderProps) {
       </Typography.Title>
       <div>
         <Space>
-          <div>
-            <Typography.Text
-              className={`cursor-pointer ${locale.startsWith('fi') ? 'font-bold' : 'font-normal'}`}
-              onClick={() => {
-                changeLocale('fi')
-                document.cookie = 'lang=fi; path=/; max-age=31536000'
-              }}
-            >
-              FI
-            </Typography.Text>{' '}
-            /{' '}
-            <Typography.Text
-              className={`cursor-pointer ${locale.startsWith('en') ? 'font-bold' : 'font-normal'}`}
-              onClick={() => {
-                changeLocale('en')
-                document.cookie = 'lang=en; path=/; max-age=31536000'
-              }}
-            >
-              EN
-            </Typography.Text>
-          </div>
+          <Button
+            type="primary"
+            className="mx-2"
+            onClick={() => {
+              changeLocale(otherLocale)
+            }}
+          >
+            {otherLocale.toUpperCase()}
+          </Button>
           <LoginBtn user={user} />
         </Space>
       </div>
