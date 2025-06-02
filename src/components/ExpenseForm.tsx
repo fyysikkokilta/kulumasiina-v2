@@ -199,76 +199,75 @@ export function ExpenseForm() {
         )}
 
         {/* Action Buttons */}
-        <Space className="mb-6">
-          <Button type="default" icon={<PlusOutlined />} onClick={() => openModal('item')}>
-            {t('add_expense')}
-          </Button>
-          <Button type="default" icon={<PlusOutlined />} onClick={() => openModal('mileage')}>
-            {t('add_mileage')}
-          </Button>
-        </Space>
+        <div className="mb-6 flex flex-col items-center gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex gap-4">
+            <Button type="default" icon={<PlusOutlined />} onClick={() => openModal('item')}>
+              {t('add_expense')}
+            </Button>
+            <Button type="default" icon={<PlusOutlined />} onClick={() => openModal('mileage')}>
+              {t('add_mileage')}
+            </Button>
+          </div>
+          <div>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={actionStatus === 'executing'}
+              size="large"
+              disabled={state.entries.length === 0}
+            >
+              {t('submit')}
+            </Button>
+          </div>
+        </div>
+
+        {/* Modals */}
+        {state.modalState.type === 'item' && (
+          <ItemForm
+            visible={state.modalState.isOpen}
+            onOk={(data) =>
+              handleAddOrUpdateEntry({
+                id: Date.now(),
+                data,
+                type: 'item'
+              })
+            }
+            onCancel={closeModal}
+            editData={editingEntry?.type === 'item' ? editingEntry.data : undefined}
+          />
+        )}
+
+        {state.modalState.type === 'mileage' && (
+          <MileageForm
+            visible={state.modalState.isOpen}
+            onOk={(data) =>
+              handleAddOrUpdateEntry({
+                id: Date.now(),
+                data,
+                type: 'mileage'
+              })
+            }
+            onCancel={closeModal}
+            editData={editingEntry?.type === 'mileage' ? editingEntry.data : undefined}
+          />
+        )}
 
         <Divider />
 
-        <div className="flex justify-end">
-          <Button
-            type="primary"
-            htmlType="submit"
-            loading={actionStatus === 'executing'}
-            size="large"
-            disabled={state.entries.length === 0}
-          >
-            {t('submit')}
-          </Button>
+        {/* Privacy Policy */}
+        <div className="text-center text-gray-500">
+          <Typography.Text>
+            {t('privacy_policy_text_1')}{' '}
+            <a
+              href={env.NEXT_PUBLIC_PRIVACY_POLICY_URL}
+              className="text-blue-500 hover:text-blue-700"
+            >
+              {t('privacy_policy_link_text')}
+            </a>
+            {t('privacy_policy_text_2')}
+          </Typography.Text>
         </div>
       </Form>
-
-      {/* Modals */}
-      {state.modalState.type === 'item' && (
-        <ItemForm
-          visible={state.modalState.isOpen}
-          onOk={(data) =>
-            handleAddOrUpdateEntry({
-              id: Date.now(),
-              data,
-              type: 'item'
-            })
-          }
-          onCancel={closeModal}
-          editData={editingEntry?.type === 'item' ? editingEntry.data : undefined}
-        />
-      )}
-
-      {state.modalState.type === 'mileage' && (
-        <MileageForm
-          visible={state.modalState.isOpen}
-          onOk={(data) =>
-            handleAddOrUpdateEntry({
-              id: Date.now(),
-              data,
-              type: 'mileage'
-            })
-          }
-          onCancel={closeModal}
-          editData={editingEntry?.type === 'mileage' ? editingEntry.data : undefined}
-        />
-      )}
-
-      <Divider />
-
-      {/* Privacy Policy */}
-      <div className="text-center text-gray-500">
-        <Typography.Text>
-          {t('privacy_policy_text_1')}{' '}
-          <a
-            href={env.NEXT_PUBLIC_PRIVACY_POLICY_URL}
-            className="text-blue-500 hover:text-blue-700"
-          >
-            {t('privacy_policy_link_text')}
-          </a>{' '}
-          {t('privacy_policy_text_2')}
-        </Typography.Text>
-      </div>
     </div>
   )
 }
