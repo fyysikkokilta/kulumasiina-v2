@@ -28,7 +28,9 @@ export function Header({ user }: HeaderProps) {
 
   return (
     <div className="flex items-baseline justify-between">
-      <Typography.Title level={1}>{t('title')}</Typography.Title>
+      <Typography.Title level={1} className="!text-2xl">
+        {t('title')}
+      </Typography.Title>
       <div>
         <Space>
           <div>
