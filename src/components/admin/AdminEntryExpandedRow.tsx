@@ -4,16 +4,14 @@ import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { bookkeepingAccounts } from '@/lib/bookkeeping-accounts'
-import type { Mileage } from '@/lib/db/schema'
+import type { ItemWithAttachments, Mileage } from '@/lib/db/schema'
+import type { EntryWithItemsAndMileages } from '@/lib/db/schema'
 import { env } from '@/lib/env'
 
-import { PopulatedEntryWithAttachmentData } from './admin-types'
-import { ItemWithoutAttachmentData } from './admin-types'
-
 interface AdminEntryExpandedRowProps {
-  record: PopulatedEntryWithAttachmentData
+  record: EntryWithItemsAndMileages
   handleAccountUpdate: (id: number, account: string, isMileage: boolean) => void
-  handleEditItem: (item: ItemWithoutAttachmentData, entryId: number) => void
+  handleEditItem: (item: ItemWithAttachments, entryId: number) => void
   handleEditMileage: (mileage: Mileage, entryId: number) => void
   handleArchive: (ids?: number[]) => void
   handleApprove: (ids?: number[]) => void

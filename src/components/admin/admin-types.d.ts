@@ -1,14 +1,5 @@
 import type { Attachment, Entry, Item, ItemWithAttachments, Mileage } from '@/lib/db/schema'
 
-export type ItemWithoutAttachmentData = Item & {
-  attachments: Omit<Attachment, 'data'>[]
-}
-
-export type PopulatedEntryWithAttachmentData = Entry & {
-  items: ItemWithoutAttachmentData[]
-  mileages: Mileage[]
-}
-
 export type EditState = {
   entryId: number
 } & (

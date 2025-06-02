@@ -3,14 +3,15 @@
 import { Button, Space, Table, Tag, Typography } from 'antd'
 import React from 'react'
 
+import { EntryWithItemsAndMileages } from '@/lib/db/schema'
+
 import { useAdminEntryTableState } from '../../hooks/useAdminEntryTableState'
-import type { PopulatedEntryWithAttachmentData } from './admin-types'
 import { AdminEntryExpandedRow } from './AdminEntryExpandedRow'
 import { AdminEntryModals } from './AdminEntryModals'
 import { getAdminEntryTableColumns } from './AdminEntryTableColumns'
 
 interface AdminEntryTableProps {
-  entries: PopulatedEntryWithAttachmentData[]
+  entries: EntryWithItemsAndMileages[]
 }
 
 export function AdminEntryTable({ entries }: AdminEntryTableProps) {
@@ -139,7 +140,7 @@ export function AdminEntryTable({ entries }: AdminEntryTableProps) {
           columns={columns}
           dataSource={tableData}
           expandable={{
-            expandedRowRender: (record: PopulatedEntryWithAttachmentData) => (
+            expandedRowRender: (record: EntryWithItemsAndMileages) => (
               <AdminEntryExpandedRow
                 record={record}
                 handleAccountUpdate={handleAccountUpdate}

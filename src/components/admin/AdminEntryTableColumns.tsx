@@ -3,7 +3,7 @@ import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { useTranslations } from 'next-intl'
 
-import { PopulatedEntryWithAttachmentData } from './admin-types'
+import { EntryWithItemsAndMileages } from '@/lib/db/schema'
 
 type TFunction = ReturnType<typeof useTranslations>
 
@@ -11,9 +11,9 @@ export function getAdminEntryTableColumns(
   t: TFunction,
   getStatusColor: (status: string) => string,
   getStatusText: (status: string) => string,
-  entries: PopulatedEntryWithAttachmentData[]
+  entries: EntryWithItemsAndMileages[]
 ) {
-  const columns: ColumnsType<PopulatedEntryWithAttachmentData> = [
+  const columns: ColumnsType<EntryWithItemsAndMileages> = [
     {
       title: t('table.id'),
       dataIndex: 'id',
