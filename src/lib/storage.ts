@@ -1,5 +1,5 @@
 import fs from 'fs/promises'
-import { Client as MinioClient } from 'minio'
+import { BucketItem, Client as MinioClient } from 'minio'
 import path from 'path'
 
 import { env } from './env'
@@ -61,5 +61,45 @@ export async function getFile(fileId: string) {
     return await getFileFromS3(fileId)
   } else {
     return await getFileLocally(fileId)
+  }
+}
+
+export async function listFiles(): Promise<string[]> {
+  if (isS3) {
+    const objects: BucketItem[] = []
+    if (!minio) throw new Error('S3 storage not enabled')
+    const objectsStream = minio.listObjectsV2(bucket, '', true)
+    await new Promise((resolve, reject) => {
+      objectsStream.on('data', (obj) => objects.push(obj))
+      objectsStream.on('end', resolve)
+      objectsStream.on('error', reject)
+    })
+    return objects.map((obj) => obj.name).filter((name): name is string => name !== undefined)
+  } else {
+    try {
+      await fs.mkdir(localPath, { recursive: true })
+      const files = await fs.readdir(localPath)
+      return files
+    } catch (e) {
+      console.log('Error listing files from local', e)
+      return []
+    }
+  }
+}
+
+export async function deleteFile(fileId: string): Promise<void> {
+  if (isS3) {
+    if (!minio) throw new Error('S3 storage not enabled')
+    await minio.removeObject(bucket, fileId)
+    console.log('Deleted file from S3', fileId)
+  } else {
+    const filePath = path.join(localPath, fileId)
+    try {
+      await fs.unlink(filePath)
+      console.log('Deleted file from local', fileId)
+    } catch (e) {
+      console.log('Error deleting file from local', fileId, e)
+      // Ignore if file does not exist
+    }
   }
 }
