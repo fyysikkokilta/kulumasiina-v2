@@ -1,6 +1,7 @@
 # To use this Dockerfile, you have to set `output: 'standalone'` in your next.config.mjs file.
 # From https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile
 
+ARG FILE_CLEANUP_SECRET
 FROM node:22.14.0-alpine AS base
 
 # Install dependencies only when needed
@@ -56,8 +57,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Create crontab file dynamically to use the runtime environment variable
-RUN echo '* * * * * curl -X POST "http://localhost:3000/api/cleanup-orphaned-files?secret=$FILE_CLEANUP_SECRET"' > /etc/crontabs/root
-
+RUN echo "* * * * * curl -X POST \"http://localhost:3000/api/cleanup-orphaned-files?secret=${FILE_CLEANUP_SECRET}\"" > /var/spool/cron/crontabs/nextjs
 USER nextjs
 
 EXPOSE 3000
