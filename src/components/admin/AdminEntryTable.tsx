@@ -155,9 +155,10 @@ export function AdminEntryTable({ entries }: AdminEntryTableProps) {
             )
           }}
           pagination={{
-            pageSize: 20,
+            defaultPageSize: 10,
             showSizeChanger: true,
-            showQuickJumper: true
+            pageSizeOptions: [10, 25, 50],
+            showTotal: (total, range) => `${range[0]}-${range[1]} / ${total}`
           }}
           style={{ minWidth: 900 }}
         />
