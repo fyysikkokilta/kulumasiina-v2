@@ -13,6 +13,7 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:migrate": "tsx ./src/lib/db/migrate.ts",
+    "cleanup-orphaned-files": "tsx ./src/lib/cleanupOrphanedFiles.ts",
     "preinstall": "npx only-allow pnpm",
     "prepare": "simple-git-hooks"
   },

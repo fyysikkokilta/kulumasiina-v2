@@ -38,7 +38,10 @@ export const env = createEnv({
     S3_ACCESS_KEY: z.string().optional(),
     S3_SECRET_KEY: z.string().optional(),
     S3_BUCKET: z.string().optional(),
-    S3_REGION: z.string().optional()
+    S3_REGION: z.string().optional(),
+
+    // File cleanup secret
+    FILE_CLEANUP_SECRET: z.string()
   },
   client: {
     NEXT_PUBLIC_ARCHIVED_ENTRIES_AGE_LIMIT_DAYS: z

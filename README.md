@@ -187,3 +187,69 @@ The application can be deployed to any platform that supports Next.js and Postgr
 4. Run `npm install`
 5. Run `npm run db:push` to set up database
 6. Run `npm run dev`
+
+## Orphaned File Cleanup
+
+This project includes an API to clean up files in storage that are not referenced in the database (orphans). This helps save storage space and keeps your storage tidy.
+
+- It works for both local and S3 storage backends.
+- Orphaned files are deleted from storage if they are not referenced in the `attachment` table in the database.
+
+### Running the Cleanup Manually
+
+You can trigger the orphaned file cleanup remotely via a protected API route:
+
+- **Endpoint:** `/api/cleanup-orphaned-files` (POST)
+- **Protection:** Requires a secret, set in the environment variable `FILE_CLEANUP_SECRET`.
+- **How to provide the secret:**
+  - As a header: `x-cleanup-secret: your_secret_here`
+  - Or as a query parameter: `?secret=your_secret_here`
+
+#### Example usage with curl
+
+```
+curl -X POST https://yourdomain.com/api/cleanup-orphaned-files -H "x-cleanup-secret: your_secret_here"
+```
+
+Or with a query parameter:
+
+```
+curl -X POST "https://yourdomain.com/api/cleanup-orphaned-files?secret=your_secret_here"
+```
+
+**Response:**
+- On success: `{ success: true, deletedCount: N, deleted: [ ...fileIds ] }`
+- On error: `{ error: "..." }`
+
+**Security:**
+- Only requests with the correct secret will be able to trigger the cleanup.
+
+### Production Setup of the Cleanup Job
+
+When running in production with Docker, the orphaned file cleanup job is scheduled and executed automatically inside the container using cron:
+
+- The Docker image installs `curl` and `cron`.
+- A crontab entry is created that triggers the protected API route `/api/cleanup-orphaned-files` at the desired schedule (default: every day at 03:00, or every minute for testing).
+- The secret for the API route is injected at runtime using the `FILE_CLEANUP_SECRET` environment variable.
+- The cron job runs inside the container and calls the API route via `curl`.
+
+#### How it works
+- The Dockerfile contains a line like:
+  ```dockerfile
+  RUN echo '0 3 * * * curl -X POST "http://localhost:3000/api/cleanup-orphaned-files?secret=$FILE_CLEANUP_SECRET"' > /etc/crontabs/root
+  ```
+  (For testing, you might see `* * * * *` for every minute.)
+- When the container starts, both cron and the Next.js server are started together.
+- The cron job will use the value of `FILE_CLEANUP_SECRET` set in your environment (e.g., in `.env` or via Docker `--env-file`).
+
+#### How to verify
+- Check your Next.js logs for cleanup activity.
+- You can also check the logs of the cron job by modifying the crontab entry to append output to a file, e.g.:
+  ```
+  0 3 * * * curl -X POST "http://localhost:3000/api/cleanup-orphaned-files?secret=$FILE_CLEANUP_SECRET" >> /var/log/cleanup.log 2>&1
+  ```
+- You can trigger the cleanup manually via the API route as described above.
+
+#### Security
+- The cleanup API route is protected by the secret and is only accessible from inside the container (localhost) unless you expose it intentionally.
+- Make sure to set a strong value for `FILE_CLEANUP_SECRET` in your production environment.

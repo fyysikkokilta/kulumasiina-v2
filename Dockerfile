@@ -31,6 +31,9 @@ FROM base AS runner
 # Install ghostscript for pdf compression
 RUN apk add --no-cache ghostscript
 
+# Install curl and cron for cleanup job
+RUN apk add --no-cache curl busybox-suid
+
 WORKDIR /app
 
 ENV NODE_ENV production
@@ -52,6 +55,9 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Create crontab file dynamically to use the runtime environment variable
+RUN echo '* * * * * curl -X POST "http://localhost:3000/api/cleanup-orphaned-files?secret=$FILE_CLEANUP_SECRET"' > /etc/crontabs/root
+
 USER nextjs
 
 EXPOSE 3000
@@ -60,4 +66,6 @@ ENV PORT 3000
 
 # server.js is created by next build from the standalone output
 # https://nextjs.org/docs/pages/api-reference/next-config-js/output
-CMD HOSTNAME="0.0.0.0" node server.js
+
+# Start both cron and Next.js server
+CMD sh -c "crond && HOSTNAME=\"0.0.0.0\" node server.js"
