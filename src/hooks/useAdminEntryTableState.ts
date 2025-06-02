@@ -4,10 +4,6 @@ import { useTranslations } from 'next-intl'
 import { useAction } from 'next-safe-action/hooks'
 import { useState } from 'react'
 
-import {
-  ItemWithoutAttachmentData,
-  PopulatedEntryWithAttachmentData
-} from '@/components/admin/admin-types'
 import { EditState, PreviewState } from '@/components/admin/admin-types'
 import { archiveEntriesAction } from '@/lib/actions/archiveEntries'
 import { denyEntriesAction } from '@/lib/actions/denyEntries'
@@ -16,10 +12,16 @@ import { updateBookkeepingAccountAction } from '@/lib/actions/updateBookkeepingA
 import { updateItemAction } from '@/lib/actions/updateItem'
 import { updateMileageAction } from '@/lib/actions/updateMileage'
 import { bookkeepingAccounts } from '@/lib/bookkeeping-accounts'
-import type { Mileage, NewItemWithAttachments, NewMileage } from '@/lib/db/schema'
+import type {
+  EntryWithItemsAndMileages,
+  ItemWithAttachments,
+  Mileage,
+  NewItemWithAttachments,
+  NewMileage
+} from '@/lib/db/schema'
 import { env } from '@/lib/env'
 
-export function useAdminEntryTableState(entries: PopulatedEntryWithAttachmentData[]) {
+export function useAdminEntryTableState(entries: EntryWithItemsAndMileages[]) {
   const t = useTranslations('admin')
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [approveModalVisible, setApproveModalVisible] = useState(false)
@@ -162,7 +164,7 @@ export function useAdminEntryTableState(entries: PopulatedEntryWithAttachmentDat
     }
   }
 
-  const handleEditItem = async (item: ItemWithoutAttachmentData, entryId: number) => {
+  const handleEditItem = async (item: ItemWithAttachments, entryId: number) => {
     // Fetch the attachments data since we don't have it loaded
     const attachments = await Promise.all(
       item.attachments.map(async (attachment) => ({
@@ -336,7 +338,7 @@ export function useAdminEntryTableState(entries: PopulatedEntryWithAttachmentDat
   const rowSelection = {
     selectedRowKeys,
     onChange: setSelectedRowKeys,
-    getCheckboxProps: (record: PopulatedEntryWithAttachmentData) => ({
+    getCheckboxProps: (record: EntryWithItemsAndMileages) => ({
       // Disable selection if we already have selections of a different status
       disabled: selectedRowKeys.length > 0 && !selectedStatuses.includes(record.status)
     })
