@@ -1,7 +1,7 @@
 import archiver from 'archiver'
 import { PDFDocument } from 'pdf-lib'
 
-import type { Attachment, Entry, Item, Mileage } from './db/schema'
+import type { EntryWithItemsAndMileages } from './db/schema'
 import { env } from './env'
 
 interface CsvRow {
@@ -311,10 +311,7 @@ function createZipArchive(csvContent: string, csvFilename: string, pdfInfos: Csv
 }
 
 export function generateCsvInfoFromEntry(
-  entry: Entry & {
-    items: (Item & { attachments: Attachment[] })[]
-    mileages: Mileage[]
-  },
+  entry: EntryWithItemsAndMileages,
   pdf?: { filename: string; data: Buffer }
 ) {
   const rows: CsvRow[] = []

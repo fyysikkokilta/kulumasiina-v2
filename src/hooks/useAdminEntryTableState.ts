@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl'
 import { useAction } from 'next-safe-action/hooks'
 import { useState } from 'react'
 
-import { EditState, PreviewState } from '@/components/admin/admin-types'
+import { EditState, PreviewState } from '@/components/admin-types'
 import { archiveEntriesAction } from '@/lib/actions/archiveEntries'
 import { denyEntriesAction } from '@/lib/actions/denyEntries'
 import { resetEntriesAction } from '@/lib/actions/resetEntries'
