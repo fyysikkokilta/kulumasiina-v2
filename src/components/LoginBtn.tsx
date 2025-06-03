@@ -1,7 +1,6 @@
 'use client'
 
-import { Button } from 'antd'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 
 import { logoutAction } from '@/lib/actions/logout'
@@ -12,7 +11,6 @@ interface LoginBtnProps {
 }
 
 export function LoginBtn({ user }: LoginBtnProps) {
-  const router = useRouter()
   const t = useTranslations('login')
 
   const handleLogout = async () => {
@@ -20,8 +18,19 @@ export function LoginBtn({ user }: LoginBtnProps) {
   }
 
   return user ? (
-    <Button onClick={handleLogout}>{t('logout')}</Button>
+    <button
+      type="button"
+      onClick={handleLogout}
+      className="inline-flex w-full cursor-pointer items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-center text-base font-semibold text-gray-700 shadow transition-colors hover:bg-gray-100 sm:w-auto"
+    >
+      {t('logout')}
+    </button>
   ) : (
-    <Button onClick={() => router.push('/login')}>{t('login')}</Button>
+    <Link
+      href="/login"
+      className="inline-flex w-full cursor-pointer items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-center text-base font-semibold text-gray-700 shadow transition-colors hover:bg-gray-100 sm:w-auto"
+    >
+      {t('login')}
+    </Link>
   )
 }

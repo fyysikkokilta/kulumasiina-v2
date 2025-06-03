@@ -1,51 +1,18 @@
-'use client'
+import { getTranslations } from 'next-intl/server'
 
-import { Button, Space, Typography } from 'antd'
-import { useRouter } from 'next/navigation'
-import { useLocale, useTranslations } from 'next-intl'
-import { useEffect } from 'react'
+import { getUserFromCookies } from '@/lib/auth'
 
-import { LoginBtn } from '@/components/LoginBtn'
-import type { User } from '@/lib/auth'
+import { HeaderButtons } from './HeaderButtons'
 
-interface HeaderProps {
-  user: User | null
-}
-
-export function Header({ user }: HeaderProps) {
-  const t = useTranslations('form.main')
-  const locale = useLocale()
-  const router = useRouter()
-
-  useEffect(() => {
-    document.title = t('title')
-  }, [locale, t])
-
-  const changeLocale = (locale: string) => {
-    document.cookie = `lang=${locale}; path=/; max-age=31536000`
-    router.refresh()
-  }
-
-  const otherLocale = locale === 'fi' ? 'en' : 'fi'
+export async function Header() {
+  const t = await getTranslations('form.main')
+  const user = await getUserFromCookies()
 
   return (
     <div className="flex items-baseline justify-between">
-      <Typography.Title level={1} className="!text-2xl">
-        {t('title')}
-      </Typography.Title>
+      <h1 className="text-2xl font-bold">{t('title')}</h1>
       <div>
-        <Space>
-          <Button
-            type="primary"
-            className="mx-2"
-            onClick={() => {
-              changeLocale(otherLocale)
-            }}
-          >
-            {otherLocale.toUpperCase()}
-          </Button>
-          <LoginBtn user={user} />
-        </Space>
+        <HeaderButtons user={user} />
       </div>
     </div>
   )
