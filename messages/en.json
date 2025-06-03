@@ -212,5 +212,9 @@
       "submit": "Mark as Paid",
       "cancel": "Cancel"
     }
+  },
+  "metadata": {
+    "title": "FK-Expenses",
+    "description": "Guild of Physics Expense Management System"
   }
 }

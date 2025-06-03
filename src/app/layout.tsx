@@ -2,13 +2,15 @@ import './globals.css'
 import '@ant-design/v5-patch-for-react-19'
 
 import { AntdRegistry } from '@ant-design/nextjs-registry'
-import type { Metadata } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
-import { getLocale } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
 
-export const metadata: Metadata = {
-  title: 'Kulumasiina',
-  description: 'Expense management system'
+export const generateMetadata = async () => {
+  const t = await getTranslations()
+  return {
+    title: t('metadata.title'),
+    description: t('metadata.description')
+  }
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
