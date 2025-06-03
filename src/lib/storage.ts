@@ -64,7 +64,7 @@ export async function getFile(fileId: string) {
   }
 }
 
-export async function listFiles(): Promise<string[]> {
+export async function listFiles() {
   if (isS3) {
     const objects: BucketItem[] = []
     if (!minio) throw new Error('S3 storage not enabled')
@@ -87,7 +87,7 @@ export async function listFiles(): Promise<string[]> {
   }
 }
 
-export async function deleteFile(fileId: string): Promise<void> {
+export async function deleteFile(fileId: string) {
   if (isS3) {
     if (!minio) throw new Error('S3 storage not enabled')
     await minio.removeObject(bucket, fileId)

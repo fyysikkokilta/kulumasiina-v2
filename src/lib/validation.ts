@@ -9,7 +9,7 @@
  * - NNN = individual number (001-899)
  * - C = check character
  */
-export function validateFinnishSSN(ssn: string): boolean {
+export function validateFinnishSSN(ssn: string) {
   if (!ssn || typeof ssn !== 'string') {
     return false
   }
@@ -82,7 +82,7 @@ export function validateFinnishSSN(ssn: string): boolean {
 /**
  * Formats Finnish SSN for display (adds spaces for readability)
  */
-export function formatFinnishSSN(ssn: string): string {
+export function formatFinnishSSN(ssn: string) {
   if (!ssn) return ssn
 
   const cleanSSN = ssn.replace(/\s/g, '').toUpperCase()

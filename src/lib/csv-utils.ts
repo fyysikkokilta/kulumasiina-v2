@@ -22,27 +22,27 @@ interface CsvInfo {
   pdf: { filename: string; data: Buffer } | null
 }
 
-export function isExpense(row: CsvRow): boolean {
+export function isExpense(row: CsvRow) {
   return !row.isMileage
 }
 
-export function isMileage(row: CsvRow): boolean {
+export function isMileage(row: CsvRow) {
   return row.isMileage
 }
 
-export function hasExpenses(rows: CsvRow[]): boolean {
+export function hasExpenses(rows: CsvRow[]) {
   return rows.some(isExpense)
 }
 
-export function hasMileages(rows: CsvRow[]): boolean {
+export function hasMileages(rows: CsvRow[]) {
   return rows.some(isMileage)
 }
 
-export function substring80AndRemoveNewlines(str: string): string {
+export function substring80AndRemoveNewlines(str: string) {
   return str.substring(0, 80).replace(/\n/g, ' ')
 }
 
-export function removeAllWhitespace(str: string): string {
+export function removeAllWhitespace(str: string) {
   return str.replace(/\s/g, '')
 }
 
