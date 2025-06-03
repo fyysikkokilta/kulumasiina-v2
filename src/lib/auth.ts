@@ -13,7 +13,7 @@ export interface User {
   name?: string
 }
 
-export async function createJWTToken(user: User): Promise<string> {
+export async function createJWTToken(user: User) {
   if (!env.ADMIN_EMAILS.includes(user.email)) {
     throw new Error('Only admin users are allowed to log in')
   }
@@ -34,7 +34,7 @@ export async function createJWTToken(user: User): Promise<string> {
   return token
 }
 
-export async function getUserFromCookies(): Promise<User | null> {
+export async function getUserFromCookies() {
   try {
     const cookieStore = await cookies()
     const token = cookieStore.get(JWT_COOKIE_NAME)?.value
@@ -55,12 +55,12 @@ export async function getUserFromCookies(): Promise<User | null> {
   }
 }
 
-export async function deleteSession(): Promise<void> {
+export async function deleteSession() {
   const cookieStore = await cookies()
   cookieStore.delete(JWT_COOKIE_NAME)
 }
 
-export async function requireAuth(): Promise<User> {
+export async function requireAuth() {
   const user = await getUserFromCookies()
   if (!user) {
     redirect('/')
@@ -68,7 +68,7 @@ export async function requireAuth(): Promise<User> {
   return user
 }
 
-export function createUser(email: string, name?: string): User {
+export function createUser(email: string, name?: string) {
   if (!env.ADMIN_EMAILS.includes(email)) {
     throw new Error('Only admin users are allowed to log in')
   }

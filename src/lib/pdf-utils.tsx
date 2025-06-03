@@ -491,12 +491,12 @@ export async function generateCombinedPDF(
   }
 }
 
-export function formatISODate(isoDate: string): string {
+export function formatISODate(isoDate: string) {
   const date = new Date(isoDate)
   return date.toLocaleDateString('fi-FI')
 }
 
-export function formatCurrency(amount: number): string {
+export function formatCurrency(amount: number) {
   return amount.toFixed(2).replace('.', ',')
 }
 
