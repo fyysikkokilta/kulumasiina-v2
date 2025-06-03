@@ -1,13 +1,20 @@
-import { AdminEntryView } from '@/components/admin/AdminEntryView'
-import { Container } from '@/components/Container'
+import { AdminEntryTable } from '@/components/admin/AdminEntryTable'
 import { requireAuth } from '@/lib/auth'
+import { db } from '@/lib/db'
 
 export default async function AdminPage() {
-  const user = await requireAuth()
+  await requireAuth()
 
-  return (
-    <Container width="wide" user={user}>
-      <AdminEntryView />
-    </Container>
-  )
+  const entries = await db.query.entries.findMany({
+    with: {
+      items: {
+        with: {
+          attachments: true
+        }
+      },
+      mileages: true
+    }
+  })
+
+  return <AdminEntryTable entries={entries} />
 }
