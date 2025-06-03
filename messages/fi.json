@@ -212,5 +212,9 @@
       "submit": "Merkitse maksetuiksi",
       "cancel": "Peruuta"
     }
+  },
+  "metadata": {
+    "title": "FK-Kulut",
+    "description": "Fyysikkokillan kulukorvausjärjestelmä"
   }
 }
