@@ -3,14 +3,13 @@ import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 import React from 'react'
 
-import { NewMileage } from '@/lib/db/schema'
-import { NewItemWithAttachments } from '@/lib/db/schema'
+import type { NewItemWithAttachments, NewMileage } from '@/lib/db/schema'
 
-import { ItemForm } from '../ItemForm'
-import { MileageForm } from '../MileageForm'
 import type { EditState, PreviewState } from './admin-types'
 import { ApproveModal } from './ApproveModal'
 import { DeleteOldArchivedModal } from './DeleteOldArchivedModal'
+import { ItemForm } from './ItemForm'
+import { MileageForm } from './MileageForm'
 import { PayModal } from './PayModal'
 
 interface AdminEntryModalsProps {

@@ -3,9 +3,9 @@
 import { Button, Space, Table, Tag, Typography } from 'antd'
 import React from 'react'
 
+import { useAdminEntryTableState } from '@/hooks/useAdminEntryTableState'
 import { EntryWithItemsAndMileages } from '@/lib/db/schema'
 
-import { useAdminEntryTableState } from '../../hooks/useAdminEntryTableState'
 import { AdminEntryExpandedRow } from './AdminEntryExpandedRow'
 import { AdminEntryModals } from './AdminEntryModals'
 import { getAdminEntryTableColumns } from './AdminEntryTableColumns'

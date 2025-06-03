@@ -1,4 +1,4 @@
-import type { Item, Mileage } from '@/lib/db/schema'
+import type { ItemWithAttachments, Mileage } from '@/lib/db/schema'
 
 export type EditState = {
   entryId: number
