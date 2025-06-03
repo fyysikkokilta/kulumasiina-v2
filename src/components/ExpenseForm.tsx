@@ -1,7 +1,7 @@
 'use client'
 
 import { PlusOutlined } from '@ant-design/icons'
-import { Button, Card, Divider, Form, Input, Result, Space, Typography } from 'antd'
+import { Button, Card, Divider, Form, Input, Result, Typography } from 'antd'
 import { isValidIBAN } from 'ibantools'
 import { useTranslations } from 'next-intl'
 import React from 'react'
