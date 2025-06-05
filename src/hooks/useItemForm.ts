@@ -2,7 +2,6 @@ import type { FormInstance } from 'antd'
 import { message } from 'antd'
 import type { RcFile } from 'antd/es/upload'
 import type { UploadFile, UploadProps } from 'antd/es/upload/interface'
-import imageCompression from 'browser-image-compression'
 import dayjs from 'dayjs'
 import type { UploadRequestOption } from 'rc-upload/lib/interface'
 import { useCallback, useState } from 'react'
@@ -113,23 +112,9 @@ export function useItemForm(form: FormInstance<ItemFormData>) {
   )
 
   // Before upload handler
-  const beforeUpload = useCallback(async (file: RcFile) => {
-    if (file.size > 4 * 1024 * 1024) {
-      if (file.type === 'application/pdf') {
-        return false
-      }
-
-      try {
-        // Compress large image files
-        return await imageCompression(file, {
-          maxSizeMB: 4,
-          maxWidthOrHeight: 1920,
-          useWebWorker: true
-        })
-      } catch (error) {
-        console.error('Failed to compress image:', error)
-        return false
-      }
+  const beforeUpload = useCallback((file: RcFile) => {
+    if (file.size > 8 * 1024 * 1024) {
+      return false
     }
     return true
   }, [])
