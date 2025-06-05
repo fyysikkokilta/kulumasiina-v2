@@ -22,9 +22,10 @@ export async function POST(request: NextRequest) {
     try {
       const image = sharp(buffer)
       const metadata = await image.metadata()
-      const isWiderThanTall = metadata.width > metadata.height
+      const isWiderThanTall = metadata.autoOrient.width > metadata.autoOrient.height
 
       buffer = await sharp(buffer)
+        .autoOrient()
         .resize({
           width: isWiderThanTall ? 1920 : 1080,
           height: isWiderThanTall ? 1080 : 1920,
