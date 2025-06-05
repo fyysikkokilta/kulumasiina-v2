@@ -22,29 +22,14 @@ export async function POST(request: NextRequest) {
     try {
       const image = sharp(buffer)
       const metadata = await image.metadata()
+      const isWiderThanTall = metadata.width > metadata.height
 
-      let resizedWidth = metadata.width
-      let resizedHeight = metadata.height
-
-      if (metadata.size && metadata.size > 256 * 1024) {
-        const ratio = metadata.width / metadata.height
-        resizedWidth = Math.round(595 * ratio)
-        resizedHeight = Math.round(842 * ratio)
-
-        if (resizedWidth > 515) {
-          resizedWidth = 515
-          resizedHeight = Math.round(515 / ratio)
-        }
-        if (resizedHeight > 700) {
-          resizedHeight = 700
-          resizedWidth = Math.round(700 * ratio)
-        }
-      }
       buffer = await sharp(buffer)
         .resize({
-          width: resizedWidth,
-          height: resizedHeight,
-          withoutEnlargement: true
+          width: isWiderThanTall ? 1920 : 1080,
+          height: isWiderThanTall ? 1080 : 1920,
+          withoutEnlargement: true,
+          fit: 'inside'
         })
         .webp()
         .toBuffer()
