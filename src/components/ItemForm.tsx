@@ -18,13 +18,14 @@ import {
 } from 'antd'
 import type { UploadFile } from 'antd/es/upload/interface'
 import { Dayjs } from 'dayjs'
-import Image from 'next/image'
 import { useLocale, useTranslations } from 'next-intl'
 import React, { useCallback, useEffect } from 'react'
 
 import { useItemForm } from '@/hooks/useItemForm'
 import { bookkeepingAccounts } from '@/lib/bookkeeping-accounts'
 import type { ItemWithAttachments, NewItemWithAttachments } from '@/lib/db/schema'
+
+import { PreviewModal } from './PreviewModal'
 
 export interface ItemFormData {
   description: string
@@ -226,30 +227,7 @@ export function ItemForm({ visible, onOk, onCancel, editData }: ItemFormProps) {
         </Form>
       </Modal>
 
-      <Modal
-        open={previewState.open}
-        title={previewState.title}
-        footer={null}
-        onCancel={closePreview}
-        width="80%"
-      >
-        {previewState.isImage ? (
-          <div className="relative h-[80vh] w-full">
-            <Image
-              alt="preview"
-              src={previewState.url}
-              className="h-full w-full max-w-[1200px] object-contain"
-              fill
-            />
-          </div>
-        ) : (
-          <iframe
-            src={previewState.url}
-            style={{ width: '100%', height: '70vh', border: 'none' }}
-            title={previewState.title}
-          />
-        )}
-      </Modal>
+      <PreviewModal previewState={previewState} closePreview={closePreview} />
     </>
   )
 }

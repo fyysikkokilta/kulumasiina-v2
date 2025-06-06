@@ -7,14 +7,8 @@ import type { UploadRequestOption } from 'rc-upload/lib/interface'
 import { useCallback, useState } from 'react'
 
 import type { ItemFormData } from '@/components/ItemForm'
+import type { PreviewState } from '@/components/PreviewModal'
 import type { ItemWithAttachments, NewItemWithAttachments } from '@/lib/db/schema'
-
-interface PreviewState {
-  open: boolean
-  url: string
-  title: string
-  isImage: boolean
-}
 
 export function useItemForm(form: FormInstance<ItemFormData>) {
   const [fileList, setFileList] = useState<UploadFile[]>([])
@@ -22,7 +16,9 @@ export function useItemForm(form: FormInstance<ItemFormData>) {
     open: false,
     url: '',
     title: '',
-    isImage: false
+    isImage: false,
+    isNotReceipt: false,
+    value: null
   })
 
   // Custom upload handler for Ant Design Upload
@@ -50,26 +46,39 @@ export function useItemForm(form: FormInstance<ItemFormData>) {
   }
 
   // Handle preview
-  const handlePreview = useCallback(async (file: UploadFile) => {
-    if (!file.url && !file.preview) {
-      // For preview, use the download API
-      file.url = `/api/attachment/${file.uid}`
-    }
-    const res = await fetch(`/api/attachment/${file.uid}`, {
-      next: {
-        revalidate: 60 * 60 * 24 // 24 hours
+  const handlePreview = useCallback(
+    async (file: UploadFile) => {
+      if (!file.url && !file.preview) {
+        // For preview, use the download API
+        file.url = `/api/attachment/${file.uid}`
       }
-    })
-    const attachment = await res.blob()
-    const mimeType = res.headers.get('content-type')
-    const url = URL.createObjectURL(attachment)
-    setPreviewState({
-      open: true,
-      url,
-      title: file.name,
-      isImage: mimeType?.startsWith('image/') ?? false
-    })
-  }, [])
+      const res = await fetch(`/api/attachment/${file.uid}`, {
+        next: {
+          revalidate: 60 * 60 * 24 // 24 hours
+        }
+      })
+      const attachment = await res.blob()
+      const mimeType = res.headers.get('content-type')
+      const url = URL.createObjectURL(attachment)
+      const isNotReceipts = form.getFieldValue('isNotReceiptValues') as
+        | { [key: string]: boolean }
+        | undefined
+      const values = form.getFieldValue('valueValues') as
+        | { [key: string]: number | null }
+        | undefined
+      const isNotReceipt = isNotReceipts?.[file.name] ?? false
+      const value = values?.[file.name] ?? null
+      setPreviewState({
+        open: true,
+        url,
+        title: file.name,
+        isImage: mimeType?.startsWith('image/') ?? false,
+        isNotReceipt,
+        value
+      })
+    },
+    [form]
+  )
 
   // Handle file list change
   const handleChange = useCallback<NonNullable<UploadProps['onChange']>>((info) => {
@@ -204,7 +213,14 @@ export function useItemForm(form: FormInstance<ItemFormData>) {
   const handleCancel = useCallback(() => {
     form.resetFields()
     setFileList([])
-    setPreviewState({ open: false, url: '', title: '', isImage: false })
+    setPreviewState({
+      open: false,
+      url: '',
+      title: '',
+      isImage: false,
+      isNotReceipt: false,
+      value: null
+    })
   }, [form])
 
   // Close preview
