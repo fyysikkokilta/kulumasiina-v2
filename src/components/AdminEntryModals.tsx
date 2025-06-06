@@ -1,16 +1,32 @@
-import { Modal } from 'antd'
-import Image from 'next/image'
-import { useTranslations } from 'next-intl'
 import React from 'react'
 
-import type { NewItemWithAttachments, NewMileage } from '@/lib/db/schema'
+import type {
+  ItemWithAttachments,
+  Mileage,
+  NewItemWithAttachments,
+  NewMileage
+} from '@/lib/db/schema'
 
-import type { EditState, PreviewState } from './admin-types'
 import { ApproveModal } from './ApproveModal'
 import { DeleteOldArchivedModal } from './DeleteOldArchivedModal'
 import { ItemForm } from './ItemForm'
 import { MileageForm } from './MileageForm'
 import { PayModal } from './PayModal'
+import type { PreviewState } from './PreviewModal'
+import { PreviewModal } from './PreviewModal'
+
+export type EditState = {
+  entryId: number
+} & (
+  | {
+      type: 'item'
+      data: ItemWithAttachments
+    }
+  | {
+      type: 'mileage'
+      data: Mileage
+    }
+)
 
 interface AdminEntryModalsProps {
   approveModalVisible: boolean
@@ -45,7 +61,6 @@ export function AdminEntryModals({
   previewState,
   closePreview
 }: AdminEntryModalsProps) {
-  const t = useTranslations('admin')
   return (
     <>
       <ApproveModal
@@ -95,32 +110,7 @@ export function AdminEntryModals({
         />
       )}
 
-      {/* Preview Modal */}
-      <Modal
-        open={previewState.open}
-        title={`${previewState.title} ${previewState.isNotReceipt ? `(${t('table.not_receipt')})` : `(${previewState.value?.toFixed(2)}€)`}`}
-        footer={null}
-        onCancel={closePreview}
-        width="80%"
-        style={{ maxWidth: '1200px' }}
-      >
-        {previewState.isImage ? (
-          <div className="relative h-[80vh] w-full">
-            <Image
-              alt="preview"
-              src={previewState.url}
-              className="h-full w-full max-w-[1200px] object-contain"
-              fill
-            />
-          </div>
-        ) : (
-          <iframe
-            src={previewState.url}
-            style={{ width: '100%', height: '70vh', border: 'none' }}
-            title={previewState.title}
-          />
-        )}
-      </Modal>
+      <PreviewModal previewState={previewState} closePreview={closePreview} />
     </>
   )
 }
