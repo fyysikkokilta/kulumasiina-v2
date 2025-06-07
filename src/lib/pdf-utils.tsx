@@ -17,16 +17,7 @@ interface AttachmentData {
   value: number | null
   isNotReceipt: boolean
   filename: string | null
-}
-
-interface ProcessedAttachmentData {
-  data: Buffer[]
-  mimeType: string
-  value: number | null
-  isNotReceipt: boolean
-  filename: string | null
   attachmentNum: number
-  isPdf: boolean
 }
 
 interface PartData {
@@ -34,13 +25,6 @@ interface PartData {
   description: string
   price: number
   attachments: AttachmentData[]
-}
-
-interface ProcessedPartData {
-  date: Date
-  description: string
-  price: number
-  attachments: ProcessedAttachmentData[]
 }
 
 // Create styles
@@ -223,7 +207,7 @@ const ExpensePDF = ({
   govId: string | null
   submissionDate: Date
   title: string
-  parts: ProcessedPartData[]
+  parts: PartData[]
   approvalNote: string | null
   approvalDate: Date | null
   paidDate: Date | null
@@ -235,7 +219,6 @@ const ExpensePDF = ({
     ? ['Pvm', 'Selite', 'Kilometrikorvaus', 'Hinta']
     : ['Pvm', 'Selite', 'Liitteet', 'Hinta']
 
-  const attachmentNumber = 1
   const total = parts.reduce((sum, part) => sum + part.price, 0)
 
   return (
@@ -313,10 +296,7 @@ const ExpensePDF = ({
 
             {/* Data rows */}
             {parts.map((part, index) => {
-              const attachmentNumbers = part.attachments
-                .filter((att) => att.data.length > 0 || att.isPdf)
-                .map((att) => att.attachmentNum)
-                .join(', ')
+              const attachmentNumbers = part.attachments.map((att) => att.attachmentNum).join(', ')
 
               return (
                 <View
@@ -364,32 +344,24 @@ const ExpensePDF = ({
 
       {/* Image attachment pages */}
       {parts.flatMap((part, partIndex) => {
-        return part.attachments
-          .filter((attachment) => !attachment.isPdf && attachment.data.length > 0)
-          .map((attachment, attIndex) => {
-            const showPrice = attachment.value !== null && !attachment.isNotReceipt
-            const priceText = showPrice ? `: ${attachment.value!.toFixed(2)} €` : ''
-            const label = `Liite ${attachment.attachmentNum}${priceText}`
+        return part.attachments.map((attachment, attIndex) => {
+          const showPrice = attachment.value !== null && !attachment.isNotReceipt
+          const priceText = showPrice ? `: ${attachment.value!.toFixed(2)} €` : ''
+          const label = `Liite ${attachment.attachmentNum}${priceText}`
 
-            return attachment.data.map((pageData, pageIndex) => {
-              // Here every attachment is a PNG
-              const imageData = `data:image/png;base64,${pageData.toString('base64')}`
+          // Here every attachment is a PNG
+          const imageData = `data:image/png;base64,${attachment.data.toString('base64')}`
 
-              return (
-                <Page
-                  key={`${partIndex}-${attIndex}-${pageIndex}`}
-                  size="A4"
-                  style={styles.attachmentPage}
-                >
-                  <Text style={styles.attachmentLabel}>{label}</Text>
-                  <View style={styles.attachmentImageContainer}>
-                    {/* eslint-disable-next-line jsx-a11y/alt-text */}
-                    <Image style={styles.attachmentImage} src={imageData} />
-                  </View>
-                </Page>
-              )
-            })
-          })
+          return (
+            <Page key={`${partIndex}-${attIndex}`} size="A4" style={styles.attachmentPage}>
+              <Text style={styles.attachmentLabel}>{label}</Text>
+              <View style={styles.attachmentImageContainer}>
+                {/* eslint-disable-next-line jsx-a11y/alt-text */}
+                <Image style={styles.attachmentImage} src={imageData} />
+              </View>
+            </Page>
+          )
+        })
       })}
     </Document>
   )
@@ -410,51 +382,23 @@ export async function generateCombinedPDF(
   rejectionDate: Date | null
 ) {
   // Process attachments, separating PDFs from images
-  let attachmentNum = 1
-  const processedParts: ProcessedPartData[] = []
-  const pdfAttachments: {
-    attachmentNum: number
-    data: Buffer
-    value: number | null
-    isNotReceipt: boolean
-  }[] = []
+  const partsWithImages: PartData[] = []
+  const pdfAttachments: AttachmentData[] = []
 
   for (const part of parts) {
-    const processedAttachments: ProcessedAttachmentData[] = []
+    const imageAttachments: AttachmentData[] = []
     for (const att of part.attachments) {
-      if (Array.isArray(att.data)) {
-        throw new Error('Attachment data is an array, but expected a single buffer')
-      }
       if (att.data && att.mimeType === 'application/pdf') {
         // Keep PDF attachments separate for later merging
-        pdfAttachments.push({
-          attachmentNum: attachmentNum,
-          data: att.data,
-          value: att.value,
-          isNotReceipt: att.isNotReceipt
-        })
-        processedAttachments.push({
-          ...att,
-          attachmentNum: attachmentNum++,
-          data: [], // Empty data for PDFs in the React PDF
-          isPdf: true
-        })
-        continue
+        pdfAttachments.push(att)
       }
       if (att.data && att.mimeType.startsWith('image/')) {
-        processedAttachments.push({
-          ...att,
-          attachmentNum: attachmentNum++,
-          data: [await convertToPng(att.data)],
-          isPdf: false
-        })
-        continue
+        imageAttachments.push(att)
       }
-      throw new Error('Unsupported attachment type')
     }
-    processedParts.push({
+    partsWithImages.push({
       ...part,
-      attachments: processedAttachments
+      attachments: imageAttachments
     })
   }
 
@@ -477,7 +421,7 @@ export async function generateCombinedPDF(
       govId={govId}
       submissionDate={submissionDate}
       title={title}
-      parts={processedParts}
+      parts={partsWithImages}
       approvalNote={approvalNote}
       approvalDate={approvalDate}
       paidDate={paidDate}
@@ -501,9 +445,7 @@ export async function generateCombinedPDF(
   // Use pdf-lib to merge PDF attachments at the correct positions
   const mainPdfDoc = await PDFDocument.load(mainPdfBuffer)
   const totalPages = mainPdfDoc.getPageCount()
-  const imageAttachments = processedParts.flatMap((part) =>
-    part.attachments.filter((att) => !att.isPdf)
-  ).length
+  const imageAttachments = partsWithImages.flatMap((part) => part.attachments).length
   const overviewPages = totalPages - imageAttachments
 
   // Calculate where to insert PDF attachments
@@ -561,25 +503,25 @@ export async function generatePartsFromEntry(entry: EntryWithItemsAndMileages) {
   const parts: PartData[] = []
 
   // Add items
+  let attachmentNum = 1
   for (const item of entry.items) {
     const attachments: AttachmentData[] = []
     for (const att of item.attachments) {
-      let data: Buffer | null = null
+      let data: Buffer = Buffer.alloc(0)
       if (att.fileId) {
         try {
-          data = await getFile(att.fileId)
+          data = (await getFile(att.fileId)) || Buffer.alloc(0)
         } catch (e) {
           console.error('Error getting file:', e)
-          data = null
         }
       }
       const mimeType = mime.lookup(att.fileId) || 'application/octet-stream'
+      data = mimeType.startsWith('image/') ? await convertToPng(data) : data
       attachments.push({
-        data: data || Buffer.alloc(0),
-        mimeType: mimeType.toString(),
-        value: att.value,
-        isNotReceipt: att.isNotReceipt ?? false,
-        filename: att.filename
+        ...att,
+        data,
+        mimeType,
+        attachmentNum: attachmentNum++
       })
     }
     const price = attachments.reduce((sum, att) => {
