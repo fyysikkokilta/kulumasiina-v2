@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm'
 import mime from 'mime-types'
 import { NextRequest, NextResponse } from 'next/server'
 
-import { requireAuth } from '@/lib/auth'
+import { getUserFromCookies } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { attachments } from '@/lib/db/schema'
 import { getFile } from '@/lib/storage'
@@ -14,17 +14,21 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   })
 
   // Prevent public access to sent submissions
-  // requireAuth() redirects to root if not authenticated
-  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-  !!attachment && !(await requireAuth())
+  const user = await getUserFromCookies()
+  if (!!attachment && !user) {
+    return new NextResponse(null, {
+      status: 404
+    })
+  }
 
-  // Fetch file from storage
   let fileBuffer: Buffer
   try {
     fileBuffer = await getFile(id)
   } catch (e) {
     console.error(e)
-    return new NextResponse('File not found', { status: 404 })
+    return new NextResponse('File not found', {
+      status: 404
+    })
   }
 
   // Guess mime type from filename extension

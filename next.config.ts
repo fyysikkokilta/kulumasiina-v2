@@ -27,6 +27,19 @@ const nextConfig: NextConfig = {
             value: 'no'
           }
         ]
+      },
+      {
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'private, no-cache, no-store'
+          },
+          {
+            key: 'Expires',
+            value: '0'
+          }
+        ]
       }
     ]
   }
