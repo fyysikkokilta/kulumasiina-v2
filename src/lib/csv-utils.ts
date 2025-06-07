@@ -1,5 +1,5 @@
+import { PDFDocument } from '@cantoo/pdf-lib'
 import archiver from 'archiver'
-import { PDFDocument } from 'pdf-lib'
 
 import type { EntryWithItemsAndMileages } from './db/schema'
 import { env } from './env'

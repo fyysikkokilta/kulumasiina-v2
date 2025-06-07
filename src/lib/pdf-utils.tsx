@@ -1,8 +1,9 @@
+import { PDFDocument, StandardFonts } from '@cantoo/pdf-lib'
 import { Document, Image, Page, renderToBuffer, StyleSheet, Text, View } from '@react-pdf/renderer'
+import { compress } from 'compress-pdf'
 import fs from 'fs/promises'
 import mime from 'mime-types'
 import path from 'path'
-import { pdfToPng } from 'pdf-to-png-converter'
 import React from 'react'
 import sharp from 'sharp'
 
@@ -25,6 +26,7 @@ interface ProcessedAttachmentData {
   isNotReceipt: boolean
   filename: string | null
   attachmentNum: number
+  isPdf: boolean
 }
 
 interface PartData {
@@ -81,9 +83,8 @@ const styles = StyleSheet.create({
     color: '#333333'
   },
   statusBlock: {
-    fontSize: 12,
-    marginTop: 10,
-    marginBottom: 10,
+    fontSize: 15,
+    marginBottom: 5,
     color: '#333333'
   },
   reasonBlock: {
@@ -234,7 +235,7 @@ const ExpensePDF = ({
     ? ['Pvm', 'Selite', 'Kilometrikorvaus', 'Hinta']
     : ['Pvm', 'Selite', 'Liitteet', 'Hinta']
 
-  let attachmentNumber = 1
+  const attachmentNumber = 1
   const total = parts.reduce((sum, part) => sum + part.price, 0)
 
   return (
@@ -242,7 +243,7 @@ const ExpensePDF = ({
       <Page size="A4" style={styles.page}>
         {/* Watermark */}
         {logoData && (
-          <View style={styles.watermarkContainer}>
+          <View fixed style={styles.watermarkContainer}>
             {/* eslint-disable-next-line jsx-a11y/alt-text */}
             <Image style={styles.watermark} src={logoData} />
           </View>
@@ -313,8 +314,8 @@ const ExpensePDF = ({
             {/* Data rows */}
             {parts.map((part, index) => {
               const attachmentNumbers = part.attachments
-                .filter((att) => att.data)
-                .map(() => attachmentNumber++)
+                .filter((att) => att.data.length > 0 || att.isPdf)
+                .map((att) => att.attachmentNum)
                 .join(', ')
 
               return (
@@ -361,32 +362,34 @@ const ExpensePDF = ({
         </View>
       </Page>
 
-      {/* Attachment pages */}
+      {/* Image attachment pages */}
       {parts.flatMap((part, partIndex) => {
-        return part.attachments.map((attachment, attIndex) => {
-          const showPrice = attachment.value !== null && !attachment.isNotReceipt
-          const priceText = showPrice ? `: ${attachment.value!.toFixed(2)} €` : ''
-          const label = `Liite ${attachment.attachmentNum}${priceText}`
+        return part.attachments
+          .filter((attachment) => !attachment.isPdf && attachment.data.length > 0)
+          .map((attachment, attIndex) => {
+            const showPrice = attachment.value !== null && !attachment.isNotReceipt
+            const priceText = showPrice ? `: ${attachment.value!.toFixed(2)} €` : ''
+            const label = `Liite ${attachment.attachmentNum}${priceText}`
 
-          return attachment.data.map((pageData, pageIndex) => {
-            // Here every attachment is a PNG
-            const imageData = `data:image/png;base64,${pageData.toString('base64')}`
+            return attachment.data.map((pageData, pageIndex) => {
+              // Here every attachment is a PNG
+              const imageData = `data:image/png;base64,${pageData.toString('base64')}`
 
-            return (
-              <Page
-                key={`${partIndex}-${attIndex}-${pageIndex}`}
-                size="A4"
-                style={styles.attachmentPage}
-              >
-                <Text style={styles.attachmentLabel}>{label}</Text>
-                <View style={styles.attachmentImageContainer}>
-                  {/* eslint-disable-next-line jsx-a11y/alt-text */}
-                  <Image style={styles.attachmentImage} src={imageData} />
-                </View>
-              </Page>
-            )
+              return (
+                <Page
+                  key={`${partIndex}-${attIndex}-${pageIndex}`}
+                  size="A4"
+                  style={styles.attachmentPage}
+                >
+                  <Text style={styles.attachmentLabel}>{label}</Text>
+                  <View style={styles.attachmentImageContainer}>
+                    {/* eslint-disable-next-line jsx-a11y/alt-text */}
+                    <Image style={styles.attachmentImage} src={imageData} />
+                  </View>
+                </Page>
+              )
+            })
           })
-        })
       })}
     </Document>
   )
@@ -406,11 +409,16 @@ export async function generateCombinedPDF(
   paidDate: Date | null,
   rejectionDate: Date | null
 ) {
-  // @ts-expect-error: pdf.worker.min.mjs is not typed
-  await import('pdfjs-dist/build/pdf.worker.min.mjs')
-  // Process images for parts, and convert PDF attachments to images
+  // Process attachments, separating PDFs from images
   let attachmentNum = 1
   const processedParts: ProcessedPartData[] = []
+  const pdfAttachments: {
+    attachmentNum: number
+    data: Buffer
+    value: number | null
+    isNotReceipt: boolean
+  }[] = []
+
   for (const part of parts) {
     const processedAttachments: ProcessedAttachmentData[] = []
     for (const att of part.attachments) {
@@ -418,22 +426,18 @@ export async function generateCombinedPDF(
         throw new Error('Attachment data is an array, but expected a single buffer')
       }
       if (att.data && att.mimeType === 'application/pdf') {
-        // Convert PDF to images
-        const pages = await pdfToPng(att.data, {
-          viewportScale: 1.5
+        // Keep PDF attachments separate for later merging
+        pdfAttachments.push({
+          attachmentNum: attachmentNum,
+          data: att.data,
+          value: att.value,
+          isNotReceipt: att.isNotReceipt
         })
-        const optimizedPages: Buffer[] = []
-        for (const imgBuf of pages) {
-          if (!imgBuf.content) {
-            throw new Error('PDF to PNG conversion failed')
-          }
-          optimizedPages.push(await convertToPng(imgBuf.content))
-        }
         processedAttachments.push({
           ...att,
-          mimeType: 'image/jpeg',
           attachmentNum: attachmentNum++,
-          data: optimizedPages
+          data: [], // Empty data for PDFs in the React PDF
+          isPdf: true
         })
         continue
       }
@@ -441,7 +445,8 @@ export async function generateCombinedPDF(
         processedAttachments.push({
           ...att,
           attachmentNum: attachmentNum++,
-          data: [await convertToPng(att.data)]
+          data: [await convertToPng(att.data)],
+          isPdf: false
         })
         continue
       }
@@ -463,7 +468,7 @@ export async function generateCombinedPDF(
     console.error('Error loading logo:', e)
   }
 
-  // Generate main PDF using React PDF
+  // Generate main PDF with overview and image attachments using React PDF
   const mainPdfBuffer = await renderToBuffer(
     <ExpensePDF
       status={status}
@@ -481,13 +486,65 @@ export async function generateCombinedPDF(
     />
   )
 
+  // If there are no PDF attachments, return the main PDF
+  if (pdfAttachments.length === 0) {
+    const sanitizedName = name.replace(/[^a-zA-Z0-9-_]/g, '_')
+    const filenameDateStr = submissionDate.toLocaleDateString('fi-FI').replace(/\./g, '-')
+    const filename = `${sanitizedName}-${filenameDateStr}-${entryId}.pdf`
+
+    return {
+      filename,
+      data: Buffer.from(mainPdfBuffer)
+    }
+  }
+
+  // Use pdf-lib to merge PDF attachments at the correct positions
+  const mainPdfDoc = await PDFDocument.load(mainPdfBuffer)
+  const totalPages = mainPdfDoc.getPageCount()
+  const imageAttachments = processedParts.flatMap((part) =>
+    part.attachments.filter((att) => !att.isPdf)
+  ).length
+  const overviewPages = totalPages - imageAttachments
+
+  // Calculate where to insert PDF attachments
+  // PDF attachments should be inserted after image attachments but before the next part's attachments
+  let pdfPageOffset = 0
+
+  const helveticaFont = await mainPdfDoc.embedFont(StandardFonts.HelveticaBold)
+  for (const pdfAtt of pdfAttachments) {
+    const pdfDoc = await PDFDocument.load(pdfAtt.data)
+    const pdfPages = await mainPdfDoc.copyPages(pdfDoc, pdfDoc.getPageIndices())
+
+    const showPrice = pdfAtt.value !== null && !pdfAtt.isNotReceipt
+    const priceText = showPrice ? `: ${pdfAtt.value!.toFixed(2)} €` : ''
+    const labelText = `Liite ${pdfAtt.attachmentNum}${priceText}`
+    const insertIndex = overviewPages + pdfPageOffset + pdfAtt.attachmentNum - 1
+
+    // Insert all PDF pages
+    for (let i = 0; i < pdfPages.length; i++) {
+      pdfPages[i].drawText(labelText, {
+        x: 40,
+        y: pdfPages[i].getHeight() - 60,
+        size: 18,
+        font: helveticaFont
+      })
+      mainPdfDoc.insertPage(insertIndex + i, pdfPages[i])
+    }
+    // -1 since we need to take into account that one page is included in attachmentNum
+    pdfPageOffset += pdfPages.length - 1
+  }
+
+  const finalPdfBytes = await mainPdfDoc.save()
+
   const sanitizedName = name.replace(/[^a-zA-Z0-9-_]/g, '_')
   const filenameDateStr = submissionDate.toLocaleDateString('fi-FI').replace(/\./g, '-')
   const filename = `${sanitizedName}-${filenameDateStr}-${entryId}.pdf`
 
+  const data = await compress(Buffer.from(finalPdfBytes))
+
   return {
     filename,
-    data: Buffer.from(mainPdfBuffer)
+    data
   }
 }
 
