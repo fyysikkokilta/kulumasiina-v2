@@ -28,7 +28,7 @@ const ItemUpdateSchema = z.object({
 })
 
 export const updateItemAction = actionClient
-  .schema(ItemUpdateSchema)
+  .inputSchema(ItemUpdateSchema)
   .use(isAuthorizedMiddleware)
   .action(async ({ parsedInput }) => {
     const { id, attachments: attachmentUpdates, ...updateData } = parsedInput

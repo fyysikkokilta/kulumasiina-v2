@@ -20,7 +20,7 @@ const MileageUpdateSchema = z.object({
 })
 
 export const updateMileageAction = actionClient
-  .schema(MileageUpdateSchema)
+  .inputSchema(MileageUpdateSchema)
   .use(isAuthorizedMiddleware)
   .action(async ({ parsedInput }) => {
     const { id, ...updateData } = parsedInput

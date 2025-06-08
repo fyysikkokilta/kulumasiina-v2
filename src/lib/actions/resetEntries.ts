@@ -14,7 +14,7 @@ const ChangeStatusSchema = z.object({
 })
 
 export const resetEntriesAction = actionClient
-  .schema(ChangeStatusSchema)
+  .inputSchema(ChangeStatusSchema)
   .use(isAuthorizedMiddleware)
   .action(async ({ parsedInput }) => {
     const now = new Date()

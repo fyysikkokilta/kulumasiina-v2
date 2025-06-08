@@ -16,7 +16,7 @@ const BookkeepingAccountSchema = z.object({
 })
 
 export const updateBookkeepingAccountAction = actionClient
-  .schema(BookkeepingAccountSchema)
+  .inputSchema(BookkeepingAccountSchema)
   .use(isAuthorizedMiddleware)
   .action(async ({ parsedInput }) => {
     const now = new Date()

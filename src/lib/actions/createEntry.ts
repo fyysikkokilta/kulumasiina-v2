@@ -48,7 +48,7 @@ const EntryCreateSchema = z.object({
 })
 
 export const createEntryAction = actionClient
-  .schema(EntryCreateSchema)
+  .inputSchema(EntryCreateSchema)
   .action(async ({ parsedInput }) => {
     const now = new Date()
     const hasItems = parsedInput.items.length > 0

@@ -15,7 +15,7 @@ const PayEntriesSchema = z.object({
 })
 
 export const payEntriesAction = actionClient
-  .schema(PayEntriesSchema)
+  .inputSchema(PayEntriesSchema)
   .use(isAuthorizedMiddleware)
   .action(async ({ parsedInput }) => {
     const paidDate = new Date(parsedInput.date)

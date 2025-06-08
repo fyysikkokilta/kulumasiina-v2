@@ -12,7 +12,7 @@ import { actionClient } from './safeActionClient'
 const DeleteEntrySchema = z.object({ id: z.number() })
 
 export const deleteEntryAction = actionClient
-  .schema(DeleteEntrySchema)
+  .inputSchema(DeleteEntrySchema)
   .use(isAuthorizedMiddleware)
   .action(async ({ parsedInput }) => {
     await db.delete(entries).where(eq(entries.id, parsedInput.id))

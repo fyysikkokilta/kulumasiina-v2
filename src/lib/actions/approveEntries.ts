@@ -16,7 +16,7 @@ const ApproveEntriesSchema = z.object({
 })
 
 export const approveEntriesAction = actionClient
-  .schema(ApproveEntriesSchema)
+  .inputSchema(ApproveEntriesSchema)
   .use(isAuthorizedMiddleware)
   .action(async ({ parsedInput }) => {
     const approvalDate = new Date(parsedInput.date)
