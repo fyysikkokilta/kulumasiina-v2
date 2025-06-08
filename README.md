@@ -4,15 +4,18 @@ A modern expense management system built with Next.js 15, featuring server-side 
 
 ## Features
 
-- **Next.js 15** with App Router
+- **Next.js 15** with App Router and Turbo mode
+- **React 19** with compatibility patches
 - **Drizzle ORM** with PostgreSQL database
 - **Server Actions** using next-safe-action for all mutating operations
 - **Server Components** for data fetching
-- **Tailwind CSS** for styling (with Ant Design components)
+- **Tailwind CSS v4** for styling (with Ant Design components)
 - **TypeScript** for type safety
-- **Internationalization** (Finnish/English)
+- **Internationalization** (Finnish/English) using next-intl
 - **Google OAuth** authentication
 - **Session-based authentication** with secure cookies
+- **File storage** with local or S3/R2 support
+- **PDF compression** with Ghostscript integration
 
 ## Pages
 
@@ -39,6 +42,9 @@ All mutating operations are handled by server actions:
 - `payEntriesAction` - Mark entries as paid
 - `archiveEntriesAction` - Archive entries
 - `resetEntriesAction` - Reset entry status
+- `deleteEntryAction` - Delete expense entries
+- `deleteOldArchivedEntriesAction` - Clean up old archived entries
+- Various update actions for items, mileages, and bookkeeping accounts
 
 ### Authentication
 
@@ -69,28 +75,34 @@ All mutating operations are handled by server actions:
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Copy environment file and configure
 cp .env.example .env.local
 
 # Generate database migrations
-npm run db:generate
+pnpm run db:generate
 
 # Push migrations to database
-npm run db:push
+pnpm run db:push
 
-# Run development server
-npm run dev
+# Run development server (with Turbo)
+pnpm run dev
 
 # Build for production
-npm run build
+pnpm run build
 
 # Start production server
-npm start
+pnpm start
 
 # Open Drizzle Studio (database GUI)
-npm run db:studio
+pnpm run db:studio
+
+# Run database migrations programmatically
+pnpm run db:migrate
+
+# Clean up orphaned files
+pnpm run cleanup-orphaned-files
 ```
 
 ## Environment Variables
@@ -101,6 +113,9 @@ Copy `.env.example` to `.env.local` and configure:
 # Database Configuration (PostgreSQL)
 DATABASE_URL=postgresql://username:password@localhost:5432/kulumasiina
 
+# Base URL Configuration
+BASE_URL=https://kulu.fyysikkokilta.fi
+
 # Google OAuth Configuration
 GOOGLE_CLIENT_ID=your_google_client_id_here
 GOOGLE_CLIENT_SECRET=your_google_client_secret_here
@@ -110,7 +125,7 @@ GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/google/callback
 ADMIN_EMAILS=admin@example.com,another-admin@example.com
 
 # Mileage Configuration
-MILEAGE_REIMBURSEMENT_RATE=0.25
+NEXT_PUBLIC_MILEAGE_REIMBURSEMENT_RATE=0.25
 MILEAGE_PROCOUNTOR_PRODUCT_ID=v2025_kmkorv
 
 # JWT Configuration
@@ -118,7 +133,23 @@ JWT_SECRET=your_long_random_jwt_secret_here
 JWT_EXPIRY_MINUTES=180
 
 # Privacy Policy
-PRIVACY_POLICY_URL=https://fyysikkokilta.fi/tietosuoja
+NEXT_PUBLIC_PRIVACY_POLICY_URL=https://fyysikkokilta.fi/tietosuoja
+
+# Archive Configuration
+NEXT_PUBLIC_ARCHIVED_ENTRIES_AGE_LIMIT_DAYS=30
+
+# Storage Configuration
+NEXT_PUBLIC_STORAGE_DRIVER=local # or s3
+
+# S3/Cloudflare R2 Configuration (if using S3 storage)
+S3_ENDPOINT=https://<your-s3-endpoint>
+S3_ACCESS_KEY=<your-access-key>
+S3_SECRET_KEY=<your-secret-key>
+S3_BUCKET=<your-bucket-name>
+S3_REGION=<your-region>
+
+# File Cleanup Secret (for orphaned file cleanup API)
+FILE_CLEANUP_SECRET=your_cleanup_secret_here
 ```
 
 ## Database Schema
@@ -174,19 +205,22 @@ The application can be deployed to any platform that supports Next.js and Postgr
 
 ## Development Notes
 
-- Database migrations must be run manually with `npm run db:push`
+- Database migrations can be run with `pnpm run db:push` or `pnpm run db:migrate`
 - Admin users are determined by the `ADMIN_EMAILS` environment variable
 - The application requires a PostgreSQL connection
 - All data is stored in the configured PostgreSQL database
+- The project uses **pnpm** as the package manager (enforced by preinstall script)
+- Development server runs with Turbo mode for faster builds
+- Supports both local file storage and S3/Cloudflare R2 for attachments
 
 ## Dev setup
 
-1. Install Node.js and npm
+1. Install Node.js and pnpm
 2. Set up PostgreSQL database (local or cloud)
 3. Copy `.env.example` to `.env.local` and configure
-4. Run `npm install`
-5. Run `npm run db:push` to set up database
-6. Run `npm run dev`
+4. Run `pnpm install`
+5. Run `pnpm run db:push` to set up database
+6. Run `pnpm run dev`
 
 ## Orphaned File Cleanup
 
