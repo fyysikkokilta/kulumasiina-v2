@@ -4,7 +4,7 @@ import path from 'path'
 
 import { env } from './env'
 
-const isS3 = env.NEXT_PUBLIC_STORAGE_DRIVER === 's3'
+const isS3 = env.STORAGE_DRIVER === 's3'
 
 // S3 client setup
 let minio: InstanceType<typeof MinioClient> | null = null

@@ -139,7 +139,7 @@ NEXT_PUBLIC_PRIVACY_POLICY_URL=https://fyysikkokilta.fi/tietosuoja
 NEXT_PUBLIC_ARCHIVED_ENTRIES_AGE_LIMIT_DAYS=30
 
 # Storage Configuration
-NEXT_PUBLIC_STORAGE_DRIVER=local # or s3
+STORAGE_DRIVER=local # or s3
 
 # S3/Cloudflare R2 Configuration (if using S3 storage)
 S3_ENDPOINT=https://<your-s3-endpoint>
