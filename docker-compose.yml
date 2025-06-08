@@ -1,21 +1,13 @@
 services:
-  database:
-    image: postgres:latest
-    environment:
-      - POSTGRES_DB=$DB_NAME
-      - POSTGRES_USER=$DB_USERNAME
-      - POSTGRES_PASSWORD=$DB_PASSWORD
-    ports:
-      - '127.0.0.1:5432:5432'
-    volumes:
-      - ./data:/var/lib/postgresql/data
   app:
     build:
       context: .
       dockerfile: Dockerfile
+      extra_hosts:
+        - "host.docker.internal:host-gateway"
     restart: always
-    depends_on:
-      - database
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     env_file:
       - .env
     ports:
