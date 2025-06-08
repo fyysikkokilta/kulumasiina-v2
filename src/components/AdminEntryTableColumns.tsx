@@ -26,7 +26,7 @@ export function getAdminEntryTableColumns(
       title: t('table.date'),
       dataIndex: 'submissionDate',
       key: 'submissionDate',
-      render: (date: string) => new Date(date).toLocaleDateString(),
+      render: (date: string) => new Date(date).toLocaleDateString('fi-FI'),
       sorter: (a, b) => new Date(a.submissionDate).getTime() - new Date(b.submissionDate).getTime(),
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
         <div className="p-2">
