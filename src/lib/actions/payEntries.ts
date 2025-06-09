@@ -1,6 +1,6 @@
 'use server'
 
-import { eq } from 'drizzle-orm'
+import { inArray } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
@@ -20,16 +20,16 @@ export const payEntriesAction = actionClient
   .action(async ({ parsedInput }) => {
     const paidDate = new Date(parsedInput.date)
     const now = new Date()
-    for (const id of parsedInput.ids) {
-      await db
-        .update(entries)
-        .set({
-          status: 'paid',
-          paidDate,
-          updatedAt: now
-        })
-        .where(eq(entries.id, id))
-    }
+
+    await db
+      .update(entries)
+      .set({
+        status: 'paid',
+        paidDate,
+        updatedAt: now
+      })
+      .where(inArray(entries.id, parsedInput.ids))
+
     revalidatePath('/admin')
     return { success: true }
   })

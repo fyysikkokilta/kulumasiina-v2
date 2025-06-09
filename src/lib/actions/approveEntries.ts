@@ -1,6 +1,6 @@
 'use server'
 
-import { eq } from 'drizzle-orm'
+import { inArray } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
@@ -22,17 +22,15 @@ export const approveEntriesAction = actionClient
     const approvalDate = new Date(parsedInput.date)
     const now = new Date()
 
-    for (const id of parsedInput.ids) {
-      await db
-        .update(entries)
-        .set({
-          status: 'approved',
-          approvalDate,
-          approvalNote: parsedInput.approval_note,
-          updatedAt: now
-        })
-        .where(eq(entries.id, id))
-    }
+    await db
+      .update(entries)
+      .set({
+        status: 'approved',
+        approvalDate,
+        approvalNote: parsedInput.approval_note,
+        updatedAt: now
+      })
+      .where(inArray(entries.id, parsedInput.ids))
 
     revalidatePath('/admin')
     return { success: true }

@@ -15,6 +15,7 @@ export const deleteOldArchivedEntriesAction = actionClient
     const ageLimitDays = env.NEXT_PUBLIC_ARCHIVED_ENTRIES_AGE_LIMIT_DAYS
     const limitDate = new Date()
     limitDate.setDate(limitDate.getDate() - ageLimitDays)
+
     await db
       .delete(entries)
       .where(
@@ -26,6 +27,7 @@ export const deleteOldArchivedEntriesAction = actionClient
           )
         )
       )
+
     revalidatePath('/admin')
     return { success: true }
   })

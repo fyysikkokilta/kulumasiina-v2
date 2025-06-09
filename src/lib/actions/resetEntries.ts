@@ -1,6 +1,6 @@
 'use server'
 
-import { eq } from 'drizzle-orm'
+import { eq, inArray } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
@@ -18,19 +18,19 @@ export const resetEntriesAction = actionClient
   .use(isAuthorizedMiddleware)
   .action(async ({ parsedInput }) => {
     const now = new Date()
-    for (const id of parsedInput.ids) {
-      await db
-        .update(entries)
-        .set({
-          status: 'submitted',
-          approvalDate: null,
-          approvalNote: null,
-          paidDate: null,
-          rejectionDate: null,
-          updatedAt: now
-        })
-        .where(eq(entries.id, id))
-    }
+
+    await db
+      .update(entries)
+      .set({
+        status: 'submitted',
+        approvalDate: null,
+        approvalNote: null,
+        paidDate: null,
+        rejectionDate: null,
+        updatedAt: now
+      })
+      .where(inArray(entries.id, parsedInput.ids))
+
     revalidatePath('/admin')
     return { success: true }
   })
