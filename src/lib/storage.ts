@@ -87,19 +87,20 @@ export async function listFiles() {
   }
 }
 
-export async function deleteFile(fileId: string) {
+export async function deleteFiles(fileIds: string[]) {
   if (isS3) {
     if (!minio) throw new Error('S3 storage not enabled')
-    await minio.removeObject(bucket, fileId)
-    console.log('Deleted file from S3', fileId)
+    await minio.removeObjects(bucket, fileIds)
+    console.log('Deleted files from S3', fileIds)
   } else {
-    const filePath = path.join(localPath, fileId)
-    try {
-      await fs.unlink(filePath)
-      console.log('Deleted file from local', fileId)
-    } catch (e) {
-      console.log('Error deleting file from local', fileId, e)
-      // Ignore if file does not exist
+    for (const fileId of fileIds) {
+      const filePath = path.join(localPath, fileId)
+      try {
+        await fs.unlink(filePath)
+      } catch (e) {
+        // Ignore if file does not exist
+      }
     }
+    console.log('Deleted files from local', fileIds)
   }
 }

@@ -1,6 +1,6 @@
 import { db } from './db'
 import { attachments } from './db/schema'
-import { deleteFile, listFiles } from './storage'
+import { deleteFiles, listFiles } from './storage'
 
 /**
  * Deletes files from storage that are not referenced in the database (orphans).
@@ -20,9 +20,7 @@ export async function cleanupOrphanedFiles() {
   const orphanedFileIds = storageFileIds.filter((fileId) => !dbFileIdSet.has(fileId))
 
   // Delete orphaned files
-  for (const fileId of orphanedFileIds) {
-    await deleteFile(fileId)
-  }
+  await deleteFiles(orphanedFileIds)
 
   return orphanedFileIds
 }
