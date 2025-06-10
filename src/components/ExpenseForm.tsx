@@ -3,6 +3,7 @@
 import { PlusOutlined } from '@ant-design/icons'
 import { Button, Card, Divider, Form, Input, Result, Typography } from 'antd'
 import { isValidIBAN } from 'ibantools'
+import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import React from 'react'
 
@@ -257,14 +258,16 @@ export function ExpenseForm() {
         {/* Privacy Policy */}
         <div className="text-center text-gray-500">
           <Typography.Text>
-            {t('privacy_policy_text_1')}{' '}
-            <a
-              href={env.NEXT_PUBLIC_PRIVACY_POLICY_URL}
-              className="text-blue-500 hover:text-blue-700"
-            >
-              {t('privacy_policy_link_text')}
-            </a>
-            {t('privacy_policy_text_2')}
+            {t.rich('privacy_policy', {
+              privacy_policy: (chunks) => (
+                <Link
+                  href={env.NEXT_PUBLIC_PRIVACY_POLICY_URL}
+                  className="text-blue-500 hover:text-blue-700"
+                >
+                  {chunks}
+                </Link>
+              )
+            })}
           </Typography.Text>
         </div>
       </Form>

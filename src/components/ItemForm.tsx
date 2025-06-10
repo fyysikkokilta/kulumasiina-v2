@@ -94,6 +94,9 @@ export function ItemForm({ visible, onOk, onCancel, editData }: ItemFormProps) {
   // Watch for checkbox changes to disable/enable value inputs
   const disablevalue = Form.useWatch('isNotReceiptValues', form)
 
+  // Check if any files are uploading to disable submit button
+  const hasUploadingFiles = fileList.some((file) => file.status === 'uploading')
+
   return (
     <>
       <Modal
@@ -102,6 +105,7 @@ export function ItemForm({ visible, onOk, onCancel, editData }: ItemFormProps) {
         onOk={handleOk}
         onCancel={handleCancel}
         width={800}
+        okButtonProps={{ disabled: hasUploadingFiles }}
       >
         <Form form={form} layout="vertical">
           <Form.Item

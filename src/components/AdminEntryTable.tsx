@@ -64,7 +64,8 @@ export function AdminEntryTable({ entries }: AdminEntryTableProps) {
       {selectedRowKeys.length > 0 && (
         <div className="rounded-md border border-blue-200 bg-blue-50 p-3">
           <Typography.Text>
-            <strong>{selectedRowKeys.length}</strong> {t('selection.entries_selected')}
+            <strong>{selectedRowKeys.length}</strong>{' '}
+            {t('selection.entries_selected', { entries: selectedRowKeys.length })}
             {selectedStatus && (
               <span className="ml-2">
                 ({t('selection.status')}:{' '}

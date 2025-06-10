@@ -41,7 +41,7 @@ export function ItemDisplay({ item, onEdit, onRemove }: ItemDisplayProps) {
         <div className="flex justify-between">
           <Text strong>{dayjs(item.date).format('DD.MM.YYYY')}</Text>
           <Tag color="green">
-            {item.attachments.length} {t('attachments')}
+            {item.attachments.length} {t('attachments', { attachments: item.attachments.length })}
           </Tag>
         </div>
         <Text>{item.description}</Text>
