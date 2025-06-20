@@ -53,7 +53,10 @@ export const env = createEnv({
       .string()
       .default('0.25')
       .transform((val) => parseFloat(val)),
-    NEXT_PUBLIC_PRIVACY_POLICY_URL: z.string().url().default('https://fyysikkokilta.fi/tietosuoja')
+    NEXT_PUBLIC_PRIVACY_POLICY_URL: z
+      .string()
+      .url()
+      .default('https://drive.google.com/drive/folders/12VBoHzXG7vEYGul87egYQZ3QN_-CKpBa')
   },
   experimental__runtimeEnv: {
     NEXT_PUBLIC_ARCHIVED_ENTRIES_AGE_LIMIT_DAYS:
@@ -61,5 +64,6 @@ export const env = createEnv({
     NEXT_PUBLIC_MILEAGE_REIMBURSEMENT_RATE: process.env.NEXT_PUBLIC_MILEAGE_REIMBURSEMENT_RATE,
     NEXT_PUBLIC_PRIVACY_POLICY_URL: process.env.NEXT_PUBLIC_PRIVACY_POLICY_URL
   },
-  emptyStringAsUndefined: true
+  emptyStringAsUndefined: true,
+  skipValidation: process.env.SKIP_ENV_VALIDATION === 'true'
 })

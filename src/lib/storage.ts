@@ -98,6 +98,7 @@ export async function deleteFiles(fileIds: string[]) {
       try {
         await fs.unlink(filePath)
       } catch (e) {
+        console.log('Error deleting file from local', e)
         // Ignore if file does not exist
       }
     }

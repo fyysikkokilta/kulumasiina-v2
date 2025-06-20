@@ -1,10 +1,6 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      extra_hosts:
-        - "host.docker.internal:host-gateway"
+    image: ghcr.io/fyysikkokilta/kulumasiina-v2:latest
     restart: always
     extra_hosts:
       - "host.docker.internal:host-gateway"
