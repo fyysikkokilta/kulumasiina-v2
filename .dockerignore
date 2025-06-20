@@ -1,8 +1,13 @@
 Dockerfile
 .dockerignore
+docker-compose.yml
+update-deployment.sh
+LICENSE
+README.md
 node_modules
 npm-debug.log
 README.md
+.env.example
 .env
 .env.local
 .env.development.local
