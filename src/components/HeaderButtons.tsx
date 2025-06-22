@@ -3,11 +3,9 @@
 import { useRouter } from 'next/navigation'
 import { useLocale } from 'next-intl'
 
-import { User } from '@/lib/auth'
-
 import { LoginBtn } from './LoginBtn'
 
-export function HeaderButtons({ user }: { user: User | null }) {
+export function HeaderButtons({ authorized }: { authorized: boolean }) {
   const locale = useLocale()
   const router = useRouter()
 
@@ -26,7 +24,7 @@ export function HeaderButtons({ user }: { user: User | null }) {
       >
         {otherLocale.toUpperCase()}
       </button>
-      <LoginBtn user={user} />
+      <LoginBtn authorized={authorized} />
     </div>
   )
 }

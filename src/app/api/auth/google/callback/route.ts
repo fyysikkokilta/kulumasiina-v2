@@ -1,7 +1,9 @@
+import { SignJWT } from 'jose'
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { NextRequest } from 'next/server'
 
-import { createJWTToken, createUser } from '@/lib/auth'
+import { JWT_COOKIE } from '@/lib/auth'
 import { env } from '@/lib/env'
 
 export async function GET(request: NextRequest) {
@@ -53,9 +55,26 @@ export async function GET(request: NextRequest) {
     redirect('/login?error=auth_failed')
   }
 
-  const userData = (await userResponse.json()) as { email: string; name: string }
+  const user = (await userResponse.json()) as { email: string; name: string }
 
-  const user = createUser(userData.email, userData.name)
-  await createJWTToken(user)
+  if (!env.ADMIN_EMAILS.includes(user.email)) {
+    throw new Error('Only admin users are allowed to log in')
+  }
+
+  const token = await new SignJWT({ user })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setIssuer('kulumasiina')
+    .setExpirationTime(Math.floor(Date.now() / 1000) + env.JWT_EXPIRY_MINUTES * 60)
+    .sign(new TextEncoder().encode(env.JWT_SECRET))
+
+  const cookieStore = await cookies()
+  cookieStore.set(JWT_COOKIE, token, {
+    httpOnly: true,
+    secure: env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: env.JWT_EXPIRY_MINUTES * 60
+  })
+
   redirect('/admin')
 }

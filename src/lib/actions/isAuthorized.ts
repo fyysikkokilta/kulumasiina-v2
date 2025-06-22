@@ -1,14 +1,11 @@
-import { MiddlewareResult } from 'next-safe-action'
+import { createMiddleware } from 'next-safe-action'
 
-import { requireAuth } from '../auth'
+import { isAuthorized } from '../auth'
 
-export const isAuthorizedMiddleware = async ({
-  next
-}: {
-  next: <NC extends object>(opts?: {
-    ctx?: NC | undefined
-  }) => Promise<MiddlewareResult<string, NC>>
-}) => {
-  await requireAuth()
+export const isAuthorizedMiddleware = createMiddleware().define(async ({ next }) => {
+  const authorized = await isAuthorized()
+  if (!authorized) {
+    throw new Error('Unauthorized')
+  }
   return next()
-}
+})

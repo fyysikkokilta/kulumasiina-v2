@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm'
 import mime from 'mime-types'
 import { NextRequest, NextResponse } from 'next/server'
 
-import { getUserFromCookies } from '@/lib/auth'
+import { isAuthorized } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { attachments } from '@/lib/db/schema'
 import { getFile } from '@/lib/storage'
@@ -14,8 +14,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   })
 
   // Prevent public access to sent submissions
-  const user = await getUserFromCookies()
-  if (!!attachment && !user) {
+  const authorized = await isAuthorized()
+  if (!!attachment && !authorized) {
     return new NextResponse(null, {
       status: 404
     })

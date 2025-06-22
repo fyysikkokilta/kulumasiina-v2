@@ -1,10 +1,7 @@
 import { AdminEntryTable } from '@/components/AdminEntryTable'
-import { requireAuth } from '@/lib/auth'
 import { db } from '@/lib/db'
 
 export default async function AdminPage() {
-  await requireAuth()
-
   const entries = await db.query.entries.findMany({
     with: {
       items: {

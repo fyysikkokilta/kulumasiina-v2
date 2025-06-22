@@ -1,14 +1,17 @@
 import { eq } from 'drizzle-orm'
 import { NextRequest, NextResponse } from 'next/server'
 
-import { requireAuth } from '@/lib/auth'
+import { isAuthorized } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { entries } from '@/lib/db/schema'
 import { generateCombinedPDF, generatePartsFromEntry } from '@/lib/pdf-utils'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  // Check authentication
-  await requireAuth()
+  const authorized = await isAuthorized()
+  if (!authorized) {
+    return new NextResponse('Unauthorized', { status: 404 })
+  }
+
   try {
     const { id } = await params
     const entryId = parseInt(id)

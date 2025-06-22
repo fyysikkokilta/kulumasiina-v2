@@ -1,15 +1,18 @@
 import { inArray } from 'drizzle-orm'
 import { NextRequest, NextResponse } from 'next/server'
 
-import { requireAuth } from '@/lib/auth'
+import { isAuthorized } from '@/lib/auth'
 import { generateCsv, generateCsvInfoFromEntry } from '@/lib/csv-utils'
 import { db } from '@/lib/db'
 import { entries } from '@/lib/db/schema'
 import { generateCombinedPDF, generatePartsFromEntry } from '@/lib/pdf-utils'
 
 export async function GET(request: NextRequest) {
-  // Check authentication
-  await requireAuth()
+  const authorized = await isAuthorized()
+  if (!authorized) {
+    return new NextResponse('Unauthorized', { status: 404 })
+  }
+
   try {
     const { searchParams } = new URL(request.url)
     const entryIdsParam = searchParams.get('entry_ids')

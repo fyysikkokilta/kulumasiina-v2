@@ -1,11 +1,13 @@
 'use server'
 
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
-import { deleteSession } from '../auth'
+import { JWT_COOKIE } from '../auth'
 import { actionClient } from './safeActionClient'
 
 export const logoutAction = actionClient.action(async () => {
-  await deleteSession()
+  const cookieStore = await cookies()
+  cookieStore.delete(JWT_COOKIE)
   redirect('/')
 })
