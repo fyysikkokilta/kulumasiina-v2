@@ -36,8 +36,8 @@ importers:
         specifier: ^7.0.1
         version: 7.0.1
       compress-pdf:
-        specifier: ^0.5.3
-        version: 0.5.3
+        specifier: ^0.5.4
+        version: 0.5.4
       dayjs:
         specifier: ^1.11.13
         version: 1.11.13
@@ -1598,8 +1598,8 @@ packages:
     resolution: {integrity: sha512-6FqVXeETqWPoGcfzrXb37E50NP0LXT8kAMu5ooZayhWWdgEY4lBEEcbQNXtkuKQsGduxiIcI4gOTsxTmuq/bSg==}
     engines: {node: '>= 14'}
 
-  compress-pdf@0.5.3:
-    resolution: {integrity: sha512-LeDPmE+o0PwxzqLU/uGIsaLxmnzZy4lXaY0tBov03uhNgXV6dZjU3VTBy3LhAhiCV+moXyBBE9kCDOZzZcEobg==}
+  compress-pdf@0.5.4:
+    resolution: {integrity: sha512-MvMWZIRROSAnZCbZE036GHgVRYP/9B9jHSiVjb0WNLMw/cqWb6dSnyD+9x3A/Kc39tUL3XQkL0AZ5FvHiN+Lcg==}
     engines: {node: '>=20.0.0', yarn: '>= 1.22.0'}
     hasBin: true
 
@@ -1710,10 +1710,6 @@ packages:
   doctrine@2.1.0:
     resolution: {integrity: sha512-35mSku4ZXK0vfCuHEDAwt55dg2jNajHZ1odvF+8SSr82EsZY4QmXfuWso8oEd8zRhVObSN18aM0CjSdoBX7zIw==}
     engines: {node: '>=0.10.0'}
-
-  dotenv@16.4.7:
-    resolution: {integrity: sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ==}
-    engines: {node: '>=12'}
 
   dotenv@16.5.0:
     resolution: {integrity: sha512-m/C+AwOAr9/W1UOIZUo232ejMNnJAJtYQjUbHoNTBNTJSvqzzDh7vnrei3o3r3m9blf6ZoDkvcw0VmozNRFJxg==}
@@ -5205,9 +5201,9 @@ snapshots:
       normalize-path: 3.0.0
       readable-stream: 4.7.0
 
-  compress-pdf@0.5.3:
+  compress-pdf@0.5.4:
     dependencies:
-      dotenv: 16.4.7
+      dotenv: 16.5.0
       lodash: 4.17.21
 
   compute-scroll-into-view@3.1.1: {}
@@ -5302,8 +5298,6 @@ snapshots:
   doctrine@2.1.0:
     dependencies:
       esutils: 2.0.3
-
-  dotenv@16.4.7: {}
 
   dotenv@16.5.0: {}
 
