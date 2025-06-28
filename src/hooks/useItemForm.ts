@@ -1,5 +1,5 @@
 import type { FormInstance } from 'antd'
-import { message } from 'antd'
+import { message, Upload } from 'antd'
 import type { RcFile } from 'antd/es/upload'
 import type { UploadFile, UploadProps } from 'antd/es/upload/interface'
 import dayjs from 'dayjs'
@@ -123,7 +123,7 @@ export function useItemForm(form: FormInstance<ItemFormData>) {
   // Before upload handler
   const beforeUpload = useCallback((file: RcFile) => {
     if (file.size > 8 * 1024 * 1024) {
-      return false
+      return Upload.LIST_IGNORE
     }
     return true
   }, [])
