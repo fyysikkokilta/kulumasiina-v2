@@ -38,11 +38,11 @@ export async function GET(request: NextRequest) {
     return new Response('Google OAuth not configured', { status: 500 })
   }
 
-  const tokenData = (await tokenResponse.json()) as { access_token: string }
-
   if (!tokenResponse.ok) {
     redirect(`/login?error=auth_failed`)
   }
+
+  const tokenData = (await tokenResponse.json()) as { access_token: string }
 
   // Get user info
   const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
@@ -52,13 +52,13 @@ export async function GET(request: NextRequest) {
   })
 
   if (!userResponse.ok) {
-    redirect('/login?error=auth_failed')
+    redirect('/login?error=unauthorized')
   }
 
   const user = (await userResponse.json()) as { email: string; name: string }
 
   if (!env.ADMIN_EMAILS.includes(user.email)) {
-    throw new Error('Only admin users are allowed to log in')
+    redirect('/login?error=unauthorized')
   }
 
   const token = await new SignJWT({ user })
