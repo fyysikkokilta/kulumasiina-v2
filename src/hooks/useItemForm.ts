@@ -8,7 +8,7 @@ import { useCallback, useState } from 'react'
 
 import type { ItemFormData } from '@/components/ItemForm'
 import type { PreviewState } from '@/components/PreviewModal'
-import type { ItemWithAttachments, NewItemWithAttachments } from '@/lib/db/schema'
+import type { ItemWithAttachments, NewAttachment, NewItemWithAttachments } from '@/lib/db/schema'
 
 export function useItemForm(form: FormInstance<ItemFormData>) {
   const [fileList, setFileList] = useState<UploadFile[]>([])
@@ -130,7 +130,11 @@ export function useItemForm(form: FormInstance<ItemFormData>) {
 
   // Load existing attachments
   const prepareEditState = useCallback(
-    (editData: Omit<ItemWithAttachments | NewItemWithAttachments, 'entryId'>) => {
+    (
+      editData: Omit<ItemWithAttachments | NewItemWithAttachments, 'entryId' | 'attachments'> & {
+        attachments: Omit<NewAttachment, 'itemId'>[]
+      }
+    ) => {
       try {
         const files = editData.attachments.map((attachment) => {
           const id = attachment.fileId

@@ -10,7 +10,7 @@ import { isAuthorizedMiddleware } from './isAuthorized'
 import { actionClient } from './safeActionClient'
 
 const ApproveEntriesSchema = z.object({
-  ids: z.array(z.number()),
+  ids: z.array(z.uuid()),
   date: z.date(),
   approval_note: z.string()
 })

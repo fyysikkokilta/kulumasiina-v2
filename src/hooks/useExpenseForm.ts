@@ -3,7 +3,7 @@ import { useAction } from 'next-safe-action/hooks'
 import { useCallback, useMemo, useState } from 'react'
 
 import { createEntryAction } from '@/lib/actions/createEntry'
-import type { NewItemWithAttachments, NewMileage } from '@/lib/db/schema'
+import type { NewAttachment, NewItemWithAttachments, NewMileage } from '@/lib/db/schema'
 import { env } from '@/lib/env'
 
 // Types
@@ -18,11 +18,13 @@ export interface ExpenseFormData {
 type EntryType = 'item' | 'mileage'
 
 export type FormEntry = {
-  id: number
+  id: string
 } & (
   | {
       type: 'item'
-      data: Omit<NewItemWithAttachments, 'entryId'>
+      data: Omit<NewItemWithAttachments, 'entryId' | 'attachments'> & {
+        attachments: Omit<NewAttachment, 'itemId'>[]
+      }
     }
   | {
       type: 'mileage'
@@ -36,7 +38,7 @@ interface FormState {
   modalState: {
     type: EntryType | null
     isOpen: boolean
-    editingId: number | null
+    editingId: string | null
   }
 }
 
@@ -123,7 +125,7 @@ export function useExpenseForm() {
     [state.entries, execute]
   )
 
-  const openModal = useCallback((type: EntryType, editingId?: number) => {
+  const openModal = useCallback((type: EntryType, editingId?: string) => {
     setState((prev) => ({
       ...prev,
       modalState: {
@@ -158,7 +160,7 @@ export function useExpenseForm() {
       } else {
         newEntries.push({
           ...data,
-          id: Date.now()
+          id: crypto.randomUUID()
         })
       }
 
@@ -170,7 +172,7 @@ export function useExpenseForm() {
     })
   }, [])
 
-  const handleRemoveEntry = useCallback((id: number) => {
+  const handleRemoveEntry = useCallback((id: string) => {
     setState((prev) => ({
       ...prev,
       entries: prev.entries.filter((entry) => entry.id !== id)

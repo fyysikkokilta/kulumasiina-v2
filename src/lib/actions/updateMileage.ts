@@ -10,7 +10,7 @@ import { isAuthorizedMiddleware } from './isAuthorized'
 import { actionClient } from './safeActionClient'
 
 const MileageUpdateSchema = z.object({
-  id: z.number(),
+  id: z.uuid(),
   description: z.string(),
   date: z.date(),
   route: z.string(),

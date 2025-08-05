@@ -1,5 +1,6 @@
 import { inArray } from 'drizzle-orm'
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 
 import { isAuthorized } from '@/lib/auth'
 import { generateCsv, generateCsvInfoFromEntry } from '@/lib/csv-utils'
@@ -21,10 +22,7 @@ export async function GET(request: NextRequest) {
       return new NextResponse('Missing entry_ids parameter', { status: 400 })
     }
 
-    const entryIds = entryIdsParam
-      .split(',')
-      .map((id) => parseInt(id.trim()))
-      .filter((id) => !isNaN(id))
+    const entryIds = entryIdsParam.split(',').map((id) => z.uuid().parse(id.trim()))
 
     if (entryIds.length === 0) {
       return new NextResponse('No valid entry IDs provided', { status: 400 })

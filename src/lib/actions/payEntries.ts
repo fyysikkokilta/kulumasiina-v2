@@ -10,7 +10,7 @@ import { isAuthorizedMiddleware } from './isAuthorized'
 import { actionClient } from './safeActionClient'
 
 const PayEntriesSchema = z.object({
-  ids: z.array(z.number()),
+  ids: z.array(z.uuid()),
   date: z.date()
 })
 

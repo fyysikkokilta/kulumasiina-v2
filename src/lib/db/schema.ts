@@ -1,21 +1,11 @@
 import { relations } from 'drizzle-orm'
-import {
-  boolean,
-  integer,
-  pgEnum,
-  pgTable,
-  real,
-  serial,
-  text,
-  timestamp,
-  uuid
-} from 'drizzle-orm/pg-core'
+import { boolean, pgEnum, pgTable, real, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 
 export const statusEnum = pgEnum('status', ['submitted', 'approved', 'paid', 'denied'])
 
 // Entries table (main expense claims)
 export const entries = pgTable('entry', {
-  id: serial('id').primaryKey(),
+  id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull(), // Payee name
   contact: text('contact').notNull(), // Contact information
   iban: text('iban').notNull(), // Bank account
@@ -34,8 +24,8 @@ export const entries = pgTable('entry', {
 
 // Items table (individual expense items)
 export const items = pgTable('item', {
-  id: serial('id').primaryKey(),
-  entryId: integer('entry_id')
+  id: uuid('id').primaryKey().defaultRandom(),
+  entryId: uuid('entry_id')
     .notNull()
     .references(() => entries.id, { onDelete: 'cascade' }),
   description: text('description').notNull(),
@@ -47,8 +37,8 @@ export const items = pgTable('item', {
 
 // Mileages table (mileage claims)
 export const mileages = pgTable('mileage', {
-  id: serial('id').primaryKey(),
-  entryId: integer('entry_id')
+  id: uuid('id').primaryKey().defaultRandom(),
+  entryId: uuid('entry_id')
     .notNull()
     .references(() => entries.id, { onDelete: 'cascade' }),
   description: text('description').notNull(),
@@ -63,10 +53,12 @@ export const mileages = pgTable('mileage', {
 
 // Attachments table (files/receipts)
 export const attachments = pgTable('attachment', {
-  id: serial('id').primaryKey(),
-  itemId: integer('item_id').references(() => items.id, {
-    onDelete: 'cascade'
-  }),
+  id: uuid('id').primaryKey().defaultRandom(),
+  itemId: uuid('item_id')
+    .notNull()
+    .references(() => items.id, {
+      onDelete: 'cascade'
+    }),
   fileId: uuid('file_id').notNull(), // random filename for storage
   filename: text('filename').notNull(), // original filename for display
   value: real('value'),

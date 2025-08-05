@@ -6,12 +6,14 @@ import dayjs from 'dayjs'
 import { useTranslations } from 'next-intl'
 import React from 'react'
 
-import type { NewItemWithAttachments, NewMileage } from '@/lib/db/schema'
+import type { NewAttachment, NewItemWithAttachments, NewMileage } from '@/lib/db/schema'
 
 const { Text } = Typography
 
 interface ItemDisplayProps {
-  item: Omit<NewItemWithAttachments, 'entryId'>
+  item: Omit<NewItemWithAttachments, 'entryId' | 'attachments'> & {
+    attachments: Omit<NewAttachment, 'itemId'>[]
+  }
   onEdit: () => void
   onRemove: () => void
 }
@@ -44,7 +46,15 @@ export function ItemDisplay({ item, onEdit, onRemove }: ItemDisplayProps) {
             {item.attachments.length} {t('attachments', { attachments: item.attachments.length })}
           </Tag>
         </div>
-        <Text>{item.description}</Text>
+        <div className="flex justify-between">
+          <Text>{item.description}</Text>
+          <Tag color="blue">
+            {item.attachments
+              .reduce((acc, attachment) => acc + (attachment.value || 0), 0)
+              .toFixed(2)}{' '}
+            €
+          </Tag>
+        </div>
       </div>
     </Card>
   )
@@ -82,11 +92,12 @@ export function MileageDisplay({ mileage, mileageRate, onEdit, onRemove }: Milea
       <div className="space-y-2">
         <div className="flex justify-between">
           <Text strong>{dayjs(mileage.date).format('DD.MM.YYYY')}</Text>
-          <Tag color="blue">
-            {mileage.distance} km → {total.toFixed(2)} €
-          </Tag>
+          <Tag color="green">{mileage.distance} km</Tag>
         </div>
-        <Text>{mileage.description}</Text>
+        <div className="flex justify-between">
+          <Text>{mileage.description}</Text>
+          <Tag color="blue">{total.toFixed(2)} €</Tag>
+        </div>
         <div className="text-sm text-gray-600">
           <div>
             <strong>{t('route')}:</strong> {mileage.route}

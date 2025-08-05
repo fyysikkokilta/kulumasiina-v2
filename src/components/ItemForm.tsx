@@ -23,7 +23,7 @@ import React, { useCallback, useEffect } from 'react'
 
 import { useItemForm } from '@/hooks/useItemForm'
 import { bookkeepingAccounts } from '@/lib/bookkeeping-accounts'
-import type { ItemWithAttachments, NewItemWithAttachments } from '@/lib/db/schema'
+import type { ItemWithAttachments, NewAttachment, NewItemWithAttachments } from '@/lib/db/schema'
 
 import { PreviewModal } from './PreviewModal'
 
@@ -38,9 +38,15 @@ export interface ItemFormData {
 
 interface ItemFormProps {
   visible: boolean
-  onOk: (item: Omit<NewItemWithAttachments, 'entryId'>) => void
+  onOk: (
+    item: Omit<NewItemWithAttachments, 'entryId' | 'attachments'> & {
+      attachments: Omit<NewAttachment, 'itemId'>[]
+    }
+  ) => void
   onCancel: () => void
-  editData?: Omit<ItemWithAttachments | NewItemWithAttachments, 'entryId'>
+  editData?: Omit<ItemWithAttachments | NewItemWithAttachments, 'entryId' | 'attachments'> & {
+    attachments: Omit<NewAttachment, 'itemId'>[]
+  }
 }
 
 export function ItemForm({ visible, onOk, onCancel, editData }: ItemFormProps) {

@@ -40,11 +40,13 @@ export async function POST(request: NextRequest) {
   }
 
   // If pdf, compress with compress-pdf
-  if (mimeType.startsWith('application/pdf')) {
+  else if (mimeType.startsWith('application/pdf')) {
     buffer = await compress(fileBuffer)
+  } else {
+    return new NextResponse('Invalid file type', { status: 400 })
   }
 
-  const fileId = await saveFile(fileBuffer)
+  const fileId = await saveFile(buffer)
 
   return NextResponse.json({ fileId, filename: originalName })
 }

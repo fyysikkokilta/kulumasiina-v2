@@ -10,14 +10,14 @@ import { env } from '@/lib/env'
 
 interface AdminEntryExpandedRowProps {
   record: EntryWithItemsAndMileages
-  handleAccountUpdate: (id: number, account: string, isMileage: boolean) => void
-  handleEditItem: (item: ItemWithAttachments, entryId: number) => void
-  handleEditMileage: (mileage: Mileage, entryId: number) => void
-  handleArchive: (ids?: number[]) => void
-  handleApprove: (ids?: number[]) => void
-  handleDeny: (ids?: number[]) => void
-  handlePay: (ids?: number[]) => void
-  handleReset: (ids?: number[]) => void
+  handleAccountUpdate: (id: string, account: string, isMileage: boolean) => void
+  handleEditItem: (item: ItemWithAttachments, entryId: string) => void
+  handleEditMileage: (mileage: Mileage, entryId: string) => void
+  handleArchive: (ids?: string[]) => void
+  handleApprove: (ids?: string[]) => void
+  handleDeny: (ids?: string[]) => void
+  handlePay: (ids?: string[]) => void
+  handleReset: (ids?: string[]) => void
   handlePreviewAttachment: (
     fileId: string,
     filename: string,
@@ -211,6 +211,13 @@ export function AdminEntryExpandedRow({
           ))}
         </div>
       )}
+
+      <div className="mb-4">
+        <Typography.Text className="text-nowrap" strong>
+          {t('table.id')}:{' '}
+        </Typography.Text>
+        <Typography.Text className="text-nowrap">{record.id}</Typography.Text>
+      </div>
 
       <div className="mt-4">
         <Space>

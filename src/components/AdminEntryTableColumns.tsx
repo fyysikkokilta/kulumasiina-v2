@@ -15,19 +15,12 @@ export function getAdminEntryTableColumns(
 ) {
   const columns: ColumnsType<EntryWithItemsAndMileages> = [
     {
-      title: t('table.id'),
-      dataIndex: 'id',
-      key: 'id',
-      sorter: (a, b) => a.id - b.id,
-      defaultSortOrder: 'descend',
-      width: 70
-    },
-    {
       title: t('table.date'),
       dataIndex: 'submissionDate',
       key: 'submissionDate',
       render: (date: string) => new Date(date).toLocaleDateString('fi-FI'),
       sorter: (a, b) => new Date(a.submissionDate).getTime() - new Date(b.submissionDate).getTime(),
+      defaultSortOrder: 'descend',
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
         <div className="p-2">
           <DatePicker.RangePicker

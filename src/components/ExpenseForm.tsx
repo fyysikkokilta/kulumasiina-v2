@@ -44,8 +44,8 @@ const EntryRenderer = ({
   onRemove
 }: {
   entry: FormEntry
-  onEdit: (id: number) => void
-  onRemove: (id: number) => void
+  onEdit: (id: string) => void
+  onRemove: (id: string) => void
 }) => {
   const commonProps = {
     onEdit: () => onEdit(entry.id),
@@ -228,7 +228,7 @@ export function ExpenseForm() {
             visible={state.modalState.isOpen}
             onOk={(data) =>
               handleAddOrUpdateEntry({
-                id: Date.now(),
+                id: crypto.randomUUID(),
                 data,
                 type: 'item'
               })
@@ -243,7 +243,7 @@ export function ExpenseForm() {
             visible={state.modalState.isOpen}
             onOk={(data) =>
               handleAddOrUpdateEntry({
-                id: Date.now(),
+                id: crypto.randomUUID(),
                 data,
                 type: 'mileage'
               })

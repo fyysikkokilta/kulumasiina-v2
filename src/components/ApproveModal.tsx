@@ -11,7 +11,7 @@ import { approveEntriesAction } from '@/lib/actions/approveEntries'
 interface ApproveModalProps {
   visible: boolean
   onCancel: () => void
-  entryIds: number[]
+  entryIds: string[]
   onSuccess?: () => void
 }
 

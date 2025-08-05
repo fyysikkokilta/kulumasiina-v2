@@ -1,5 +1,6 @@
 import { eq } from 'drizzle-orm'
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 
 import { isAuthorized } from '@/lib/auth'
 import { generateCsv, generateCsvInfoFromEntry } from '@/lib/csv-utils'
@@ -15,11 +16,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   try {
     const { id } = await params
-    const entryId = parseInt(id)
-
-    if (isNaN(entryId)) {
-      return new NextResponse('Invalid entry ID', { status: 400 })
-    }
+    const entryId = z.uuid().parse(id)
 
     // Get entry with all related data
     const entry = await db.query.entries.findFirst({

@@ -3,6 +3,7 @@ import React from 'react'
 import type {
   ItemWithAttachments,
   Mileage,
+  NewAttachment,
   NewItemWithAttachments,
   NewMileage
 } from '@/lib/db/schema'
@@ -16,7 +17,7 @@ import type { PreviewState } from './PreviewModal'
 import { PreviewModal } from './PreviewModal'
 
 export type EditState = {
-  entryId: number
+  entryId: string
 } & (
   | {
       type: 'item'
@@ -35,11 +36,15 @@ interface AdminEntryModalsProps {
   setPayModalVisible: (v: boolean) => void
   deleteOldArchivedModalVisible: boolean
   setDeleteOldArchivedModalVisible: (v: boolean) => void
-  modalEntryIds: number[]
+  modalEntryIds: string[]
   setSelectedRowKeys: (v: React.Key[]) => void
   editState: EditState | null
   setEditState: (v: EditState | null) => void
-  handleItemUpdate: (itemData: Omit<NewItemWithAttachments, 'entryId'>) => void
+  handleItemUpdate: (
+    itemData: Omit<NewItemWithAttachments, 'entryId' | 'attachments'> & {
+      attachments: Omit<NewAttachment, 'itemId'>[]
+    }
+  ) => void
   handleMileageUpdate: (mileageData: Omit<NewMileage, 'entryId'>) => void
   previewState: PreviewState
   closePreview: () => void

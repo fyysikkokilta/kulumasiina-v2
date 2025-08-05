@@ -9,7 +9,7 @@ import { entries } from '../db/schema'
 import { isAuthorizedMiddleware } from './isAuthorized'
 import { actionClient } from './safeActionClient'
 
-const DeleteEntrySchema = z.object({ id: z.number() })
+const DeleteEntrySchema = z.object({ id: z.uuid() })
 
 export const deleteEntryAction = actionClient
   .inputSchema(DeleteEntrySchema)

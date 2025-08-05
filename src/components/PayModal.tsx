@@ -11,7 +11,7 @@ import { payEntriesAction } from '@/lib/actions/payEntries'
 interface PayModalProps {
   visible: boolean
   onCancel: () => void
-  entryIds: number[]
+  entryIds: string[]
   onSuccess?: () => void
 }
 

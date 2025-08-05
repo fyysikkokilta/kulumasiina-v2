@@ -368,7 +368,7 @@ const ExpensePDF = ({
 }
 
 export async function generateCombinedPDF(
-  entryId: number,
+  entryId: string,
   status: 'approved' | 'paid' | 'submitted' | 'denied',
   name: string,
   iban: string,

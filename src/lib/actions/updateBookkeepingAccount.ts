@@ -10,7 +10,7 @@ import { isAuthorizedMiddleware } from './isAuthorized'
 import { actionClient } from './safeActionClient'
 
 const BookkeepingAccountSchema = z.object({
-  id: z.number(),
+  id: z.uuid(),
   account: z.string(),
   isMileage: z.boolean()
 })

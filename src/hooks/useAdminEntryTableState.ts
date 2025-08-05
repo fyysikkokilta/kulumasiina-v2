@@ -17,6 +17,7 @@ import type {
   EntryWithItemsAndMileages,
   ItemWithAttachments,
   Mileage,
+  NewAttachment,
   NewItemWithAttachments,
   NewMileage
 } from '@/lib/db/schema'
@@ -28,7 +29,7 @@ export function useAdminEntryTableState(entries: EntryWithItemsAndMileages[]) {
   const [approveModalVisible, setApproveModalVisible] = useState(false)
   const [payModalVisible, setPayModalVisible] = useState(false)
   const [deleteOldArchivedModalVisible, setDeleteOldArchivedModalVisible] = useState(false)
-  const [modalEntryIds, setModalEntryIds] = useState<number[]>([])
+  const [modalEntryIds, setModalEntryIds] = useState<string[]>([])
   const [editState, setEditState] = useState<EditState | null>(null)
   const [previewState, setPreviewState] = useState<PreviewState>({
     open: false,
@@ -165,7 +166,7 @@ export function useAdminEntryTableState(entries: EntryWithItemsAndMileages[]) {
     }
   }
 
-  const handleEditItem = async (item: ItemWithAttachments, entryId: number) => {
+  const handleEditItem = async (item: ItemWithAttachments, entryId: string) => {
     // Fetch the attachments data since we don't have it loaded
     const attachments = await Promise.all(
       item.attachments.map(async (attachment) => ({
@@ -187,7 +188,7 @@ export function useAdminEntryTableState(entries: EntryWithItemsAndMileages[]) {
     })
   }
 
-  const handleEditMileage = (mileage: Mileage, entryId: number) => {
+  const handleEditMileage = (mileage: Mileage, entryId: string) => {
     setEditState({
       type: 'mileage',
       data: mileage,
@@ -195,7 +196,11 @@ export function useAdminEntryTableState(entries: EntryWithItemsAndMileages[]) {
     })
   }
 
-  const handleItemUpdate = (itemData: Omit<NewItemWithAttachments, 'entryId'>) => {
+  const handleItemUpdate = (
+    itemData: Omit<NewItemWithAttachments, 'entryId' | 'attachments'> & {
+      attachments: Omit<NewAttachment, 'itemId'>[]
+    }
+  ) => {
     if (editState?.data) {
       updateItem({
         id: editState.data.id,
@@ -225,7 +230,7 @@ export function useAdminEntryTableState(entries: EntryWithItemsAndMileages[]) {
     }
   }
 
-  const handleAccountUpdate = (id: number, account: string, isMileage: boolean) => {
+  const handleAccountUpdate = (id: string, account: string, isMileage: boolean) => {
     updateBookkeepingAccount({
       id,
       account,
@@ -268,30 +273,30 @@ export function useAdminEntryTableState(entries: EntryWithItemsAndMileages[]) {
     })
   }
 
-  const handleApprove = (ids?: number[]) => {
-    const targetIds = ids || selectedRowKeys.map((key) => Number(key))
+  const handleApprove = (ids?: string[]) => {
+    const targetIds = ids || selectedRowKeys.map((key) => key.toString())
     setModalEntryIds(targetIds)
     setApproveModalVisible(true)
   }
 
-  const handleDeny = (ids?: number[]) => {
-    const targetIds = ids || selectedRowKeys.map((key) => Number(key))
+  const handleDeny = (ids?: string[]) => {
+    const targetIds = ids || selectedRowKeys.map((key) => key.toString())
     denyEntries({ ids: targetIds })
   }
 
-  const handlePay = (ids?: number[]) => {
-    const targetIds = ids || selectedRowKeys.map((key) => Number(key))
+  const handlePay = (ids?: string[]) => {
+    const targetIds = ids || selectedRowKeys.map((key) => key.toString())
     setModalEntryIds(targetIds)
     setPayModalVisible(true)
   }
 
-  const handleArchive = (ids?: number[]) => {
-    const targetIds = ids || selectedRowKeys.map((key) => Number(key))
+  const handleArchive = (ids?: string[]) => {
+    const targetIds = ids || selectedRowKeys.map((key) => key.toString())
     archiveEntries({ ids: targetIds })
   }
 
-  const handleReset = (ids?: number[]) => {
-    const targetIds = ids || selectedRowKeys.map((key) => Number(key))
+  const handleReset = (ids?: string[]) => {
+    const targetIds = ids || selectedRowKeys.map((key) => key.toString())
     resetEntries({ ids: targetIds })
   }
 

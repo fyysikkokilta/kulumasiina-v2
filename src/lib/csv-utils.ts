@@ -13,7 +13,7 @@ interface CsvRow {
 }
 
 interface CsvInfo {
-  entryId: number
+  entryId: string
   name: string
   iban: string
   govId: string | null
@@ -85,7 +85,7 @@ export async function mergeCsvInfos(csvInfos: CsvInfo[]) {
         mergedCsvInfo.submissionDate = new Date(
           Math.min(mergedCsvInfo.submissionDate.getTime(), csvInfo.submissionDate.getTime())
         )
-        mergedCsvInfo.entryId = parseInt(`${mergedCsvInfo.entryId}${csvInfo.entryId}`)
+        mergedCsvInfo.entryId = `${mergedCsvInfo.entryId}-${csvInfo.entryId}`
         found = true
         break
       }
