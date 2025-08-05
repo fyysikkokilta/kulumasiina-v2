@@ -7,7 +7,8 @@ import {
   real,
   serial,
   text,
-  timestamp
+  timestamp,
+  uuid
 } from 'drizzle-orm/pg-core'
 
 export const statusEnum = pgEnum('status', ['submitted', 'approved', 'paid', 'denied'])
@@ -66,7 +67,7 @@ export const attachments = pgTable('attachment', {
   itemId: integer('item_id').references(() => items.id, {
     onDelete: 'cascade'
   }),
-  fileId: text('file_id').notNull(), // random filename for storage
+  fileId: uuid('file_id').notNull(), // random filename for storage
   filename: text('filename').notNull(), // original filename for display
   value: real('value'),
   isNotReceipt: boolean('is_not_receipt').notNull(),

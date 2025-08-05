@@ -62,7 +62,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       entry.rejectionDate ? new Date(entry.rejectionDate) : null
     )
 
-    return new NextResponse(data, {
+    return new NextResponse(Buffer.from(data), {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',

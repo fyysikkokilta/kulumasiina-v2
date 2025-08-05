@@ -24,7 +24,7 @@ const EntryCreateSchema = z.object({
       account: z.string().nullish(),
       attachments: z.array(
         z.object({
-          fileId: z.string(),
+          fileId: z.uuid(),
           filename: z.string(),
           value: z
             .number()

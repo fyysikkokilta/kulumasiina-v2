@@ -2,7 +2,6 @@ import { PDFDocument, StandardFonts } from '@cantoo/pdf-lib'
 import { Document, Image, Page, renderToBuffer, StyleSheet, Text, View } from '@react-pdf/renderer'
 import { compress } from 'compress-pdf'
 import fs from 'fs/promises'
-import mime from 'mime-types'
 import path from 'path'
 import React from 'react'
 import sharp from 'sharp'
@@ -10,6 +9,7 @@ import sharp from 'sharp'
 import type { EntryWithItemsAndMileages } from './db/schema'
 import { env } from './env'
 import { getFile } from './storage'
+import { isPdf } from './validation'
 
 interface AttachmentData {
   data: Buffer
@@ -515,12 +515,12 @@ export async function generatePartsFromEntry(entry: EntryWithItemsAndMileages) {
           console.error('Error getting file:', e)
         }
       }
-      const mimeType = mime.lookup(att.fileId) || 'application/octet-stream'
-      data = mimeType.startsWith('image/') ? await convertToPng(data) : data
+      const isPdfFile = isPdf(data)
+      data = isPdfFile ? data : await convertToPng(data)
       attachments.push({
         ...att,
         data,
-        mimeType,
+        mimeType: isPdfFile ? 'application/pdf' : 'image/png',
         attachmentNum: attachmentNum++
       })
     }

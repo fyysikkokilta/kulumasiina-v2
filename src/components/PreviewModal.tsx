@@ -17,9 +17,9 @@ interface PreviewModalProps {
 }
 
 export function PreviewModal({ previewState, closePreview }: PreviewModalProps) {
-  const t = useTranslations('admin')
+  const t = useTranslations('form.expense')
 
-  const title = `${previewState.title} ${previewState.isNotReceipt ? `(${t('table.not_receipt')})` : `(${previewState.value?.toFixed(2)}€)`}`
+  const title = `${previewState.title} ${previewState.isNotReceipt ? `(${t('is_not_receipt')})` : previewState.value ? `(${previewState.value.toFixed(2)} €)` : ''}`
 
   if (previewState.isImage) {
     return (

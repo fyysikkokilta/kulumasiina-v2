@@ -16,7 +16,7 @@ const ItemUpdateSchema = z.object({
   account: z.string(),
   attachments: z.array(
     z.object({
-      fileId: z.string(),
+      fileId: z.uuid(),
       filename: z.string(),
       value: z
         .number()

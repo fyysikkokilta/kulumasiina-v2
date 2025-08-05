@@ -1,11 +1,11 @@
 import { eq } from 'drizzle-orm'
-import mime from 'mime-types'
 import { NextRequest, NextResponse } from 'next/server'
 
 import { isAuthorized } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { attachments } from '@/lib/db/schema'
 import { getFile } from '@/lib/storage'
+import { isPdf } from '@/lib/validation'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -32,9 +32,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 
   // Guess mime type from filename extension
-  const mimeType = mime.lookup(id) || 'application/octet-stream'
+  const mimeType = isPdf(fileBuffer) ? 'application/pdf' : 'image/webp'
 
-  return new NextResponse(fileBuffer, {
+  return new NextResponse(Buffer.from(fileBuffer), {
     status: 200,
     headers: {
       'Content-Type': mimeType,

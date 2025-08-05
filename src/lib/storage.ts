@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
 import { BucketItem, Client as MinioClient } from 'minio'
 import path from 'path'
@@ -22,22 +23,26 @@ if (isS3) {
 const bucket = env.S3_BUCKET || ''
 const localPath = path.join(process.cwd(), 'data')
 
-async function saveFileLocally(filename: string, buffer: Buffer) {
+async function saveFileLocally(buffer: Buffer) {
+  const filename = randomUUID()
   const filePath = path.join(localPath, filename)
   await fs.mkdir(localPath, { recursive: true })
   await fs.writeFile(filePath, buffer)
+  return filename
 }
 
-async function saveFileToS3(fileId: string, buffer: Buffer) {
+async function saveFileToS3(buffer: Buffer) {
   if (!isS3 || !minio) throw new Error('S3 storage not enabled')
+  const fileId = randomUUID()
   await minio.putObject(bucket, fileId, buffer, buffer.length)
+  return fileId
 }
 
-export async function saveFile(fileId: string, buffer: Buffer) {
+export async function saveFile(buffer: Buffer) {
   if (isS3) {
-    return await saveFileToS3(fileId, buffer)
+    return await saveFileToS3(buffer)
   } else {
-    return await saveFileLocally(fileId, buffer)
+    return await saveFileLocally(buffer)
   }
 }
 

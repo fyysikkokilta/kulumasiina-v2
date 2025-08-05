@@ -1,7 +1,6 @@
 import { compress } from 'compress-pdf'
 import { NextRequest, NextResponse } from 'next/server'
 import sharp from 'sharp'
-import { v4 as uuidv4 } from 'uuid'
 
 import { saveFile } from '@/lib/storage'
 
@@ -13,18 +12,18 @@ export async function POST(request: NextRequest) {
   if (!file || !originalName) {
     return new NextResponse('Missing file or filename', { status: 400 })
   }
-  let ext = originalName.includes('.') ? originalName.substring(originalName.lastIndexOf('.')) : ''
   const mimeType = file.type
-  let buffer = Buffer.from(await file.arrayBuffer())
+  const fileBuffer = Buffer.from(await file.arrayBuffer())
+  let buffer: Buffer
 
   // If image, compress/resize with sharp
   if (mimeType.startsWith('image/')) {
     try {
-      const image = sharp(buffer)
+      const image = sharp(fileBuffer)
       const metadata = await image.metadata()
       const isWiderThanTall = metadata.autoOrient.width > metadata.autoOrient.height
 
-      buffer = await sharp(buffer)
+      buffer = await image
         .autoOrient()
         .resize({
           width: isWiderThanTall ? 1920 : 1080,
@@ -34,7 +33,6 @@ export async function POST(request: NextRequest) {
         })
         .webp()
         .toBuffer()
-      ext = '.webp'
     } catch (e) {
       console.error('Failed to compress image', e)
       return new NextResponse('Failed to compress image', { status: 500 })
@@ -43,13 +41,10 @@ export async function POST(request: NextRequest) {
 
   // If pdf, compress with compress-pdf
   if (mimeType.startsWith('application/pdf')) {
-    buffer = await compress(buffer)
-    ext = '.pdf'
+    buffer = await compress(fileBuffer)
   }
 
-  const fileId = uuidv4() + ext
-
-  await saveFile(fileId, buffer)
+  const fileId = await saveFile(fileBuffer)
 
   return NextResponse.json({ fileId, filename: originalName })
 }

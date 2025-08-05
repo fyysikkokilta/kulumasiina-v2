@@ -11,6 +11,9 @@ const compat = new FlatCompat({
 })
 
 const eslintConfig = [
+  {
+    ignores: ['node_modules', 'src/drizzle/**', '.next', 'data']
+  },
   ...compat.config({
     extends: [
       'next',

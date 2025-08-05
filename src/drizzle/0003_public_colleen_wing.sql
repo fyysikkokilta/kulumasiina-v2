@@ -1,0 +1,1 @@
+ALTER TABLE "attachment" ALTER COLUMN "file_id" TYPE uuid USING SUBSTRING("file_id", 1, 36)::uuid;
