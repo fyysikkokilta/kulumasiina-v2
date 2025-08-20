@@ -35,6 +35,7 @@ interface PartData {
   description: string
   price: number
   attachments: AttachmentData[]
+  attachmentNums: string
 }
 
 // Create styles
@@ -307,39 +308,33 @@ const ExpensePDF = ({
             </View>
 
             {/* Data rows */}
-            {parts.map((part, index) => {
-              const attachmentNumbers = part.attachments.map((att) => att.attachmentNum).join(', ')
-
-              return (
-                <View
-                  key={index}
-                  style={[
-                    styles.tableRow,
-                    index % 2 === 1 ? styles.tableRowEven : {},
-                    index === parts.length - 1 ? styles.tableRowLast : {}
-                  ]}
-                >
-                  <View style={styles.tableCol1}>
-                    <Text style={styles.tableCellText}>
-                      {part.date.toLocaleDateString('fi-FI')}
-                    </Text>
-                  </View>
-                  <View style={styles.tableCol2}>
-                    <Text style={styles.tableCellText}>{part.description}</Text>
-                  </View>
-                  <View style={styles.tableCol3}>
-                    <Text style={styles.tableCellText}>
-                      {govId
-                        ? `${env.NEXT_PUBLIC_MILEAGE_REIMBURSEMENT_RATE} €/km`
-                        : attachmentNumbers || '-'}
-                    </Text>
-                  </View>
-                  <View style={styles.tableCol4}>
-                    <Text style={styles.tableCellText}>{part.price.toFixed(2)} €</Text>
-                  </View>
+            {parts.map((part, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.tableRow,
+                  index % 2 === 1 ? styles.tableRowEven : {},
+                  index === parts.length - 1 ? styles.tableRowLast : {}
+                ]}
+              >
+                <View style={styles.tableCol1}>
+                  <Text style={styles.tableCellText}>{part.date.toLocaleDateString('fi-FI')}</Text>
                 </View>
-              )
-            })}
+                <View style={styles.tableCol2}>
+                  <Text style={styles.tableCellText}>{part.description}</Text>
+                </View>
+                <View style={styles.tableCol3}>
+                  <Text style={styles.tableCellText}>
+                    {govId
+                      ? `${env.NEXT_PUBLIC_MILEAGE_REIMBURSEMENT_RATE} €/km`
+                      : part.attachmentNums || '-'}
+                  </Text>
+                </View>
+                <View style={styles.tableCol4}>
+                  <Text style={styles.tableCellText}>{part.price.toFixed(2)} €</Text>
+                </View>
+              </View>
+            ))}
 
             {/* Total row */}
             <View style={styles.totalRow}>
@@ -546,7 +541,8 @@ export async function generatePartsFromEntry(entry: EntryWithItemsAndMileages) {
       date: new Date(item.date),
       description: item.description,
       price,
-      attachments
+      attachments,
+      attachmentNums: attachments.map((att) => att.attachmentNum).join(', ')
     })
   }
 
@@ -557,7 +553,8 @@ export async function generatePartsFromEntry(entry: EntryWithItemsAndMileages) {
       date: new Date(mileage.date),
       description: `Kilometrikorvaus: ${mileage.description}\nReitti: ${mileage.route}\nMatkan pituus: ${mileage.distance} km\nRekisterinumero: ${mileage.plateNo}`,
       price: mileage.distance * mileageRate,
-      attachments: []
+      attachments: [],
+      attachmentNums: ''
     })
   }
 
