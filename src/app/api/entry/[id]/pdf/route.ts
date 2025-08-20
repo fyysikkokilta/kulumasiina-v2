@@ -7,7 +7,7 @@ import { db } from '@/lib/db'
 import { entries } from '@/lib/db/schema'
 import { generateCombinedPDF, generatePartsFromEntry } from '@/lib/pdf-utils'
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: NextRequest, { params }: RouteContext<'/api/entry/[id]/pdf'>) {
   const authorized = await isAuthorized()
   if (!authorized) {
     return new NextResponse('Unauthorized', { status: 404 })

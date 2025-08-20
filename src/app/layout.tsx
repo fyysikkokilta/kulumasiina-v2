@@ -16,7 +16,7 @@ export const generateMetadata = async () => {
   }
 }
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: LayoutProps<'/'>) {
   const locale = await getLocale()
   return (
     <html lang={locale}>
