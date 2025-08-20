@@ -322,9 +322,9 @@ export function useAdminEntryTableState(entries: EntryWithItemsAndMileages[]) {
           const totalDistance = entry.mileages.reduce((acc, mileage) => acc + mileage.distance, 0)
           return `${entry.name}, ${
             entry.title
-          } (${totalDistance} km); ${entry.total.toFixed(2)} € (${uniqueAccounts})`
+          } (${totalDistance} km); ${entry.total.toFixed(2).replace('.', ',')} € (${uniqueAccounts})`
         }
-        return `${entry.name}, ${entry.title}; ${entry.total.toFixed(2)} € (${uniqueAccounts})`
+        return `${entry.name}, ${entry.title}; ${entry.total.toFixed(2).replace('.', ',')} € (${uniqueAccounts})`
       })
       .join('\n')
     void navigator.clipboard.writeText(clipboardText)
