@@ -1,7 +1,7 @@
 import path from 'path'
 
 const buildEslintCommand = (filenames: string[]) =>
-  `next lint --fix --file ${filenames.map((f) => path.relative(process.cwd(), f)).join(' --file ')}`
+  `eslint --fix ${filenames.map((f) => path.relative(process.cwd(), f)).join(' ')}`
 
 const lintStagedConfig = {
   '**/*.ts?(x)': () => 'tsc --noEmit',
