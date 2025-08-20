@@ -11,6 +11,16 @@ import { env } from './env'
 import { getFile } from './storage'
 import { isPdf } from './validation'
 
+// Helper function to format dates in Finnish timezone
+function formatDateInFinnishTimezone(date: Date): string {
+  return date.toLocaleDateString('fi-FI', {
+    timeZone: 'Europe/Helsinki',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  })
+}
+
 interface AttachmentData {
   data: Buffer
   mimeType: string
@@ -214,7 +224,7 @@ const ExpensePDF = ({
   rejectionDate: Date | null
   logoData?: string
 }) => {
-  const now = new Date().toLocaleDateString('fi-FI')
+  const now = new Date()
   const tableHeaders = govId
     ? ['Pvm', 'Selite', 'Kilometrikorvaus', 'Hinta']
     : ['Pvm', 'Selite', 'Liitteet', 'Hinta']
@@ -254,22 +264,24 @@ const ExpensePDF = ({
             {status === 'approved' && approvalDate && approvalNote && (
               <React.Fragment>
                 <Text>
-                  Hyväksytty {approvalDate.toLocaleDateString('fi-FI')}, peruste: {approvalNote}
+                  Hyväksytty ({formatDateInFinnishTimezone(approvalDate)}), peruste: {approvalNote}
                 </Text>
-                <Text>Ei maksettu (as of {now})</Text>
+                <Text>Ei maksettu ({formatDateInFinnishTimezone(now)})</Text>
               </React.Fragment>
             )}
             {status === 'paid' && approvalDate && approvalNote && paidDate && (
               <React.Fragment>
                 <Text>
-                  Hyväksytty {approvalDate.toLocaleDateString('fi-FI')}, peruste: {approvalNote}
+                  Hyväksytty ({formatDateInFinnishTimezone(approvalDate)}), peruste: {approvalNote}
                 </Text>
-                <Text>Maksettu {paidDate.toLocaleDateString('fi-FI')}</Text>
+                <Text>Maksettu ({formatDateInFinnishTimezone(paidDate)})</Text>
               </React.Fragment>
             )}
-            {status === 'submitted' && <Text>Odottaa hyväksyntää (as of {now})</Text>}
+            {status === 'submitted' && (
+              <Text>Odottaa hyväksyntää ({formatDateInFinnishTimezone(now)})</Text>
+            )}
             {status === 'denied' && rejectionDate && (
-              <Text>Hylätty ({rejectionDate.toLocaleDateString('fi-FI')})</Text>
+              <Text>Hylätty ({formatDateInFinnishTimezone(rejectionDate)})</Text>
             )}
           </View>
 
