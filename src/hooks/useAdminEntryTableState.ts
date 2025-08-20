@@ -301,8 +301,8 @@ export function useAdminEntryTableState(entries: EntryWithItemsAndMileages[]) {
   }
 
   const handleMultiZipDownload = () => {
-    const ids = selectedRowKeys.map((key) => Number(key))
-    const url = `/api/entry/multi/csv?entry_ids=${ids.join(',')}`
+    const targetIds = selectedRowKeys.map((key) => key.toString())
+    const url = `/api/entry/multi/zip?entry_ids=${targetIds.join(',')}`
     window.open(url)
   }
 
