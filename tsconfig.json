@@ -29,7 +29,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "*.mjs",
-    ".lintstagedrc.mjs",
+    ".lintstagedrc.ts",
     "eslint.config.mjs",
     "postcss.config.js"
   ],

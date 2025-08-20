@@ -1,6 +1,6 @@
 import path from 'path'
 
-const buildEslintCommand = (filenames) =>
+const buildEslintCommand = (filenames: string[]) =>
   `next lint --fix --file ${filenames.map((f) => path.relative(process.cwd(), f)).join(' --file ')}`
 
 const lintStagedConfig = {

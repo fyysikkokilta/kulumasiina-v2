@@ -12,12 +12,14 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   {
-    ignores: ['node_modules/**', '.next/**', 'out/**', 'build/**', 'next-env.d.ts']
+    ignores: ['node_modules/**', '.next/**', 'next-env.d.ts', 'src/drizzle/**', 'data']
   },
-  {
-    ignores: ['node_modules', 'src/drizzle/**', '.next', 'data']
-  },
-  ...compat.extends('next/core-web-vitals', 'next/typescript', 'plugin:prettier/recommended'),
+  ...compat.extends(
+    'next/core-web-vitals',
+    'next/typescript',
+    'plugin:prettier/recommended',
+    'plugin:@typescript-eslint/recommended-type-checked'
+  ),
   {
     plugins: {
       'simple-import-sort': simpleImportSort
