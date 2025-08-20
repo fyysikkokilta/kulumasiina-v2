@@ -11,7 +11,6 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['antd', '@ant-design/icons', 'drizzle-orm']
   },
   transpilePackages: ['@t3-oss/env-nextjs', '@t3-oss/env-core'],
-  // eslint-disable-next-line @typescript-eslint/require-await
   async headers() {
     return [
       {
