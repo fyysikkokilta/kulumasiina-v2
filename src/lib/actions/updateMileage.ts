@@ -33,6 +33,8 @@ export const updateMileageAction = actionClient
         updatedAt: now
       })
       .where(eq(mileages.id, id))
-    revalidatePath('/admin')
+
+    revalidatePath('/[locale]/admin', 'page')
+
     return { success: true }
   })

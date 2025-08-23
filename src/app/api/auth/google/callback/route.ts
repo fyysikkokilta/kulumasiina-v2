@@ -3,8 +3,8 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { NextRequest } from 'next/server'
 
-import { JWT_COOKIE } from '@/lib/auth'
 import { env } from '@/lib/env'
+import { JWT_COOKIE } from '@/utils/isAuthorized'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)

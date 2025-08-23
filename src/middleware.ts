@@ -1,58 +1,52 @@
-import { jwtVerify } from 'jose'
 import { NextRequest, NextResponse } from 'next/server'
+import createIntlMiddleware from 'next-intl/middleware'
 
-import { JWT_COOKIE } from './lib/auth'
-import { env } from './lib/env'
+import { routing } from './i18n/routing'
+import isAuthorized, { JWT_COOKIE } from './utils/isAuthorized'
 
-const JWT_SECRET = new TextEncoder().encode(env.JWT_SECRET)
+const intlMiddleware = createIntlMiddleware(routing)
 
-export interface User {
-  email: string
-  name?: string
+function extractLocale(pathname: string) {
+  // Regex to match locale at the start of the pathname
+  // Matches /en/, /fi/, or just / (no locale)
+  const localeRegex = /^\/(en|fi)(\/.*)?$/
+  const match = pathname.match(localeRegex)
+
+  if (match) {
+    return match[1]
+  }
+
+  return null
 }
 
-export async function middleware(request: NextRequest) {
+export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+  const locale = extractLocale(pathname) || routing.defaultLocale
 
-  const token = request.cookies.get(JWT_COOKIE)?.value
+  try {
+    const adminToken = request.cookies.get(JWT_COOKIE)?.value
+    const authorized = await isAuthorized(adminToken)
 
-  if (pathname === '/admin') {
-    if (!token) {
-      return NextResponse.redirect(new URL('/login', request.url))
+    // Redirect only if the path contains the locale
+    // This way the locale is not lost
+    if (!authorized && locale && pathname.startsWith(`/${locale}/admin`)) {
+      return NextResponse.redirect(new URL(`/${locale}/login`, request.url))
     }
 
-    try {
-      const { payload } = await jwtVerify(token, JWT_SECRET)
-      const user = payload.user as User
-
-      if (!env.ADMIN_EMAILS.includes(user.email)) {
-        return NextResponse.redirect(new URL('/login', request.url))
-      }
-
-      return NextResponse.next()
-    } catch (error) {
-      console.error('JWT verification failed in middleware:', error)
-      return NextResponse.redirect(new URL('/login', request.url))
+    if (authorized && locale && pathname.startsWith(`/${locale}/login`)) {
+      return NextResponse.redirect(new URL(`/${locale}/admin`, request.url))
     }
+
+    return intlMiddleware(request)
+  } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Middleware error:', error)
+    }
+
+    return intlMiddleware(request)
   }
-
-  if (token && pathname === '/login') {
-    try {
-      const { payload } = await jwtVerify(token, JWT_SECRET)
-      const user = payload.user as User
-
-      if (env.ADMIN_EMAILS?.includes(user.email)) {
-        const adminUrl = new URL('/admin', request.url)
-        return NextResponse.redirect(adminUrl)
-      }
-    } catch (error) {
-      console.error('JWT verification failed in middleware:', error)
-    }
-  }
-
-  return NextResponse.next()
 }
 
 export const config = {
-  matcher: ['/((?!api/auth|_next/static|_next/image|favicon.ico).*)']
+  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)']
 }

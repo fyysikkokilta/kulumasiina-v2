@@ -28,6 +28,7 @@ export const deleteOldArchivedEntriesAction = actionClient
         )
       )
 
-    revalidatePath('/admin')
+    revalidatePath('/[locale]/admin', 'page')
+
     return { success: true }
   })

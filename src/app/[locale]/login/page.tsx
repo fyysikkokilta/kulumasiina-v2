@@ -1,7 +1,13 @@
-import Link from 'next/link'
-import { getTranslations } from 'next-intl/server'
+import NextLink from 'next/link'
+import { Locale } from 'next-intl'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
 
-export default async function LoginPage() {
+import { Link } from '@/i18n/navigation'
+
+export default async function LoginPage({ params }: PageProps<'/[locale]/login'>) {
+  const { locale } = await params
+  setRequestLocale(locale as Locale)
+
   const t = await getTranslations('login')
 
   return (
@@ -12,12 +18,12 @@ export default async function LoginPage() {
       </div>
 
       <div className="flex max-w-xs flex-col justify-center gap-4 sm:flex-row sm:gap-8">
-        <Link
+        <NextLink
           href="/api/auth/google"
           className="inline-flex w-full items-center justify-center rounded-lg bg-blue-500 px-4 py-2 text-center text-base font-semibold text-white shadow transition-colors hover:bg-blue-600 sm:w-auto"
         >
           {t('login_google')}
-        </Link>
+        </NextLink>
         <Link
           href="/"
           className="inline-flex w-full items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-center text-base font-semibold text-gray-700 shadow transition-colors hover:bg-gray-100 sm:w-auto"

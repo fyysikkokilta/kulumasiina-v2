@@ -54,6 +54,8 @@ export const updateItemAction = actionClient
         }))
       )
     })
-    revalidatePath('/admin')
+
+    revalidatePath('/[locale]/admin', 'page')
+
     return { success: true }
   })

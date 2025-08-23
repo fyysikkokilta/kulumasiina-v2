@@ -211,6 +211,9 @@
       "cancel": "Peruuta"
     }
   },
+  "LanguageSwitcher": {
+    "other_language": "EN"
+  },
   "metadata": {
     "title": "FK-Kulut",
     "description": "Fyysikkokillan kulukorvausjärjestelmä"

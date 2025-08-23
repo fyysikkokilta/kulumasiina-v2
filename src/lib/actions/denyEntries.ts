@@ -28,6 +28,7 @@ export const denyEntriesAction = actionClient
       })
       .where(inArray(entries.id, parsedInput.ids))
 
-    revalidatePath('/admin')
+    revalidatePath('/[locale]/admin', 'page')
+
     return { success: true }
   })

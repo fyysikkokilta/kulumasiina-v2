@@ -8,7 +8,8 @@ const nextConfig: NextConfig = {
   experimental: {
     reactCompiler: true,
     useCache: true,
-    optimizePackageImports: ['antd', '@ant-design/icons', 'drizzle-orm']
+    optimizePackageImports: ['antd', '@ant-design/icons', 'drizzle-orm'],
+    ppr: true
   },
   transpilePackages: ['@t3-oss/env-nextjs', '@t3-oss/env-core'],
   // eslint-disable-next-line @typescript-eslint/require-await

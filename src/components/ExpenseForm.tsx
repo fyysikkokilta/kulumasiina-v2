@@ -3,11 +3,11 @@
 import { PlusOutlined } from '@ant-design/icons'
 import { Button, Card, Divider, Form, Input, Result, Typography } from 'antd'
 import { isValidIBAN } from 'ibantools'
-import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { type ExpenseFormData, type FormEntry, useExpenseForm } from '@/hooks/useExpenseForm'
+import { Link } from '@/i18n/navigation'
 import { env } from '@/lib/env'
 import { validateFinnishSSN } from '@/lib/validation'
 

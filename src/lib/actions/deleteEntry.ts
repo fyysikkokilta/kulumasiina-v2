@@ -16,6 +16,8 @@ export const deleteEntryAction = actionClient
   .use(isAuthorizedMiddleware)
   .action(async ({ parsedInput }) => {
     await db.delete(entries).where(eq(entries.id, parsedInput.id))
-    revalidatePath('/admin')
+
+    revalidatePath('/[locale]/admin', 'page')
+
     return { success: true }
   })

@@ -37,6 +37,8 @@ export const updateBookkeepingAccountAction = actionClient
         })
         .where(eq(items.id, parsedInput.id))
     }
-    revalidatePath('/admin')
+
+    revalidatePath('/[locale]/admin', 'page')
+
     return { success: true }
   })

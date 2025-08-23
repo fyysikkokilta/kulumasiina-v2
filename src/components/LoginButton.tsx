@@ -1,15 +1,15 @@
 'use client'
 
-import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 
+import { Link } from '@/i18n/navigation'
 import { logoutAction } from '@/lib/actions/logout'
 
-interface LoginBtnProps {
+interface LoginButtonProps {
   authorized: boolean
 }
 
-export function LoginBtn({ authorized }: LoginBtnProps) {
+export function LoginButton({ authorized }: LoginButtonProps) {
   const t = useTranslations('login')
 
   const handleLogout = async () => {

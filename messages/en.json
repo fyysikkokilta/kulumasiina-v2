@@ -211,6 +211,9 @@
       "cancel": "Cancel"
     }
   },
+  "LanguageSwitcher": {
+    "other_language": "FI"
+  },
   "metadata": {
     "title": "FK-Expenses",
     "description": "Guild of Physics Expense Management System"

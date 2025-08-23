@@ -1,11 +1,12 @@
 import { eq } from 'drizzle-orm'
+import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
-import { isAuthorized } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { attachments } from '@/lib/db/schema'
 import { getFile } from '@/lib/storage'
 import { isPdf } from '@/lib/validation'
+import isAuthorized, { JWT_COOKIE } from '@/utils/isAuthorized'
 
 export async function GET(request: NextRequest, { params }: RouteContext<'/api/attachment/[id]'>) {
   const { id } = await params
@@ -14,7 +15,9 @@ export async function GET(request: NextRequest, { params }: RouteContext<'/api/a
   })
 
   // Prevent public access to sent submissions
-  const authorized = await isAuthorized()
+  const cookieStore = await cookies()
+  const token = cookieStore.get(JWT_COOKIE)?.value
+  const authorized = await isAuthorized(token)
   if (!!attachment && !authorized) {
     return new NextResponse(null, {
       status: 404
