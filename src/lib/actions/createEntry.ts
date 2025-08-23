@@ -10,42 +10,89 @@ import { validateFinnishSSN } from '../validation'
 import { actionClient } from './safeActionClient'
 
 const EntryCreateSchema = z.object({
-  name: z.string().min(1),
-  contact: z.string().min(1),
+  name: z
+    .string()
+    .min(1)
+    .max(255)
+    .regex(/^[^<>{}]*$/, 'Name contains invalid characters'),
+  contact: z
+    .string()
+    .min(1)
+    .max(255)
+    .regex(/^[^<>{}]*$/, 'Contact contains invalid characters'),
   iban: z.string().refine((val) => isValidIBAN(val.replace(/\s/g, ''))),
   govId: z
     .string()
     .optional()
     .refine((val) => !val || validateFinnishSSN(val)),
-  title: z.string().min(1),
-  items: z.array(
-    z.object({
-      description: z.string().min(1),
-      date: z.date(),
-      account: z.string().nullish(),
-      attachments: z.array(
-        z.object({
-          fileId: z.uuid(),
-          filename: z.string(),
-          value: z
-            .number()
-            .nullish()
-            .refine((val) => !val || val > 0),
-          isNotReceipt: z.boolean()
-        })
-      )
-    })
-  ),
-  mileages: z.array(
-    z.object({
-      description: z.string().min(1),
-      date: z.date(),
-      route: z.string(),
-      distance: z.number().refine((val) => val > 0),
-      plateNo: z.string(),
-      account: z.string().nullish()
-    })
-  )
+  title: z
+    .string()
+    .min(1)
+    .max(1000)
+    .regex(/^[^<>{}]*$/, 'Title contains invalid characters'),
+  items: z
+    .array(
+      z.object({
+        description: z
+          .string()
+          .min(1)
+          .max(500)
+          .regex(/^[^<>{}]*$/, 'Description contains invalid characters'),
+        date: z.date(),
+        account: z
+          .string()
+          .max(4)
+          .regex(/^[0-9]{0,4}$/, 'Account must be 0-4 digits')
+          .nullish(),
+        attachments: z
+          .array(
+            z.object({
+              fileId: z.uuid(),
+              filename: z
+                .string()
+                .min(1)
+                .max(255)
+                .regex(/^[^<>{}]*$/, 'Filename contains invalid characters'),
+              value: z
+                .number()
+                .nullish()
+                .refine((val) => !val || val > 0),
+              isNotReceipt: z.boolean()
+            })
+          )
+          .max(20, 'Maximum 20 attachments per item')
+      })
+    )
+    .max(20, 'Maximum 20 items per entry'),
+  mileages: z
+    .array(
+      z.object({
+        description: z
+          .string()
+          .min(1)
+          .max(500)
+          .regex(/^[^<>{}]*$/, 'Description contains invalid characters'),
+        date: z.date(),
+        route: z
+          .string()
+          .min(1)
+          .max(500)
+          .regex(/^[^<>{}]*$/, 'Route contains invalid characters'),
+        distance: z.number().refine((val) => val > 0),
+        plateNo: z
+          .string()
+          .min(1)
+          .max(12)
+          .regex(/^[A-Za-zÅÄÖåäö0-9-]*$/, 'Invalid plate number format')
+          .transform((val) => val.toUpperCase()),
+        account: z
+          .string()
+          .max(4)
+          .regex(/^[0-9]{0,4}$/, 'Account must be 0-4 digits')
+          .nullish()
+      })
+    )
+    .max(20, 'Maximum 20 mileages per entry')
 })
 
 export const createEntryAction = actionClient

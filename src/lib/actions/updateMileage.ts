@@ -11,12 +11,28 @@ import { actionClient } from './safeActionClient'
 
 const MileageUpdateSchema = z.object({
   id: z.uuid(),
-  description: z.string(),
+  description: z
+    .string()
+    .min(1)
+    .max(500)
+    .regex(/^[^<>{}]*$/, 'Description contains invalid characters'),
   date: z.date(),
-  route: z.string(),
+  route: z
+    .string()
+    .min(1)
+    .max(500)
+    .regex(/^[^<>{}]*$/, 'Route contains invalid characters'),
   distance: z.number().refine((val) => val > 0),
-  plateNo: z.string(),
-  account: z.string()
+  plateNo: z
+    .string()
+    .min(1)
+    .max(12)
+    .regex(/^[A-Za-zÅÄÖåäö0-9-]*$/, 'Invalid plate number format')
+    .transform((val) => val.toUpperCase()),
+  account: z
+    .string()
+    .max(4)
+    .regex(/^[0-9]{0,4}$/, 'Account must be 0-4 digits')
 })
 
 export const updateMileageAction = actionClient

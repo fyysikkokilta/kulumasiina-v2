@@ -153,11 +153,28 @@ export function useExpenseForm() {
       const newEntries = [...prev.entries]
 
       if (editingId) {
+        // Editing existing entry - always allow
         const index = newEntries.findIndex((entry) => entry.id === editingId)
         if (index !== -1) {
           newEntries[index] = { ...newEntries[index], ...data }
         }
       } else {
+        // Adding new entry - check limits
+        if (
+          data.type === 'item' &&
+          newEntries.filter((entry) => entry.type === 'item').length >= 20
+        ) {
+          console.warn('Maximum 20 items reached')
+          return prev
+        }
+        if (
+          data.type === 'mileage' &&
+          newEntries.filter((entry) => entry.type === 'mileage').length >= 20
+        ) {
+          console.warn('Maximum 20 mileage entries reached')
+          return prev
+        }
+
         newEntries.push({
           ...data,
           id: crypto.randomUUID()

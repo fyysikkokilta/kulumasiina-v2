@@ -40,15 +40,15 @@ export function ItemDisplay({ item, onEdit, onRemove }: ItemDisplayProps) {
       }
     >
       <div className="space-y-2">
-        <div className="flex justify-between">
+        <div className="flex items-start justify-between gap-4">
           <Text strong>{dayjs(item.date).format('DD.MM.YYYY')}</Text>
           <Tag color="green">
             {item.attachments.length} {t('attachments', { attachments: item.attachments.length })}
           </Tag>
         </div>
-        <div className="flex justify-between">
+        <div className="flex items-start justify-between gap-4">
           <Text>{item.description}</Text>
-          <Tag color="blue">
+          <Tag className="h-fit" color="blue">
             {item.attachments
               .reduce((acc, attachment) => acc + (attachment.value || 0), 0)
               .toFixed(2)}{' '}
@@ -90,13 +90,17 @@ export function MileageDisplay({ mileage, mileageRate, onEdit, onRemove }: Milea
       }
     >
       <div className="space-y-2">
-        <div className="flex justify-between">
+        <div className="flex items-start justify-between gap-4">
           <Text strong>{dayjs(mileage.date).format('DD.MM.YYYY')}</Text>
-          <Tag color="green">{mileage.distance} km</Tag>
+          <Tag className="h-fit" color="green">
+            {mileage.distance} km
+          </Tag>
         </div>
-        <div className="flex justify-between">
+        <div className="flex items-start justify-between gap-4">
           <Text>{mileage.description}</Text>
-          <Tag color="blue">{total.toFixed(2)} €</Tag>
+          <Tag className="h-fit" color="blue">
+            {total.toFixed(2)} €
+          </Tag>
         </div>
         <div className="text-sm text-gray-600">
           <div>

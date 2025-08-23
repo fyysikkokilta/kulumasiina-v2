@@ -63,6 +63,7 @@ export function getAdminEntryTableColumns(
         text: name,
         value: name
       })),
+      ellipsis: true,
       onFilter: (value, record) => record.name === value,
       width: 180
     },
@@ -70,7 +71,7 @@ export function getAdminEntryTableColumns(
       title: t('table.title'),
       dataIndex: 'title',
       key: 'title',
-      render: (title: string) => (title.length > 24 ? title.slice(0, 24) + '…' : title),
+      ellipsis: true,
       width: 220
     },
     {

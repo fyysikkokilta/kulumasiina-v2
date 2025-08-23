@@ -11,20 +11,33 @@ import { actionClient } from './safeActionClient'
 
 const ItemUpdateSchema = z.object({
   id: z.uuid(),
-  description: z.string(),
+  description: z
+    .string()
+    .min(1)
+    .max(500)
+    .regex(/^[^<>{}]*$/, 'Description contains invalid characters'),
   date: z.date(),
-  account: z.string(),
-  attachments: z.array(
-    z.object({
-      fileId: z.uuid(),
-      filename: z.string(),
-      value: z
-        .number()
-        .nullable()
-        .refine((val) => !val || val > 0),
-      isNotReceipt: z.boolean()
-    })
-  )
+  account: z
+    .string()
+    .max(4)
+    .regex(/^[0-9]{0,4}$/, 'Account must be 0-4 digits'),
+  attachments: z
+    .array(
+      z.object({
+        fileId: z.uuid(),
+        filename: z
+          .string()
+          .min(1)
+          .max(255)
+          .regex(/^[^<>{}]*$/, 'Filename contains invalid characters'),
+        value: z
+          .number()
+          .nullable()
+          .refine((val) => !val || val > 0),
+        isNotReceipt: z.boolean()
+      })
+    )
+    .max(20, 'Maximum 20 attachments per item')
 })
 
 export const updateItemAction = actionClient

@@ -66,7 +66,7 @@ export function ApproveModal({ visible, onCancel, entryIds, onSuccess }: Approve
             }
           ]}
         >
-          <Input placeholder={t('approval_note_placeholder')} />
+          <Input maxLength={100} placeholder={t('approval_note_placeholder')} />
         </Form.Item>
 
         <Form.Item>

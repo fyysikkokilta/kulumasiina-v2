@@ -11,7 +11,10 @@ import { actionClient } from './safeActionClient'
 
 const BookkeepingAccountSchema = z.object({
   id: z.uuid(),
-  account: z.string(),
+  account: z
+    .string()
+    .max(4)
+    .regex(/^[0-9]{0,4}$/, 'Account must be 0-4 digits'),
   isMileage: z.boolean()
 })
 

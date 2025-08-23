@@ -164,6 +164,10 @@ export function ItemForm({ visible, onOk, onCancel, editData }: ItemFormProps) {
                     return Promise.reject(new Error(t('attachments_error_1')))
                   }
 
+                  if (fileList.length > 20) {
+                    return Promise.reject(new Error(t('attachments_error_max')))
+                  }
+
                   if (Object.values(disablevalue || {}).every(Boolean)) {
                     return Promise.reject(new Error(t('attachments_error_2')))
                   }
@@ -175,6 +179,9 @@ export function ItemForm({ visible, onOk, onCancel, editData }: ItemFormProps) {
             <Space direction="vertical" className="w-full">
               <Typography.Text type="secondary" className="mb-2">
                 {t('upload_note')}
+              </Typography.Text>
+              <Typography.Text type="secondary" className="mb-2 text-xs">
+                {t('attachments_max_note')}
               </Typography.Text>
               <Upload
                 listType="picture"

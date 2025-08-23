@@ -104,7 +104,7 @@ export function ExpenseForm() {
           label={t('payee_name')}
           rules={[{ required: true, message: t('payee_name_error') }]}
         >
-          <Input placeholder={t('payee_name_placeholder')} autoComplete="off" />
+          <Input placeholder={t('payee_name_placeholder')} maxLength={255} autoComplete="off" />
         </Form.Item>
 
         <Form.Item
@@ -112,7 +112,7 @@ export function ExpenseForm() {
           label={t('payee_contact')}
           rules={[{ required: true, message: t('payee_contact_error') }]}
         >
-          <Input placeholder={t('payee_contact_placeholder')} autoComplete="off" />
+          <Input placeholder={t('payee_contact_placeholder')} maxLength={255} autoComplete="off" />
         </Form.Item>
 
         <Form.Item
@@ -141,7 +141,13 @@ export function ExpenseForm() {
           label={t('claim_title')}
           rules={[{ required: true, message: t('claim_title_error') }]}
         >
-          <Input.TextArea placeholder={t('claim_title_placeholder')} autoComplete="off" rows={1} />
+          <Input.TextArea
+            showCount
+            placeholder={t('claim_title_placeholder')}
+            maxLength={1000}
+            autoComplete="off"
+            rows={2}
+          />
         </Form.Item>
 
         {hasMileages && (
@@ -176,6 +182,18 @@ export function ExpenseForm() {
 
         {/* Entries Section */}
         {state.entries.length > 0 && (
+          <div className="mb-4 text-center text-sm text-gray-500">
+            <Typography.Text>
+              {t('entries_count', {
+                items: state.entries.filter((entry) => entry.type === 'item').length,
+                mileages: state.entries.filter((entry) => entry.type === 'mileage').length,
+                maxItems: 20,
+                maxMileages: 20
+              })}
+            </Typography.Text>
+          </div>
+        )}
+        {state.entries.length > 0 && (
           <div className="mb-6 space-y-4">
             <Typography.Title level={4}>{t('entries')}</Typography.Title>
 
@@ -202,10 +220,30 @@ export function ExpenseForm() {
         {/* Action Buttons */}
         <div className="mb-6 flex flex-col items-center gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex gap-4">
-            <Button type="default" icon={<PlusOutlined />} onClick={() => openModal('item')}>
+            <Button
+              type="default"
+              icon={<PlusOutlined />}
+              onClick={() => openModal('item')}
+              disabled={state.entries.filter((entry) => entry.type === 'item').length >= 20}
+              title={
+                state.entries.filter((entry) => entry.type === 'item').length >= 20
+                  ? t('max_items_reached')
+                  : undefined
+              }
+            >
               {t('add_expense')}
             </Button>
-            <Button type="default" icon={<PlusOutlined />} onClick={() => openModal('mileage')}>
+            <Button
+              type="default"
+              icon={<PlusOutlined />}
+              onClick={() => openModal('mileage')}
+              disabled={state.entries.filter((entry) => entry.type === 'mileage').length >= 20}
+              title={
+                state.entries.filter((entry) => entry.type === 'mileage').length >= 20
+                  ? t('max_mileages_reached')
+                  : undefined
+              }
+            >
               {t('add_mileage')}
             </Button>
           </div>
