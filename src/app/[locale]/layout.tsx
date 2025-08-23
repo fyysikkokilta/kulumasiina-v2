@@ -10,7 +10,8 @@ import { Header } from '@/components/Header'
 import { routing } from '@/i18n/routing'
 
 export const generateStaticParams = async () => {
-  return Promise.resolve(routing.locales.map((locale) => ({ locale })))
+  // Cannot pre-render in CI since admin page needs the database
+  return Promise.resolve([])
 }
 
 export async function generateMetadata({ params }: LayoutProps<'/[locale]'>) {
