@@ -441,7 +441,7 @@ export async function generateCombinedPDF(
   if (pdfAttachments.length === 0) {
     const sanitizedName = name.replace(/[^a-zA-Z0-9-_]/g, '_')
     const filenameDateStr = submissionDate.toLocaleDateString('fi-FI').replace(/\./g, '-')
-    const filename = `${sanitizedName}-${filenameDateStr}-${entryId}.pdf`
+    const filename = `${sanitizedName}-${filenameDateStr}.pdf`
 
     return {
       filename,
@@ -487,7 +487,7 @@ export async function generateCombinedPDF(
 
   const sanitizedName = name.replace(/[^a-zA-Z0-9-_]/g, '_')
   const filenameDateStr = submissionDate.toLocaleDateString('fi-FI').replace(/\./g, '-')
-  const filename = `${sanitizedName}-${filenameDateStr}-${entryId}.pdf`
+  const filename = `${sanitizedName}-${filenameDateStr}.pdf`
 
   const data = await compress(Buffer.from(finalPdfBytes))
 

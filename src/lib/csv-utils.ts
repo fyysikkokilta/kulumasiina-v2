@@ -71,11 +71,10 @@ export async function mergeCsvInfos(csvInfos: CsvInfo[]) {
               pdf1.addPage(page)
             }
 
-            const entries = [mergedCsvInfo.entryId, csvInfo.entryId].sort().join('-')
             const pdfBytes = await pdf1.save()
 
             mergedCsvInfo.pdf = {
-              filename: `${mergedCsvInfo.name}-${entries}.pdf`,
+              filename: `${mergedCsvInfo.name}.pdf`,
               data: Buffer.from(pdfBytes)
             }
           } else {
@@ -85,7 +84,6 @@ export async function mergeCsvInfos(csvInfos: CsvInfo[]) {
         mergedCsvInfo.submissionDate = new Date(
           Math.min(mergedCsvInfo.submissionDate.getTime(), csvInfo.submissionDate.getTime())
         )
-        mergedCsvInfo.entryId = `${mergedCsvInfo.entryId}-${csvInfo.entryId}`
         found = true
         break
       }
@@ -244,12 +242,10 @@ export async function generateCsv(csvInfos: CsvInfo[]) {
   const csvContent = lines.join('\n')
 
   // Generate filename
-  const sanitizedName = csvInfos[0]?.name.replace(/[^a-zA-Z0-9-_]/g, '_') || 'export'
   const dateStr =
     csvInfos[0]?.submissionDate.toISOString().split('T')[0] ||
     new Date().toISOString().split('T')[0]
-  const entryId = csvInfos[0]?.entryId || 'unknown'
-  const documentName = `${sanitizedName}-${dateStr}-${entryId}`
+  const documentName = `entry-data-${dateStr}`
 
   const csvInfoLength = csvInfos.length
   const hasPdf = mergedCsvInfos.some((info) => info.pdf)
@@ -262,8 +258,7 @@ export async function generateCsv(csvInfos: CsvInfo[]) {
     }
   }
 
-  const entryIds = csvInfos.map((info) => info.entryId.toString()).join('-')
-  const multiName = `${dateStr}-entries-${entryIds}`
+  const multiName = `multi-entries-data-${dateStr}`
 
   // If merged csv infos don't have pdfs, return CSV as is
   if (!hasPdf) {
