@@ -11,17 +11,9 @@ import { actionClient } from './safeActionClient'
 
 const MileageUpdateSchema = z.object({
   id: z.uuid(),
-  description: z
-    .string()
-    .min(1)
-    .max(500)
-    .regex(/^[^<>{}]*$/, 'Description contains invalid characters'),
+  description: z.string().min(1).max(500),
   date: z.date(),
-  route: z
-    .string()
-    .min(1)
-    .max(500)
-    .regex(/^[^<>{}]*$/, 'Route contains invalid characters'),
+  route: z.string().min(1).max(500),
   distance: z.number().refine((val) => val > 0),
   plateNo: z
     .string()

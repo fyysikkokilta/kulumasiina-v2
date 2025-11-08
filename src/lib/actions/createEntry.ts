@@ -10,34 +10,18 @@ import { validateFinnishSSN } from '../validation'
 import { actionClient } from './safeActionClient'
 
 const EntryCreateSchema = z.object({
-  name: z
-    .string()
-    .min(1)
-    .max(255)
-    .regex(/^[^<>{}]*$/, 'Name contains invalid characters'),
-  contact: z
-    .string()
-    .min(1)
-    .max(255)
-    .regex(/^[^<>{}]*$/, 'Contact contains invalid characters'),
+  name: z.string().min(1).max(255),
+  contact: z.string().min(1).max(255),
   iban: z.string().refine((val) => isValidIBAN(val.replace(/\s/g, ''))),
   govId: z
     .string()
     .optional()
     .refine((val) => !val || validateFinnishSSN(val)),
-  title: z
-    .string()
-    .min(1)
-    .max(1000)
-    .regex(/^[^<>{}]*$/, 'Title contains invalid characters'),
+  title: z.string().min(1).max(1000),
   items: z
     .array(
       z.object({
-        description: z
-          .string()
-          .min(1)
-          .max(500)
-          .regex(/^[^<>{}]*$/, 'Description contains invalid characters'),
+        description: z.string().min(1).max(500),
         date: z.date(),
         account: z
           .string()
@@ -48,11 +32,7 @@ const EntryCreateSchema = z.object({
           .array(
             z.object({
               fileId: z.uuid(),
-              filename: z
-                .string()
-                .min(1)
-                .max(255)
-                .regex(/^[^<>{}]*$/, 'Filename contains invalid characters'),
+              filename: z.string().min(1).max(255),
               value: z
                 .number()
                 .nullish()
@@ -67,17 +47,9 @@ const EntryCreateSchema = z.object({
   mileages: z
     .array(
       z.object({
-        description: z
-          .string()
-          .min(1)
-          .max(500)
-          .regex(/^[^<>{}]*$/, 'Description contains invalid characters'),
+        description: z.string().min(1).max(500),
         date: z.date(),
-        route: z
-          .string()
-          .min(1)
-          .max(500)
-          .regex(/^[^<>{}]*$/, 'Route contains invalid characters'),
+        route: z.string().min(1).max(500),
         distance: z.number().refine((val) => val > 0),
         plateNo: z
           .string()

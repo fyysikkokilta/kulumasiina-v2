@@ -12,10 +12,7 @@ import { actionClient } from './safeActionClient'
 const ApproveEntriesSchema = z.object({
   ids: z.array(z.uuid()),
   date: z.date(),
-  approval_note: z
-    .string()
-    .max(100)
-    .regex(/^[^<>{}]*$/, 'Approval note contains invalid characters')
+  approval_note: z.string().max(100)
 })
 
 export const approveEntriesAction = actionClient

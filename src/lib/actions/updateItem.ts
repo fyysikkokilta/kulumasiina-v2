@@ -11,11 +11,7 @@ import { actionClient } from './safeActionClient'
 
 const ItemUpdateSchema = z.object({
   id: z.uuid(),
-  description: z
-    .string()
-    .min(1)
-    .max(500)
-    .regex(/^[^<>{}]*$/, 'Description contains invalid characters'),
+  description: z.string().min(1).max(500),
   date: z.date(),
   account: z
     .string()
@@ -25,11 +21,7 @@ const ItemUpdateSchema = z.object({
     .array(
       z.object({
         fileId: z.uuid(),
-        filename: z
-          .string()
-          .min(1)
-          .max(255)
-          .regex(/^[^<>{}]*$/, 'Filename contains invalid characters'),
+        filename: z.string().min(1).max(255),
         value: z
           .number()
           .nullable()
