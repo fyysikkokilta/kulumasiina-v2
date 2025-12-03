@@ -1,7 +1,6 @@
 import { Button, Select, Space, Tag, Typography } from 'antd'
 import dayjs from 'dayjs'
 import { useTranslations } from 'next-intl'
-import React from 'react'
 
 import { bookkeepingAccounts } from '@/lib/bookkeeping-accounts'
 import type { ItemWithAttachments, Mileage } from '@/lib/db/schema'
@@ -43,20 +42,20 @@ export function AdminEntryExpandedRow({
     <div className="rounded border border-gray-200 bg-white p-4 shadow">
       <div className="mb-4 flex flex-col md:flex-row md:items-center md:gap-8">
         <Typography.Text className="text-nowrap" strong>
-          {t('table.title')}:{' '}
+          {`${t('table.title')}: `}
         </Typography.Text>
         <Typography.Text>{record.title}</Typography.Text>
       </div>
       <div className="mb-4 flex flex-col md:flex-row md:items-center md:gap-8">
         <Typography.Text className="text-nowrap" strong>
-          {t('table.contact')}:{' '}
+          {`${t('table.contact')}: `}
         </Typography.Text>
         <Typography.Text>{record.contact}</Typography.Text>
       </div>
 
       <div className="mb-4 flex flex-col md:flex-row md:items-center md:gap-8">
         <Typography.Text className="text-nowrap" strong>
-          {t('table.iban')}:{' '}
+          {`${t('table.iban')}: `}
         </Typography.Text>
         <Typography.Text>{record.iban}</Typography.Text>
       </div>
@@ -64,14 +63,17 @@ export function AdminEntryExpandedRow({
       {record.items.length > 0 && (
         <div className="mb-4">
           <Typography.Text className="text-nowrap" strong>
-            {t('table.items')}:
+            {`${t('table.items')}: `}
           </Typography.Text>
           {record.items.map((item) => (
-            <div key={item.id} className="mt-2 ml-4 rounded border border-gray-100 bg-gray-50 p-2">
+            <div
+              key={item.id}
+              className="mt-2 ml-4 rounded border border-gray-100 bg-gray-50 p-2"
+            >
               <div className="flex flex-col gap-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <Typography.Text className="text-gray-600">
-                    {dayjs(item.date).format('DD.MM.YYYY')} -{' '}
+                    {`${dayjs(item.date).format('DD.MM.YYYY')} - `}
                     {item.attachments
                       .reduce((acc, att) => {
                         if (att.isNotReceipt) {
@@ -79,8 +81,8 @@ export function AdminEntryExpandedRow({
                         }
                         return acc + (att.value || 0)
                       }, 0)
-                      .toFixed(2)}{' '}
-                    €
+                      .toFixed(2)}
+                    {' €'}
                   </Typography.Text>
                   <div className="flex flex-wrap items-center gap-2">
                     <Select
@@ -88,17 +90,21 @@ export function AdminEntryExpandedRow({
                       value={item.account || undefined}
                       placeholder={t('table.select_account')}
                       style={{ minWidth: 200 }}
-                      showSearch
+                      showSearch={{
+                        optionFilterProp: 'children',
+                        filterOption: (input, option) =>
+                          (option?.label ?? '')
+                            .toLowerCase()
+                            .includes(input.toLowerCase())
+                      }}
                       disabled={!!record.archived}
-                      optionFilterProp="children"
-                      filterOption={(input, option) =>
-                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                      }
                       options={bookkeepingAccounts.map((account) => ({
                         value: account.value,
                         label: account.label
                       }))}
-                      onChange={(value) => handleAccountUpdate(item.id, value, false)}
+                      onChange={(value) =>
+                        handleAccountUpdate(item.id, value, false)
+                      }
                     />
                     <Button
                       size="small"
@@ -110,12 +116,12 @@ export function AdminEntryExpandedRow({
                   </div>
                 </div>
                 <Typography.Text className="text-sm text-gray-600">
-                  {t('table.description')}: {item.description}
+                  {`${t('table.description')}: ${item.description}`}
                 </Typography.Text>
                 {item.attachments.length > 0 && (
                   <div className="mt-2 flex items-start gap-2">
                     <Typography.Text className="text-sm whitespace-nowrap text-gray-600">
-                      {t('table.attachments')}:
+                      {`${t('table.attachments')}: `}
                     </Typography.Text>
                     <div className="flex flex-wrap gap-3">
                       {item.attachments.map((attachment) => (
@@ -141,7 +147,7 @@ export function AdminEntryExpandedRow({
                           {attachment.isNotReceipt ? (
                             <Tag color="orange">{t('table.not_receipt')}</Tag>
                           ) : attachment.value ? (
-                            <Tag color="blue">{attachment.value.toFixed(2)} €</Tag>
+                            <Tag color="blue">{`${attachment.value.toFixed(2)} €`}</Tag>
                           ) : null}
                         </div>
                       ))}
@@ -157,7 +163,7 @@ export function AdminEntryExpandedRow({
       {record.mileages.length > 0 && (
         <div className="mb-4">
           <Typography.Text className="text-nowrap" strong>
-            {t('table.mileages')}:
+            {`${t('table.mileages')}: `}
           </Typography.Text>
           {record.mileages.map((mileage) => (
             <div
@@ -167,8 +173,8 @@ export function AdminEntryExpandedRow({
               <div className="flex flex-col gap-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <Typography.Text className="text-gray-600">
-                    {dayjs(mileage.date).format('DD.MM.YYYY')} - {mileage.distance} km -{' '}
-                    {(mileage.distance * env.NEXT_PUBLIC_MILEAGE_REIMBURSEMENT_RATE).toFixed(2)} €
+                    {`${dayjs(mileage.date).format('DD.MM.YYYY')} - ${mileage.distance} km - `}
+                    {`${(mileage.distance * env.NEXT_PUBLIC_MILEAGE_REIMBURSEMENT_RATE).toFixed(2)} €`}
                   </Typography.Text>
                   <div className="flex flex-wrap items-center gap-2">
                     <Select
@@ -176,17 +182,21 @@ export function AdminEntryExpandedRow({
                       value={mileage.account || undefined}
                       placeholder={t('table.select_account')}
                       style={{ minWidth: 200 }}
-                      showSearch
                       disabled={!!record.archived}
-                      optionFilterProp="children"
-                      filterOption={(input, option) =>
-                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                      }
+                      showSearch={{
+                        optionFilterProp: 'children',
+                        filterOption: (input, option) =>
+                          (option?.label ?? '')
+                            .toLowerCase()
+                            .includes(input.toLowerCase())
+                      }}
                       options={bookkeepingAccounts.map((account) => ({
                         value: account.value,
                         label: account.label
                       }))}
-                      onChange={(value) => handleAccountUpdate(mileage.id, value, true)}
+                      onChange={(value) =>
+                        handleAccountUpdate(mileage.id, value, true)
+                      }
                     />
                     <Button
                       size="small"
@@ -198,13 +208,13 @@ export function AdminEntryExpandedRow({
                   </div>
                 </div>
                 <Typography.Text className="text-sm text-gray-600">
-                  {t('table.description')}: {mileage.description}
+                  {`${t('table.description')}: ${mileage.description}`}
                 </Typography.Text>
                 <Typography.Text className="text-sm text-gray-600">
-                  {t('table.route')}: {mileage.route}
+                  {`${t('table.route')}: ${mileage.route}`}
                 </Typography.Text>
                 <Typography.Text className="text-sm text-gray-600">
-                  {t('table.plate_number')}: {mileage.plateNo}
+                  {`${t('table.plate_number')}: ${mileage.plateNo}`}
                 </Typography.Text>
               </div>
             </div>
@@ -214,7 +224,7 @@ export function AdminEntryExpandedRow({
 
       <div className="mb-4">
         <Typography.Text className="text-nowrap" strong>
-          {t('table.id')}:{' '}
+          {`${t('table.id')}: `}
         </Typography.Text>
         <Typography.Text className="text-nowrap">{record.id}</Typography.Text>
       </div>
@@ -223,21 +233,30 @@ export function AdminEntryExpandedRow({
         <Space>
           {record.status === 'submitted' && (
             <>
-              <Button onClick={() => handleApprove([record.id])}>{t('actions.approve')}</Button>
-              <Button onClick={() => handleDeny([record.id])}>{t('actions.deny')}</Button>
+              <Button onClick={() => handleApprove([record.id])}>
+                {t('actions.approve')}
+              </Button>
+              <Button onClick={() => handleDeny([record.id])}>
+                {t('actions.deny')}
+              </Button>
             </>
           )}
           {record.status === 'approved' && (
-            <Button onClick={() => handlePay([record.id])}>{t('actions.pay')}</Button>
-          )}
-          {record.status !== 'submitted' && !record.archived && (
-            <Button onClick={() => handleReset([record.id])}>{t('actions.reset')}</Button>
-          )}
-          {(record.status === 'paid' || record.status === 'denied') && !record.archived && (
-            <Button danger onClick={() => handleArchive([record.id])}>
-              {t('actions.archive')}
+            <Button onClick={() => handlePay([record.id])}>
+              {t('actions.pay')}
             </Button>
           )}
+          {record.status !== 'submitted' && !record.archived && (
+            <Button onClick={() => handleReset([record.id])}>
+              {t('actions.reset')}
+            </Button>
+          )}
+          {(record.status === 'paid' || record.status === 'denied') &&
+            !record.archived && (
+              <Button danger onClick={() => handleArchive([record.id])}>
+                {t('actions.archive')}
+              </Button>
+            )}
         </Space>
       </div>
     </div>

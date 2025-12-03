@@ -13,7 +13,9 @@ const pool = new Pool({
 const db = drizzle(pool)
 
 try {
-  await migrate(db, { migrationsFolder: path.join(process.cwd(), 'src/drizzle') })
+  await migrate(db, {
+    migrationsFolder: path.join(process.cwd(), 'src/drizzle')
+  })
   console.log('Migration successful')
 } catch (error) {
   console.error('Migration failed:', error)

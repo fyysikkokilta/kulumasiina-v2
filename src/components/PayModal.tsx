@@ -4,7 +4,6 @@ import { Button, DatePicker, Form, Modal, Space } from 'antd'
 import dayjs, { Dayjs } from 'dayjs'
 import { useTranslations } from 'next-intl'
 import { useAction } from 'next-safe-action/hooks'
-import React from 'react'
 
 import { payEntriesAction } from '@/lib/actions/payEntries'
 
@@ -19,7 +18,12 @@ interface PayFormData {
   date: Dayjs
 }
 
-export function PayModal({ visible, onCancel, entryIds, onSuccess }: PayModalProps) {
+export function PayModal({
+  visible,
+  onCancel,
+  entryIds,
+  onSuccess
+}: PayModalProps) {
   const [form] = Form.useForm<PayFormData>()
   const t = useTranslations('admin.pay_modal')
 
@@ -44,8 +48,18 @@ export function PayModal({ visible, onCancel, entryIds, onSuccess }: PayModalPro
   }
 
   return (
-    <Modal title={t('title')} open={visible} footer={null} onCancel={handleCancel}>
-      <Form form={form} onFinish={handleSubmit} initialValues={{ date: dayjs() }} layout="vertical">
+    <Modal
+      title={t('title')}
+      open={visible}
+      footer={null}
+      onCancel={handleCancel}
+    >
+      <Form
+        form={form}
+        onFinish={handleSubmit}
+        initialValues={{ date: dayjs() }}
+        layout="vertical"
+      >
         <Form.Item
           name="date"
           label={t('date')}
@@ -56,7 +70,11 @@ export function PayModal({ visible, onCancel, entryIds, onSuccess }: PayModalPro
 
         <Form.Item>
           <Space>
-            <Button type="primary" htmlType="submit" loading={status === 'executing'}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={status === 'executing'}
+            >
               {t('submit')}
             </Button>
             <Button onClick={handleCancel}>{t('cancel')}</Button>

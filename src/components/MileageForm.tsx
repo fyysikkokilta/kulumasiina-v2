@@ -3,7 +3,7 @@
 import { DatePicker, Form, Input, InputNumber, Modal, Select } from 'antd'
 import { Dayjs } from 'dayjs'
 import { useLocale, useTranslations } from 'next-intl'
-import React, { useCallback, useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 
 import { useMileageForm } from '@/hooks/useMileageForm'
 import { bookkeepingAccounts } from '@/lib/bookkeeping-accounts'
@@ -25,7 +25,12 @@ interface MileageFormProps {
   editData?: Omit<Mileage | NewMileage, 'entryId'>
 }
 
-export function MileageForm({ visible, onOk, onCancel, editData }: MileageFormProps) {
+export function MileageForm({
+  visible,
+  onOk,
+  onCancel,
+  editData
+}: MileageFormProps) {
   const [form] = Form.useForm<MileageFormData>()
   const t = useTranslations('form.mileage')
   const locale = useLocale()
@@ -95,7 +100,12 @@ export function MileageForm({ visible, onOk, onCancel, editData }: MileageFormPr
           label={t('route')}
           rules={[{ required: true, message: t('route_error') }]}
         >
-          <Input.TextArea showCount maxLength={500} rows={2} placeholder={t('route_placeholder')} />
+          <Input.TextArea
+            showCount
+            maxLength={500}
+            rows={2}
+            placeholder={t('route_placeholder')}
+          />
         </Form.Item>
 
         <Form.Item
@@ -131,12 +141,14 @@ export function MileageForm({ visible, onOk, onCancel, editData }: MileageFormPr
 
         <Form.Item name="account" label={t('account')}>
           <Select
-            showSearch
+            showSearch={{
+              optionFilterProp: 'children',
+              filterOption: (input, option) =>
+                (option?.label ?? '')
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+            }}
             placeholder={t('account_placeholder')}
-            optionFilterProp="children"
-            filterOption={(input, option) =>
-              (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-            }
             options={bookkeepingAccounts.map((account) => ({
               value: account.value,
               label: account.label

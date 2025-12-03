@@ -1,6 +1,5 @@
 import { Image, Modal } from 'antd'
 import { useTranslations } from 'next-intl'
-import React from 'react'
 
 export interface PreviewState {
   open: boolean
@@ -16,7 +15,10 @@ interface PreviewModalProps {
   closePreview: () => void
 }
 
-export function PreviewModal({ previewState, closePreview }: PreviewModalProps) {
+export function PreviewModal({
+  previewState,
+  closePreview
+}: PreviewModalProps) {
   const t = useTranslations('form.expense')
 
   const title = `${previewState.title} ${previewState.isNotReceipt ? `(${t('is_not_receipt')})` : previewState.value ? `(${previewState.value.toFixed(2)} €)` : ''}`
@@ -28,9 +30,8 @@ export function PreviewModal({ previewState, closePreview }: PreviewModalProps) 
         alt={previewState.title}
         style={{ display: 'none' }}
         preview={{
-          destroyOnHidden: true,
-          visible: previewState.open,
-          onVisibleChange: (visible) => {
+          open: previewState.open,
+          onOpenChange: (visible) => {
             if (!visible) {
               closePreview()
             }
@@ -39,7 +40,9 @@ export function PreviewModal({ previewState, closePreview }: PreviewModalProps) 
             return (
               <div className="rounded-lg bg-white">
                 <div className="rounded-lg bg-white px-6 py-4">
-                  <h3 className="text-center text-lg font-semibold text-gray-900">{title}</h3>
+                  <h3 className="text-center text-lg font-semibold text-gray-900">
+                    {title}
+                  </h3>
                 </div>
                 <div className="flex justify-center rounded-b-lg bg-gray-50 p-8">
                   {originalNode}
@@ -66,7 +69,9 @@ export function PreviewModal({ previewState, closePreview }: PreviewModalProps) 
     >
       <div className="overflow-hidden rounded-lg bg-white">
         <div className="bg-white px-6 py-4">
-          <h3 className="text-center text-lg font-semibold text-gray-900">{title}</h3>
+          <h3 className="text-center text-lg font-semibold text-gray-900">
+            {title}
+          </h3>
         </div>
         <div className="relative h-full w-full overflow-hidden rounded-b-lg bg-gray-50">
           <iframe

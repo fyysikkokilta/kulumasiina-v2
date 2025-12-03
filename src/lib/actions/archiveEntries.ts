@@ -1,7 +1,7 @@
 'use server'
 
 import { inArray } from 'drizzle-orm'
-import { revalidatePath } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { z } from 'zod'
 
 import { db } from '../db'
@@ -27,7 +27,7 @@ export const archiveEntriesAction = actionClient
       })
       .where(inArray(entries.id, parsedInput.ids))
 
-    revalidatePath('/[locale]/admin', 'page')
+    updateTag('admin-entries')
 
     return { success: true }
   })

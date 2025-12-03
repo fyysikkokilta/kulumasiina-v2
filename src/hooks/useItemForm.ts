@@ -8,7 +8,11 @@ import { useCallback, useState } from 'react'
 
 import type { ItemFormData } from '@/components/ItemForm'
 import type { PreviewState } from '@/components/PreviewModal'
-import type { ItemWithAttachments, NewAttachment, NewItemWithAttachments } from '@/lib/db/schema'
+import type {
+  ItemWithAttachments,
+  NewAttachment,
+  NewItemWithAttachments
+} from '@/lib/db/schema'
 
 export function useItemForm(form: FormInstance<ItemFormData>) {
   const [fileList, setFileList] = useState<UploadFile[]>([])
@@ -60,12 +64,8 @@ export function useItemForm(form: FormInstance<ItemFormData>) {
       const attachment = await res.blob()
       const mimeType = res.headers.get('content-type')
       const url = URL.createObjectURL(attachment)
-      const isNotReceipts = form.getFieldValue('isNotReceiptValues') as
-        | { [key: string]: boolean }
-        | undefined
-      const values = form.getFieldValue('valueValues') as
-        | { [key: string]: number | null }
-        | undefined
+      const isNotReceipts = form.getFieldValue('isNotReceiptValues')
+      const values = form.getFieldValue('valueValues')
       const isNotReceipt = isNotReceipts?.[file.name] ?? false
       const value = values?.[file.name] ?? null
       setPreviewState({
@@ -81,21 +81,24 @@ export function useItemForm(form: FormInstance<ItemFormData>) {
   )
 
   // Handle file list change
-  const handleChange = useCallback<NonNullable<UploadProps['onChange']>>((info) => {
-    // Patch fileList to store fileId in uid and for preview/download
-    const patchedList = info.fileList.map((file) => {
-      const response = file.response as { fileId?: string } | undefined
-      if (response?.fileId) {
-        return {
-          ...file,
-          uid: response.fileId,
-          url: `/api/attachment/${response.fileId}`
+  const handleChange = useCallback<NonNullable<UploadProps['onChange']>>(
+    (info) => {
+      // Patch fileList to store fileId in uid and for preview/download
+      const patchedList = info.fileList.map((file) => {
+        const response = file.response as { fileId?: string } | undefined
+        if (response?.fileId) {
+          return {
+            ...file,
+            uid: response.fileId,
+            url: `/api/attachment/${response.fileId}`
+          }
         }
-      }
-      return file
-    })
-    setFileList(patchedList)
-  }, [])
+        return file
+      })
+      setFileList(patchedList)
+    },
+    []
+  )
 
   // Handle file removal
   const handleRemove = useCallback(
@@ -131,7 +134,10 @@ export function useItemForm(form: FormInstance<ItemFormData>) {
   // Load existing attachments
   const prepareEditState = useCallback(
     (
-      editData: Omit<ItemWithAttachments | NewItemWithAttachments, 'entryId' | 'attachments'> & {
+      editData: Omit<
+        ItemWithAttachments | NewItemWithAttachments,
+        'entryId' | 'attachments'
+      > & {
         attachments: Omit<NewAttachment, 'itemId'>[]
       }
     ) => {
@@ -157,7 +163,8 @@ export function useItemForm(form: FormInstance<ItemFormData>) {
 
         editData.attachments.forEach((attachment) => {
           value[attachment.filename] = attachment.value ?? null
-          isNotReceiptValues[attachment.filename] = attachment.isNotReceipt ?? false
+          isNotReceiptValues[attachment.filename] =
+            attachment.isNotReceipt ?? false
         })
 
         form.setFieldsValue({

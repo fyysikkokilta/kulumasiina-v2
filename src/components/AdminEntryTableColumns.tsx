@@ -3,7 +3,7 @@ import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { useTranslations } from 'next-intl'
 
-import { EntryWithItemsAndMileages } from '@/lib/db/schema'
+import type { AdminEntries } from '@/data/getAdminEntries'
 
 type TFunction = ReturnType<typeof useTranslations>
 
@@ -11,27 +11,40 @@ export function getAdminEntryTableColumns(
   t: TFunction,
   getStatusColor: (status: string) => string,
   getStatusText: (status: string) => string,
-  entries: EntryWithItemsAndMileages[]
+  entries: AdminEntries
 ) {
-  const columns: ColumnsType<EntryWithItemsAndMileages> = [
+  const columns: ColumnsType<AdminEntries[number]> = [
     {
       title: t('table.date'),
       dataIndex: 'submissionDate',
       key: 'submissionDate',
       render: (date: string) => new Date(date).toLocaleDateString('fi-FI'),
-      sorter: (a, b) => new Date(a.submissionDate).getTime() - new Date(b.submissionDate).getTime(),
+      sorter: (a, b) =>
+        new Date(a.submissionDate).getTime() -
+        new Date(b.submissionDate).getTime(),
       defaultSortOrder: 'descend',
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters
+      }) => (
         <div className="p-2">
           <DatePicker.RangePicker
             value={
               selectedKeys[0]
-                ? [dayjs(selectedKeys[0] as string), dayjs(selectedKeys[1] as string)]
+                ? [
+                    dayjs(selectedKeys[0] as string),
+                    dayjs(selectedKeys[1] as string)
+                  ]
                 : null
             }
             onChange={(dates) => {
               if (dates) {
-                setSelectedKeys([dates[0]?.toISOString() || '', dates[1]?.toISOString() || ''])
+                setSelectedKeys([
+                  dates[0]?.toISOString() || '',
+                  dates[1]?.toISOString() || ''
+                ])
               } else {
                 setSelectedKeys([])
               }
@@ -85,7 +98,9 @@ export function getAdminEntryTableColumns(
       title: t('table.status'),
       dataIndex: 'status',
       key: 'status',
-      render: (status: string) => <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>,
+      render: (status: string) => (
+        <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>
+      ),
       filters: [
         { text: t('filter.submitted'), value: 'submitted' },
         { text: t('filter.approved'), value: 'approved' },
@@ -117,11 +132,17 @@ export function getAdminEntryTableColumns(
       key: 'actions',
       render: (_, record) => (
         <Space>
-          <Button size="small" onClick={() => window.open(`/api/entry/${record.id}/pdf`)}>
+          <Button
+            size="small"
+            onClick={() => window.open(`/api/entry/${record.id}/pdf`)}
+          >
             {t('actions.pdf')}
           </Button>
           {(record.status === 'paid' || record.status === 'approved') && (
-            <Button size="small" onClick={() => window.open(`/api/entry/${record.id}/csv`)}>
+            <Button
+              size="small"
+              onClick={() => window.open(`/api/entry/${record.id}/csv`)}
+            >
               {record.status === 'paid' ? t('actions.zip') : t('actions.csv')}
             </Button>
           )}

@@ -17,14 +17,17 @@ export function DeleteOldArchivedModal({
 }: DeleteOldArchivedModalProps) {
   const t = useTranslations('admin.delete_archived_modal')
 
-  const { execute: deleteOldArchivedEntries } = useAction(deleteOldArchivedEntriesAction, {
-    onSuccess: () => {
-      onSuccess()
-    },
-    onError: (error) => {
-      console.error(error)
+  const { execute: deleteOldArchivedEntries } = useAction(
+    deleteOldArchivedEntriesAction,
+    {
+      onSuccess: () => {
+        onSuccess()
+      },
+      onError: (error) => {
+        console.error(error)
+      }
     }
-  })
+  )
 
   const handleSubmit = () => {
     deleteOldArchivedEntries()
@@ -34,7 +37,9 @@ export function DeleteOldArchivedModal({
     <Modal title={t('title')} open={visible} footer={null} onCancel={onCancel}>
       <Form onFinish={handleSubmit}>
         <Form.Item>
-          <Typography.Paragraph type="danger">{t('text_1')}</Typography.Paragraph>
+          <Typography.Paragraph type="danger">
+            {t('text_1')}
+          </Typography.Paragraph>
           <Typography.Paragraph>{t('text_2')}</Typography.Paragraph>
         </Form.Item>
         <Form.Item>

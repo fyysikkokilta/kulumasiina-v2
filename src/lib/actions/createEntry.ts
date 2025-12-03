@@ -1,7 +1,7 @@
 'use server'
 
 import { isValidIBAN } from 'ibantools'
-import { revalidatePath } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { z } from 'zod'
 
 import { db } from '../db'
@@ -230,7 +230,7 @@ export const createEntryAction = actionClient
         )
       }
 
-      revalidatePath('/[locale]/admin', 'page')
+      updateTag('admin-entries')
 
       return entry
     })

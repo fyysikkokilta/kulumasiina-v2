@@ -2,22 +2,16 @@ import { Locale } from 'next-intl'
 import { setRequestLocale } from 'next-intl/server'
 
 import { AdminEntryTable } from '@/components/AdminEntryTable'
-import { db } from '@/lib/db'
+import { getAdminEntries } from '@/data/getAdminEntries'
 
-export default async function AdminPage({ params }: PageProps<'/[locale]/admin'>) {
+export default async function AdminPage({
+  params
+}: PageProps<'/[locale]/admin'>) {
   const { locale } = await params
-  setRequestLocale(locale as Locale)
+  const nextIntlLocale = locale as Locale
+  setRequestLocale(nextIntlLocale)
 
-  const entries = await db.query.entries.findMany({
-    with: {
-      items: {
-        with: {
-          attachments: true
-        }
-      },
-      mileages: true
-    }
-  })
+  const entries = await getAdminEntries(nextIntlLocale)
 
   return <AdminEntryTable entries={entries} />
 }

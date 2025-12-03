@@ -6,13 +6,11 @@ const withNextIntl = createNextIntlPlugin()
 const nextConfig: NextConfig = {
   output: 'standalone',
   reactCompiler: true,
+  cacheComponents: true,
   experimental: {
-    useCache: true,
-    optimizePackageImports: ['antd', '@ant-design/icons', 'drizzle-orm'],
-    ppr: true
+    optimizePackageImports: ['antd', '@ant-design/icons', 'drizzle-orm']
   },
   transpilePackages: ['@t3-oss/env-nextjs', '@t3-oss/env-core'],
-  // eslint-disable-next-line @typescript-eslint/require-await
   async headers() {
     return [
       {

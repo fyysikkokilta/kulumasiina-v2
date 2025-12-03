@@ -17,7 +17,8 @@ export const env = createEnv({
       .string()
       .transform((val) => val.split(',').map((email) => email.trim()))
       .refine((val) => val.every((email) => email.includes('@')), {
-        message: 'ADMIN_EMAILS must be a comma-separated list of email addresses'
+        message:
+          'ADMIN_EMAILS must be a comma-separated list of email addresses'
       }),
 
     MILEAGE_PROCOUNTOR_PRODUCT_ID: z.string().default('v2025_kmkorv'),
@@ -30,7 +31,9 @@ export const env = createEnv({
       .transform((val) => parseInt(val, 10)),
 
     // Environment
-    NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+    NODE_ENV: z
+      .enum(['development', 'test', 'production'])
+      .default('development'),
     BASE_URL: z.string(),
 
     // Storage configuration
@@ -56,12 +59,15 @@ export const env = createEnv({
     NEXT_PUBLIC_PRIVACY_POLICY_URL: z
       .string()
       .url()
-      .default('https://drive.google.com/drive/folders/12VBoHzXG7vEYGul87egYQZ3QN_-CKpBa')
+      .default(
+        'https://drive.google.com/drive/folders/12VBoHzXG7vEYGul87egYQZ3QN_-CKpBa'
+      )
   },
   experimental__runtimeEnv: {
     NEXT_PUBLIC_ARCHIVED_ENTRIES_AGE_LIMIT_DAYS:
       process.env.NEXT_PUBLIC_ARCHIVED_ENTRIES_AGE_LIMIT_DAYS,
-    NEXT_PUBLIC_MILEAGE_REIMBURSEMENT_RATE: process.env.NEXT_PUBLIC_MILEAGE_REIMBURSEMENT_RATE,
+    NEXT_PUBLIC_MILEAGE_REIMBURSEMENT_RATE:
+      process.env.NEXT_PUBLIC_MILEAGE_REIMBURSEMENT_RATE,
     NEXT_PUBLIC_PRIVACY_POLICY_URL: process.env.NEXT_PUBLIC_PRIVACY_POLICY_URL
   },
   emptyStringAsUndefined: true,
