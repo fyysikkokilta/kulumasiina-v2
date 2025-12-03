@@ -52,9 +52,12 @@ export async function mergeCsvInfos(csvInfos: CsvInfo[]) {
   for (const csvInfo of csvInfos) {
     let found = false
     for (const mergedCsvInfo of mergedCsvInfos) {
-      const sameIban = removeAllWhitespace(mergedCsvInfo.iban) === removeAllWhitespace(csvInfo.iban)
+      const sameIban =
+        removeAllWhitespace(mergedCsvInfo.iban) ===
+        removeAllWhitespace(csvInfo.iban)
       const sameGovId =
-        removeAllWhitespace(mergedCsvInfo.govId || '') === removeAllWhitespace(csvInfo.govId || '')
+        removeAllWhitespace(mergedCsvInfo.govId || '') ===
+        removeAllWhitespace(csvInfo.govId || '')
 
       if (sameIban && sameGovId) {
         mergedCsvInfo.rows.push(...csvInfo.rows)
@@ -82,7 +85,10 @@ export async function mergeCsvInfos(csvInfos: CsvInfo[]) {
           }
         }
         mergedCsvInfo.submissionDate = new Date(
-          Math.min(mergedCsvInfo.submissionDate.getTime(), csvInfo.submissionDate.getTime())
+          Math.min(
+            mergedCsvInfo.submissionDate.getTime(),
+            csvInfo.submissionDate.getTime()
+          )
         )
         found = true
         break
@@ -112,7 +118,9 @@ export async function generateCsv(csvInfos: CsvInfo[]) {
 
     // Expenses
     if (hasExpenses(rows)) {
-      const notes = !pdf ? `Muista lisätä PDFt liitetiedostoina: ${entryId}` : ''
+      const notes = !pdf
+        ? `Muista lisätä PDFt liitetiedostoina: ${entryId}`
+        : ''
 
       const expenseHeader = [
         'K', // Type
@@ -176,7 +184,9 @@ export async function generateCsv(csvInfos: CsvInfo[]) {
 
     // Mileages
     if (hasMileages(rows)) {
-      const notes = !pdf ? `Muista lisätä PDFt liitetiedostoina: ${entryId}` : ''
+      const notes = !pdf
+        ? `Muista lisätä PDFt liitetiedostoina: ${entryId}`
+        : ''
 
       const mileageHeader = [
         'T', // Type (travel)
@@ -282,7 +292,11 @@ export async function generateCsv(csvInfos: CsvInfo[]) {
   }
 }
 
-function createZipArchive(csvContent: string, csvFilename: string, pdfInfos: CsvInfo[]) {
+function createZipArchive(
+  csvContent: string,
+  csvFilename: string,
+  pdfInfos: CsvInfo[]
+) {
   return new Promise((resolve, reject) => {
     const archive = archiver('zip', { zlib: { level: 9 } })
     const chunks: Buffer[] = []

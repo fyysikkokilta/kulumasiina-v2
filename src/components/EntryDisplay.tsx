@@ -4,9 +4,12 @@ import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
 import { Button, Card, Tag, Typography } from 'antd'
 import dayjs from 'dayjs'
 import { useTranslations } from 'next-intl'
-import React from 'react'
 
-import type { NewAttachment, NewItemWithAttachments, NewMileage } from '@/lib/db/schema'
+import type {
+  NewAttachment,
+  NewItemWithAttachments,
+  NewMileage
+} from '@/lib/db/schema'
 
 const { Text } = Typography
 
@@ -29,10 +32,21 @@ export function ItemDisplay({ item, onEdit, onRemove }: ItemDisplayProps) {
         <div className="flex items-center justify-between">
           <span>{t('expense_item')}</span>
           <div className="space-x-2">
-            <Button type="link" size="small" icon={<EditOutlined />} onClick={onEdit}>
+            <Button
+              type="link"
+              size="small"
+              icon={<EditOutlined />}
+              onClick={onEdit}
+            >
               {t('edit')}
             </Button>
-            <Button type="link" size="small" danger icon={<DeleteOutlined />} onClick={onRemove}>
+            <Button
+              type="link"
+              size="small"
+              danger
+              icon={<DeleteOutlined />}
+              onClick={onRemove}
+            >
               {t('remove')}
             </Button>
           </div>
@@ -43,7 +57,8 @@ export function ItemDisplay({ item, onEdit, onRemove }: ItemDisplayProps) {
         <div className="flex items-start justify-between gap-4">
           <Text strong>{dayjs(item.date).format('DD.MM.YYYY')}</Text>
           <Tag color="green">
-            {item.attachments.length} {t('attachments', { attachments: item.attachments.length })}
+            {item.attachments.length}{' '}
+            {t('attachments', { attachments: item.attachments.length })}
           </Tag>
         </div>
         <div className="flex items-start justify-between gap-4">
@@ -51,8 +66,8 @@ export function ItemDisplay({ item, onEdit, onRemove }: ItemDisplayProps) {
           <Tag className="h-fit" color="blue">
             {item.attachments
               .reduce((acc, attachment) => acc + (attachment.value || 0), 0)
-              .toFixed(2)}{' '}
-            €
+              .toFixed(2)}
+            {' €'}
           </Tag>
         </div>
       </div>
@@ -67,7 +82,12 @@ interface MileageDisplayProps {
   onRemove: () => void
 }
 
-export function MileageDisplay({ mileage, mileageRate, onEdit, onRemove }: MileageDisplayProps) {
+export function MileageDisplay({
+  mileage,
+  mileageRate,
+  onEdit,
+  onRemove
+}: MileageDisplayProps) {
   const t = useTranslations('form.main')
   const total = mileage.distance * mileageRate
 
@@ -79,10 +99,21 @@ export function MileageDisplay({ mileage, mileageRate, onEdit, onRemove }: Milea
         <div className="flex items-center justify-between">
           <span>{t('mileage')}</span>
           <div className="space-x-2">
-            <Button type="link" size="small" icon={<EditOutlined />} onClick={onEdit}>
+            <Button
+              type="link"
+              size="small"
+              icon={<EditOutlined />}
+              onClick={onEdit}
+            >
               {t('edit')}
             </Button>
-            <Button type="link" size="small" danger icon={<DeleteOutlined />} onClick={onRemove}>
+            <Button
+              type="link"
+              size="small"
+              danger
+              icon={<DeleteOutlined />}
+              onClick={onRemove}
+            >
               {t('remove')}
             </Button>
           </div>
@@ -93,21 +124,22 @@ export function MileageDisplay({ mileage, mileageRate, onEdit, onRemove }: Milea
         <div className="flex items-start justify-between gap-4">
           <Text strong>{dayjs(mileage.date).format('DD.MM.YYYY')}</Text>
           <Tag className="h-fit" color="green">
-            {mileage.distance} km
+            {`${mileage.distance} km`}
           </Tag>
         </div>
         <div className="flex items-start justify-between gap-4">
           <Text>{mileage.description}</Text>
           <Tag className="h-fit" color="blue">
-            {total.toFixed(2)} €
+            {`${total.toFixed(2)} €`}
           </Tag>
         </div>
         <div className="text-sm text-gray-600">
           <div>
-            <strong>{t('route')}:</strong> {mileage.route}
+            <strong>{`${t('route')}:`}</strong> {mileage.route}
           </div>
           <div>
-            <strong>{t('plate_number')}:</strong> {mileage.plateNo.toUpperCase()}
+            <strong>{`${t('plate_number')}:`}</strong>{' '}
+            {mileage.plateNo.toUpperCase()}
           </div>
         </div>
       </div>

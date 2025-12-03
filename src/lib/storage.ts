@@ -79,7 +79,9 @@ export async function listFiles() {
       objectsStream.on('end', resolve)
       objectsStream.on('error', reject)
     })
-    return objects.map((obj) => obj.name).filter((name): name is string => name !== undefined)
+    return objects
+      .map((obj) => obj.name)
+      .filter((name): name is string => name !== undefined)
   } else {
     try {
       await fs.mkdir(localPath, { recursive: true })

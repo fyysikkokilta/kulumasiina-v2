@@ -19,11 +19,15 @@ import {
 import type { UploadFile } from 'antd/es/upload/interface'
 import { Dayjs } from 'dayjs'
 import { useLocale, useTranslations } from 'next-intl'
-import React, { useCallback, useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 
 import { useItemForm } from '@/hooks/useItemForm'
 import { bookkeepingAccounts } from '@/lib/bookkeeping-accounts'
-import type { ItemWithAttachments, NewAttachment, NewItemWithAttachments } from '@/lib/db/schema'
+import type {
+  ItemWithAttachments,
+  NewAttachment,
+  NewItemWithAttachments
+} from '@/lib/db/schema'
 
 import { PreviewModal } from './PreviewModal'
 
@@ -44,7 +48,10 @@ interface ItemFormProps {
     }
   ) => void
   onCancel: () => void
-  editData?: Omit<ItemWithAttachments | NewItemWithAttachments, 'entryId' | 'attachments'> & {
+  editData?: Omit<
+    ItemWithAttachments | NewItemWithAttachments,
+    'entryId' | 'attachments'
+  > & {
     attachments: Omit<NewAttachment, 'itemId'>[]
   }
 }
@@ -141,7 +148,9 @@ export function ItemForm({ visible, onOk, onCancel, editData }: ItemFormProps) {
               placeholder={t('account_placeholder')}
               optionFilterProp="children"
               filterOption={(input, option) =>
-                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                (option?.label ?? '')
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
               }
               options={bookkeepingAccounts.map((account) => ({
                 value: account.value,
@@ -176,7 +185,7 @@ export function ItemForm({ visible, onOk, onCancel, editData }: ItemFormProps) {
               }
             ]}
           >
-            <Space direction="vertical" className="w-full">
+            <Space orientation="vertical" className="w-full">
               <Typography.Text type="secondary" className="mb-2">
                 {t('upload_note')}
               </Typography.Text>

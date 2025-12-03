@@ -4,7 +4,6 @@ import { Button, DatePicker, Form, Input, Modal, Space } from 'antd'
 import dayjs, { Dayjs } from 'dayjs'
 import { useTranslations } from 'next-intl'
 import { useAction } from 'next-safe-action/hooks'
-import React from 'react'
 
 import { approveEntriesAction } from '@/lib/actions/approveEntries'
 
@@ -20,7 +19,12 @@ interface ApproveFormData {
   approvalNote: string
 }
 
-export function ApproveModal({ visible, onCancel, entryIds, onSuccess }: ApproveModalProps) {
+export function ApproveModal({
+  visible,
+  onCancel,
+  entryIds,
+  onSuccess
+}: ApproveModalProps) {
   const [form] = Form.useForm<ApproveFormData>()
   const t = useTranslations('admin.approve_modal')
 
@@ -46,8 +50,18 @@ export function ApproveModal({ visible, onCancel, entryIds, onSuccess }: Approve
   }
 
   return (
-    <Modal title={t('title')} open={visible} footer={null} onCancel={handleCancel}>
-      <Form form={form} onFinish={handleSubmit} initialValues={{ date: dayjs() }} layout="vertical">
+    <Modal
+      title={t('title')}
+      open={visible}
+      footer={null}
+      onCancel={handleCancel}
+    >
+      <Form
+        form={form}
+        onFinish={handleSubmit}
+        initialValues={{ date: dayjs() }}
+        layout="vertical"
+      >
         <Form.Item
           name="date"
           label={t('date')}
@@ -71,7 +85,11 @@ export function ApproveModal({ visible, onCancel, entryIds, onSuccess }: Approve
 
         <Form.Item>
           <Space>
-            <Button type="primary" htmlType="submit" loading={status === 'executing'}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={status === 'executing'}
+            >
               {t('submit')}
             </Button>
             <Button onClick={handleCancel}>{t('cancel')}</Button>

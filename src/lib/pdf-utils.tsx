@@ -1,5 +1,13 @@
 import { PDFDocument, StandardFonts } from '@cantoo/pdf-lib'
-import { Document, Image, Page, renderToBuffer, StyleSheet, Text, View } from '@react-pdf/renderer'
+import {
+  Document,
+  Image,
+  Page,
+  renderToBuffer,
+  StyleSheet,
+  Text,
+  View
+} from '@react-pdf/renderer'
 import { compress } from 'compress-pdf'
 import fs from 'fs/promises'
 import path from 'path'
@@ -253,11 +261,13 @@ const ExpensePDF = ({
           </Text>
 
           {/* Info block */}
-          <Text style={styles.infoBlock}>Nimi: {name}</Text>
-          <Text style={styles.infoBlock}>IBAN: {iban}</Text>
-          {govId && <Text style={styles.infoBlock}>Henkilötunnus: {govId}</Text>}
+          <Text style={styles.infoBlock}>{`Nimi: ${name}`}</Text>
+          <Text style={styles.infoBlock}>{`IBAN: ${iban}`}</Text>
+          {govId && (
+            <Text style={styles.infoBlock}>{`Henkilötunnus: ${govId}`}</Text>
+          )}
           <Text style={styles.infoBlock}>
-            Päivämäärä: {submissionDate.toLocaleDateString('fi-FI')}
+            {`Päivämäärä: ${submissionDate.toLocaleDateString('fi-FI')}`}
           </Text>
 
           {/* Status block */}
@@ -265,29 +275,31 @@ const ExpensePDF = ({
             {status === 'approved' && approvalDate && approvalNote && (
               <React.Fragment>
                 <Text>
-                  Hyväksytty ({formatDateInFinnishTimezone(approvalDate)}), peruste: {approvalNote}
+                  {`Hyväksytty (${formatDateInFinnishTimezone(approvalDate)}), peruste: ${approvalNote}`}
                 </Text>
-                <Text>Ei maksettu ({formatDateInFinnishTimezone(now)})</Text>
+                <Text>{`Ei maksettu (${formatDateInFinnishTimezone(now)})`}</Text>
               </React.Fragment>
             )}
             {status === 'paid' && approvalDate && approvalNote && paidDate && (
               <React.Fragment>
                 <Text>
-                  Hyväksytty ({formatDateInFinnishTimezone(approvalDate)}), peruste: {approvalNote}
+                  {`Hyväksytty (${formatDateInFinnishTimezone(approvalDate)}), peruste: ${approvalNote}`}
                 </Text>
-                <Text>Maksettu ({formatDateInFinnishTimezone(paidDate)})</Text>
+                <Text>{`Maksettu (${formatDateInFinnishTimezone(paidDate)})`}</Text>
               </React.Fragment>
             )}
             {status === 'submitted' && (
-              <Text>Odottaa hyväksyntää ({formatDateInFinnishTimezone(now)})</Text>
+              <Text>{`Odottaa hyväksyntää (${formatDateInFinnishTimezone(now)})`}</Text>
             )}
             {status === 'denied' && rejectionDate && (
-              <Text>Hylätty ({formatDateInFinnishTimezone(rejectionDate)})</Text>
+              <Text>{`Hylätty (${formatDateInFinnishTimezone(rejectionDate)})`}</Text>
             )}
           </View>
 
           {/* Reason block */}
-          <Text style={styles.reasonBlock}>Korvauksen peruste: {title}</Text>
+          <Text
+            style={styles.reasonBlock}
+          >{`Korvauksen peruste: ${title}`}</Text>
 
           {/* Table */}
           <View style={styles.table}>
@@ -318,7 +330,9 @@ const ExpensePDF = ({
                 ]}
               >
                 <View style={styles.tableCol1}>
-                  <Text style={styles.tableCellText}>{part.date.toLocaleDateString('fi-FI')}</Text>
+                  <Text style={styles.tableCellText}>
+                    {part.date.toLocaleDateString('fi-FI')}
+                  </Text>
                 </View>
                 <View style={styles.tableCol2}>
                   <Text style={styles.tableCellText}>{part.description}</Text>
@@ -331,7 +345,9 @@ const ExpensePDF = ({
                   </Text>
                 </View>
                 <View style={styles.tableCol4}>
-                  <Text style={styles.tableCellText}>{part.price.toFixed(2)} €</Text>
+                  <Text
+                    style={styles.tableCellText}
+                  >{`${part.price.toFixed(2)} €`}</Text>
                 </View>
               </View>
             ))}
@@ -339,10 +355,12 @@ const ExpensePDF = ({
             {/* Total row */}
             <View style={styles.totalRow}>
               <View style={styles.totalLabel}>
-                <Text style={styles.totalLabelText}>Yhteensä</Text>
+                <Text style={styles.totalLabelText}>{`Yhteensä`}</Text>
               </View>
               <View style={styles.totalAmount}>
-                <Text style={styles.totalAmountText}>{total.toFixed(2)} €</Text>
+                <Text
+                  style={styles.totalAmountText}
+                >{`${total.toFixed(2)} €`}</Text>
               </View>
             </View>
           </View>
@@ -352,15 +370,22 @@ const ExpensePDF = ({
       {/* Image attachment pages */}
       {parts.flatMap((part, partIndex) => {
         return part.attachments.map((attachment, attIndex) => {
-          const showPrice = attachment.value !== null && !attachment.isNotReceipt
-          const priceText = showPrice ? `: ${attachment.value!.toFixed(2)} €` : ''
+          const showPrice =
+            attachment.value !== null && !attachment.isNotReceipt
+          const priceText = showPrice
+            ? `: ${attachment.value!.toFixed(2)} €`
+            : ''
           const label = `Liite ${attachment.attachmentNum}${priceText}`
 
           // Here every attachment is a PNG
           const imageData = `data:image/png;base64,${attachment.data.toString('base64')}`
 
           return (
-            <Page key={`${partIndex}-${attIndex}`} size="A4" style={styles.attachmentPage}>
+            <Page
+              key={`${partIndex}-${attIndex}`}
+              size="A4"
+              style={styles.attachmentPage}
+            >
               <Text style={styles.attachmentLabel}>{label}</Text>
               <View style={styles.attachmentImageContainer}>
                 {/* eslint-disable-next-line jsx-a11y/alt-text */}
@@ -413,7 +438,10 @@ export async function generateCombinedPDF(
   let logoData: string | undefined
   try {
     const logoSvgData = await fs.readFile(LOGO_SVG_PATH)
-    const logoPngData = await sharp(logoSvgData).resize(400, 400).toFormat('png').toBuffer()
+    const logoPngData = await sharp(logoSvgData)
+      .resize(400, 400)
+      .toFormat('png')
+      .toBuffer()
     logoData = `data:image/png;base64,${logoPngData.toString('base64')}`
   } catch (e) {
     console.error('Error loading logo:', e)
@@ -440,7 +468,9 @@ export async function generateCombinedPDF(
   // If there are no PDF attachments, return the main PDF
   if (pdfAttachments.length === 0) {
     const sanitizedName = name.replace(/[^a-zA-Z0-9-_]/g, '_')
-    const filenameDateStr = submissionDate.toLocaleDateString('fi-FI').replace(/\./g, '-')
+    const filenameDateStr = submissionDate
+      .toLocaleDateString('fi-FI')
+      .replace(/\./g, '-')
     const filename = `${sanitizedName}-${filenameDateStr}.pdf`
 
     return {
@@ -452,7 +482,9 @@ export async function generateCombinedPDF(
   // Use pdf-lib to merge PDF attachments at the correct positions
   const mainPdfDoc = await PDFDocument.load(mainPdfBuffer)
   const totalPages = mainPdfDoc.getPageCount()
-  const imageAttachments = partsWithImages.flatMap((part) => part.attachments).length
+  const imageAttachments = partsWithImages.flatMap(
+    (part) => part.attachments
+  ).length
   const overviewPages = totalPages - imageAttachments
 
   // Calculate where to insert PDF attachments
@@ -486,7 +518,9 @@ export async function generateCombinedPDF(
   const finalPdfBytes = await mainPdfDoc.save()
 
   const sanitizedName = name.replace(/[^a-zA-Z0-9-_]/g, '_')
-  const filenameDateStr = submissionDate.toLocaleDateString('fi-FI').replace(/\./g, '-')
+  const filenameDateStr = submissionDate
+    .toLocaleDateString('fi-FI')
+    .replace(/\./g, '-')
   const filename = `${sanitizedName}-${filenameDateStr}.pdf`
 
   const data = await compress(Buffer.from(finalPdfBytes))

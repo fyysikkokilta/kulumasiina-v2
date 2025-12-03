@@ -4,9 +4,12 @@ import { PlusOutlined } from '@ant-design/icons'
 import { Button, Card, Divider, Form, Input, Result, Typography } from 'antd'
 import { isValidIBAN } from 'ibantools'
 import { useTranslations } from 'next-intl'
-import React from 'react'
 
-import { type ExpenseFormData, type FormEntry, useExpenseForm } from '@/hooks/useExpenseForm'
+import {
+  type ExpenseFormData,
+  type FormEntry,
+  useExpenseForm
+} from '@/hooks/useExpenseForm'
 import { Link } from '@/i18n/navigation'
 import { env } from '@/lib/env'
 import { validateFinnishSSN } from '@/lib/validation'
@@ -16,10 +19,13 @@ import { ItemForm } from './ItemForm'
 import { MileageForm } from './MileageForm'
 
 // Result Component
-const FormResult: React.FC<{
+const FormResult = ({
+  status,
+  onReset
+}: {
   status: 'success' | 'failure'
   onReset: () => void
-}> = ({ status, onReset }) => {
+}) => {
   const t = useTranslations('form.main')
   const isSuccess = status === 'success'
 
@@ -97,14 +103,23 @@ export function ExpenseForm() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <Form form={form} layout="vertical" onFinish={onFinish} className="space-y-4">
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={onFinish}
+        className="space-y-4"
+      >
         {/* Basic Information Fields */}
         <Form.Item
           name="name"
           label={t('payee_name')}
           rules={[{ required: true, message: t('payee_name_error') }]}
         >
-          <Input placeholder={t('payee_name_placeholder')} maxLength={255} autoComplete="off" />
+          <Input
+            placeholder={t('payee_name_placeholder')}
+            maxLength={255}
+            autoComplete="off"
+          />
         </Form.Item>
 
         <Form.Item
@@ -112,7 +127,11 @@ export function ExpenseForm() {
           label={t('payee_contact')}
           rules={[{ required: true, message: t('payee_contact_error') }]}
         >
-          <Input placeholder={t('payee_contact_placeholder')} maxLength={255} autoComplete="off" />
+          <Input
+            placeholder={t('payee_contact_placeholder')}
+            maxLength={255}
+            autoComplete="off"
+          />
         </Form.Item>
 
         <Form.Item
@@ -164,7 +183,9 @@ export function ExpenseForm() {
                   if (validateFinnishSSN(value)) {
                     return Promise.resolve()
                   }
-                  return Promise.reject(new Error(t('personal_id_code_invalid')))
+                  return Promise.reject(
+                    new Error(t('personal_id_code_invalid'))
+                  )
                 }
               }
             ]}
@@ -185,8 +206,11 @@ export function ExpenseForm() {
           <div className="mb-4 text-center text-sm text-gray-500">
             <Typography.Text>
               {t('entries_count', {
-                items: state.entries.filter((entry) => entry.type === 'item').length,
-                mileages: state.entries.filter((entry) => entry.type === 'mileage').length,
+                items: state.entries.filter((entry) => entry.type === 'item')
+                  .length,
+                mileages: state.entries.filter(
+                  (entry) => entry.type === 'mileage'
+                ).length,
                 maxItems: 20,
                 maxMileages: 20
               })}
@@ -208,9 +232,9 @@ export function ExpenseForm() {
 
             <Card size="small" className="bg-gray-50">
               <div className="flex items-center justify-between">
-                <Typography.Text strong>{t('total')}:</Typography.Text>
+                <Typography.Text strong>{`${t('total')}:`}</Typography.Text>
                 <Typography.Text strong className="text-lg">
-                  {total.toFixed(2)} €
+                  {`${total.toFixed(2)} €`}
                 </Typography.Text>
               </div>
             </Card>
@@ -224,9 +248,13 @@ export function ExpenseForm() {
               type="default"
               icon={<PlusOutlined />}
               onClick={() => openModal('item')}
-              disabled={state.entries.filter((entry) => entry.type === 'item').length >= 20}
+              disabled={
+                state.entries.filter((entry) => entry.type === 'item').length >=
+                20
+              }
               title={
-                state.entries.filter((entry) => entry.type === 'item').length >= 20
+                state.entries.filter((entry) => entry.type === 'item').length >=
+                20
                   ? t('max_items_reached')
                   : undefined
               }
@@ -237,9 +265,13 @@ export function ExpenseForm() {
               type="default"
               icon={<PlusOutlined />}
               onClick={() => openModal('mileage')}
-              disabled={state.entries.filter((entry) => entry.type === 'mileage').length >= 20}
+              disabled={
+                state.entries.filter((entry) => entry.type === 'mileage')
+                  .length >= 20
+              }
               title={
-                state.entries.filter((entry) => entry.type === 'mileage').length >= 20
+                state.entries.filter((entry) => entry.type === 'mileage')
+                  .length >= 20
                   ? t('max_mileages_reached')
                   : undefined
               }
@@ -272,7 +304,9 @@ export function ExpenseForm() {
               })
             }
             onCancel={closeModal}
-            editData={editingEntry?.type === 'item' ? editingEntry.data : undefined}
+            editData={
+              editingEntry?.type === 'item' ? editingEntry.data : undefined
+            }
           />
         )}
 
@@ -287,7 +321,9 @@ export function ExpenseForm() {
               })
             }
             onCancel={closeModal}
-            editData={editingEntry?.type === 'mileage' ? editingEntry.data : undefined}
+            editData={
+              editingEntry?.type === 'mileage' ? editingEntry.data : undefined
+            }
           />
         )}
 

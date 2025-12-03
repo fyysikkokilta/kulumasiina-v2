@@ -1,4 +1,4 @@
-import React from 'react'
+import { Key } from 'react'
 
 import type {
   ItemWithAttachments,
@@ -37,7 +37,7 @@ interface AdminEntryModalsProps {
   deleteOldArchivedModalVisible: boolean
   setDeleteOldArchivedModalVisible: (v: boolean) => void
   modalEntryIds: string[]
-  setSelectedRowKeys: (v: React.Key[]) => void
+  setSelectedRowKeys: (v: Key[]) => void
   editState: EditState | null
   setEditState: (v: EditState | null) => void
   handleItemUpdate: (

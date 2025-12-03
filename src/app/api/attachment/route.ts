@@ -7,9 +7,14 @@ import { saveFile } from '@/lib/storage'
 export async function POST(request: NextRequest) {
   // Always expect multipart/form-data
   const formData = await request.formData()
-  const file = formData.get('file') as File | null
-  const originalName = formData.get('filename') as string | null
-  if (!file || !originalName) {
+  const file = formData.get('file')
+  const originalName = formData.get('filename')
+  if (
+    !file ||
+    !originalName ||
+    typeof originalName !== 'string' ||
+    typeof file !== 'object'
+  ) {
     return new NextResponse('Missing file or filename', { status: 400 })
   }
   const mimeType = file.type
@@ -21,7 +26,8 @@ export async function POST(request: NextRequest) {
     try {
       const image = sharp(fileBuffer)
       const metadata = await image.metadata()
-      const isWiderThanTall = metadata.autoOrient.width > metadata.autoOrient.height
+      const isWiderThanTall =
+        metadata.autoOrient.width > metadata.autoOrient.height
 
       buffer = await image
         .autoOrient()

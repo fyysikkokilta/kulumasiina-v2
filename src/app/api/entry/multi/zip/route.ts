@@ -25,7 +25,9 @@ export async function GET(request: NextRequest) {
       return new NextResponse('Missing entry_ids parameter', { status: 400 })
     }
 
-    const entryIds = entryIdsParam.split(',').map((id) => z.uuid().parse(id.trim()))
+    const entryIds = entryIdsParam
+      .split(',')
+      .map((id) => z.uuid().parse(id.trim()))
 
     if (entryIds.length === 0) {
       return new NextResponse('No valid entry IDs provided', { status: 400 })
@@ -49,7 +51,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Check that all entries are paid
-    const invalidEntries = entriesData.filter((entry) => entry.status !== 'paid')
+    const invalidEntries = entriesData.filter(
+      (entry) => entry.status !== 'paid'
+    )
     if (invalidEntries.length > 0) {
       return new NextResponse('All entries must be paid for CSV generation', {
         status: 400

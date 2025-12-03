@@ -1,7 +1,7 @@
 'use server'
 
 import { eq } from 'drizzle-orm'
-import { revalidatePath } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { z } from 'zod'
 
 import { db } from '../db'
@@ -41,7 +41,7 @@ export const updateBookkeepingAccountAction = actionClient
         .where(eq(items.id, parsedInput.id))
     }
 
-    revalidatePath('/[locale]/admin', 'page')
+    updateTag('admin-entries')
 
     return { success: true }
   })

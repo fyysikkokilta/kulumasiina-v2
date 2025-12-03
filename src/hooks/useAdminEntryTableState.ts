@@ -6,6 +6,7 @@ import { useState } from 'react'
 
 import type { EditState } from '@/components/AdminEntryModals'
 import type { PreviewState } from '@/components/PreviewModal'
+import type { AdminEntries } from '@/data/getAdminEntries'
 import { archiveEntriesAction } from '@/lib/actions/archiveEntries'
 import { denyEntriesAction } from '@/lib/actions/denyEntries'
 import { resetEntriesAction } from '@/lib/actions/resetEntries'
@@ -23,12 +24,13 @@ import type {
 } from '@/lib/db/schema'
 import { env } from '@/lib/env'
 
-export function useAdminEntryTableState(entries: EntryWithItemsAndMileages[]) {
+export function useAdminEntryTableState(entries: AdminEntries) {
   const t = useTranslations('admin')
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [approveModalVisible, setApproveModalVisible] = useState(false)
   const [payModalVisible, setPayModalVisible] = useState(false)
-  const [deleteOldArchivedModalVisible, setDeleteOldArchivedModalVisible] = useState(false)
+  const [deleteOldArchivedModalVisible, setDeleteOldArchivedModalVisible] =
+    useState(false)
   const [modalEntryIds, setModalEntryIds] = useState<string[]>([])
   const [editState, setEditState] = useState<EditState | null>(null)
   const [previewState, setPreviewState] = useState<PreviewState>({
@@ -90,14 +92,17 @@ export function useAdminEntryTableState(entries: EntryWithItemsAndMileages[]) {
     }
   })
 
-  const { execute: updateBookkeepingAccount } = useAction(updateBookkeepingAccountAction, {
-    onSuccess: () => {
-      message.success(t('messages.account_updated'))
-    },
-    onError: () => {
-      message.error(t('messages.update_failed'))
+  const { execute: updateBookkeepingAccount } = useAction(
+    updateBookkeepingAccountAction,
+    {
+      onSuccess: () => {
+        message.success(t('messages.account_updated'))
+      },
+      onError: () => {
+        message.error(t('messages.update_failed'))
+      }
     }
-  })
+  )
 
   // Calculate total for each entry
   const tableData = entries.map((entry) => {
@@ -132,7 +137,10 @@ export function useAdminEntryTableState(entries: EntryWithItemsAndMileages[]) {
         entry.status === 'paid'
           ? entry.paidDate && dayjs(entry.paidDate)
           : entry.rejectionDate && dayjs(entry.rejectionDate)
-      const monthAgo = dayjs().subtract(env.NEXT_PUBLIC_ARCHIVED_ENTRIES_AGE_LIMIT_DAYS, 'days')
+      const monthAgo = dayjs().subtract(
+        env.NEXT_PUBLIC_ARCHIVED_ENTRIES_AGE_LIMIT_DAYS,
+        'days'
+      )
       return date && date.isBefore(monthAgo)
     }).length
 
@@ -230,7 +238,11 @@ export function useAdminEntryTableState(entries: EntryWithItemsAndMileages[]) {
     }
   }
 
-  const handleAccountUpdate = (id: string, account: string, isMileage: boolean) => {
+  const handleAccountUpdate = (
+    id: string,
+    account: string,
+    isMileage: boolean
+  ) => {
     updateBookkeepingAccount({
       id,
       account,
@@ -314,12 +326,20 @@ export function useAdminEntryTableState(entries: EntryWithItemsAndMileages[]) {
           .map((item) => item.account)
           .concat(entry.mileages.map((mileage) => mileage.account))
         const uniqueAccounts = accounts
-          .filter((value, index, self) => self.indexOf(value) === index && value)
-          .map((account) => bookkeepingAccounts.find((a) => a.value === account)?.label)
+          .filter(
+            (value, index, self) => self.indexOf(value) === index && value
+          )
+          .map(
+            (account) =>
+              bookkeepingAccounts.find((a) => a.value === account)?.label
+          )
           .sort()
           .join(', ')
         if (entry.mileages.length > 0) {
-          const totalDistance = entry.mileages.reduce((acc, mileage) => acc + mileage.distance, 0)
+          const totalDistance = entry.mileages.reduce(
+            (acc, mileage) => acc + mileage.distance,
+            0
+          )
           return `${entry.name}, ${
             entry.title
           } (${totalDistance} km); ${entry.total.toFixed(2).replace('.', ',')} € (${uniqueAccounts})`
@@ -331,8 +351,12 @@ export function useAdminEntryTableState(entries: EntryWithItemsAndMileages[]) {
   }
 
   // Get the status of selected entries to determine which actions are available
-  const selectedEntries = tableData.filter((entry) => selectedRowKeys.includes(entry.key))
-  const selectedStatuses = [...new Set(selectedEntries.map((entry) => entry.status))]
+  const selectedEntries = tableData.filter((entry) =>
+    selectedRowKeys.includes(entry.key)
+  )
+  const selectedStatuses = [
+    ...new Set(selectedEntries.map((entry) => entry.status))
+  ]
   const allSelectedSameStatus = selectedStatuses.length === 1
   const selectedStatus = allSelectedSameStatus ? selectedStatuses[0] : null
   const allSelectedPaid = selectedStatus === 'paid'
@@ -346,7 +370,8 @@ export function useAdminEntryTableState(entries: EntryWithItemsAndMileages[]) {
     onChange: setSelectedRowKeys,
     getCheckboxProps: (record: EntryWithItemsAndMileages) => ({
       // Disable selection if we already have selections of a different status
-      disabled: selectedRowKeys.length > 0 && !selectedStatuses.includes(record.status)
+      disabled:
+        selectedRowKeys.length > 0 && !selectedStatuses.includes(record.status)
     })
   }
 

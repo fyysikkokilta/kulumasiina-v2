@@ -1,20 +1,15 @@
 'use client'
 
 import { Button, Space, Table, Tag, Typography } from 'antd'
-import React from 'react'
 
+import type { AdminEntries } from '@/data/getAdminEntries'
 import { useAdminEntryTableState } from '@/hooks/useAdminEntryTableState'
-import { EntryWithItemsAndMileages } from '@/lib/db/schema'
 
 import { AdminEntryExpandedRow } from './AdminEntryExpandedRow'
 import { AdminEntryModals } from './AdminEntryModals'
 import { getAdminEntryTableColumns } from './AdminEntryTableColumns'
 
-interface AdminEntryTableProps {
-  entries: EntryWithItemsAndMileages[]
-}
-
-export function AdminEntryTable({ entries }: AdminEntryTableProps) {
+export function AdminEntryTable({ entries }: { entries: AdminEntries }) {
   const {
     t,
     tableData,
@@ -57,7 +52,12 @@ export function AdminEntryTable({ entries }: AdminEntryTableProps) {
     allSelectedSameStatus
   } = useAdminEntryTableState(entries)
 
-  const columns = getAdminEntryTableColumns(t, getStatusColor, getStatusText, entries)
+  const columns = getAdminEntryTableColumns(
+    t,
+    getStatusColor,
+    getStatusText,
+    entries
+  )
 
   return (
     <div className="space-y-4">
@@ -65,15 +65,20 @@ export function AdminEntryTable({ entries }: AdminEntryTableProps) {
         <div className="rounded-md border border-blue-200 bg-blue-50 p-3">
           <Typography.Text>
             <strong>{selectedRowKeys.length}</strong>{' '}
-            {t('selection.entries_selected', { entries: selectedRowKeys.length })}
+            {t('selection.entries_selected', {
+              entries: selectedRowKeys.length
+            })}
             {selectedStatus && (
               <span className="ml-2">
-                ({t('selection.status')}:{' '}
-                <Tag color={getStatusColor(selectedStatus)}>{t(`status.${selectedStatus}`)}</Tag>)
+                {`(${t('selection.status')}: `}
+                <Tag color={getStatusColor(selectedStatus)}>
+                  {t(`status.${selectedStatus}`)}
+                </Tag>
+                {')'}
               </span>
             )}
             {!allSelectedSameStatus && (
-              <span className="ml-2 text-orange-600">({t('selection.mixed_statuses')})</span>
+              <span className="ml-2 text-orange-600">{`(${t('selection.mixed_statuses')})`}</span>
             )}
           </Typography.Text>
         </div>
@@ -87,27 +92,41 @@ export function AdminEntryTable({ entries }: AdminEntryTableProps) {
               onClick={() => handleApprove()}
               disabled={selectedRowKeys.length === 0}
             >
-              {t('bulk_actions.approve_selected')} ({selectedRowKeys.length})
+              {`${t('bulk_actions.approve_selected')} (${selectedRowKeys.length})`}
             </Button>
           )}
           {allSelectedSubmitted && noneArchived && (
-            <Button onClick={() => handleDeny()} disabled={selectedRowKeys.length === 0}>
-              {t('bulk_actions.deny_selected')} ({selectedRowKeys.length})
+            <Button
+              onClick={() => handleDeny()}
+              disabled={selectedRowKeys.length === 0}
+            >
+              {`${t('bulk_actions.deny_selected')} (${selectedRowKeys.length})`}
             </Button>
           )}
           {allSelectedApproved && noneArchived && (
-            <Button onClick={() => handlePay()} disabled={selectedRowKeys.length === 0}>
-              {t('bulk_actions.mark_as_paid')} ({selectedRowKeys.length})
+            <Button
+              onClick={() => handlePay()}
+              disabled={selectedRowKeys.length === 0}
+            >
+              {`${t('bulk_actions.mark_as_paid')} (${selectedRowKeys.length})`}
             </Button>
           )}
-          {(allSelectedApproved || allSelectedDenied || allSelectedPaid) && noneArchived && (
-            <Button onClick={() => handleReset()} disabled={selectedRowKeys.length === 0}>
-              {t('bulk_actions.reset_selected')} ({selectedRowKeys.length})
-            </Button>
-          )}
+          {(allSelectedApproved || allSelectedDenied || allSelectedPaid) &&
+            noneArchived && (
+              <Button
+                onClick={() => handleReset()}
+                disabled={selectedRowKeys.length === 0}
+              >
+                {`${t('bulk_actions.reset_selected')} (${selectedRowKeys.length})`}
+              </Button>
+            )}
           {(allSelectedDenied || allSelectedPaid) && noneArchived && (
-            <Button danger onClick={() => handleArchive()} disabled={selectedRowKeys.length === 0}>
-              {t('bulk_actions.archive_selected')} ({selectedRowKeys.length})
+            <Button
+              danger
+              onClick={() => handleArchive()}
+              disabled={selectedRowKeys.length === 0}
+            >
+              {`${t('bulk_actions.archive_selected')} (${selectedRowKeys.length})`}
             </Button>
           )}
           {allSelectedPaid && (
@@ -116,17 +135,20 @@ export function AdminEntryTable({ entries }: AdminEntryTableProps) {
               disabled={selectedRowKeys.length === 0}
               type="default"
             >
-              {t('bulk_actions.download_zip')} ({selectedRowKeys.length})
+              {`${t('bulk_actions.download_zip')} (${selectedRowKeys.length})`}
             </Button>
           )}
           {toBeDeleted > 0 && (
-            <Button danger onClick={() => setDeleteOldArchivedModalVisible(true)}>
-              {t('bulk_actions.remove_old_archived')} ({toBeDeleted})
+            <Button
+              danger
+              onClick={() => setDeleteOldArchivedModalVisible(true)}
+            >
+              {`${t('bulk_actions.remove_old_archived')} (${toBeDeleted})`}
             </Button>
           )}
           {selectedRowKeys.length > 0 && (
             <Button onClick={handleCopyClipboardText}>
-              {t('bulk_actions.copy_clipboard_text')} ({selectedRowKeys.length})
+              {`${t('bulk_actions.copy_clipboard_text')} (${selectedRowKeys.length})`}
             </Button>
           )}
         </Space>
@@ -141,7 +163,7 @@ export function AdminEntryTable({ entries }: AdminEntryTableProps) {
           columns={columns}
           dataSource={tableData}
           expandable={{
-            expandedRowRender: (record: EntryWithItemsAndMileages) => (
+            expandedRowRender: (record) => (
               <AdminEntryExpandedRow
                 record={record}
                 handleAccountUpdate={handleAccountUpdate}

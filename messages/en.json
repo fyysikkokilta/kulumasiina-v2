@@ -1,4 +1,7 @@
 {
+  "common": {
+    "loading": "Loading..."
+  },
   "form": {
     "main": {
       "title": "FK-Expenses",

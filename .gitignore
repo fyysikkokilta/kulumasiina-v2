@@ -10,7 +10,7 @@ next-env.d.ts
 **/.DS_Store
 
 # Local storage
-data/
+/data/
 
 /.vscode
 /.idea

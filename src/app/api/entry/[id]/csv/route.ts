@@ -9,7 +9,10 @@ import { entries } from '@/lib/db/schema'
 import { generateCombinedPDF, generatePartsFromEntry } from '@/lib/pdf-utils'
 import isAuthorized, { JWT_COOKIE } from '@/utils/isAuthorized'
 
-export async function GET(request: NextRequest, { params }: RouteContext<'/api/entry/[id]/csv'>) {
+export async function GET(
+  request: NextRequest,
+  { params }: RouteContext<'/api/entry/[id]/csv'>
+) {
   const cookieStore = await cookies()
   const token = cookieStore.get(JWT_COOKIE)?.value
   const authorized = await isAuthorized(token)

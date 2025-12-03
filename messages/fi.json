@@ -1,4 +1,7 @@
 {
+  "common": {
+    "loading": "Ladataan..."
+  },
   "form": {
     "main": {
       "title": "FK-Kulut",

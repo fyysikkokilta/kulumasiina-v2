@@ -3,7 +3,11 @@ import { useAction } from 'next-safe-action/hooks'
 import { useCallback, useMemo, useState } from 'react'
 
 import { createEntryAction } from '@/lib/actions/createEntry'
-import type { NewAttachment, NewItemWithAttachments, NewMileage } from '@/lib/db/schema'
+import type {
+  NewAttachment,
+  NewItemWithAttachments,
+  NewMileage
+} from '@/lib/db/schema'
 import { env } from '@/lib/env'
 
 // Types
@@ -78,7 +82,9 @@ export function useExpenseForm() {
     return state.entries.reduce((sum, entry) => {
       if (entry.type === 'mileage') {
         const mileage = entry.data
-        return sum + mileage.distance * env.NEXT_PUBLIC_MILEAGE_REIMBURSEMENT_RATE
+        return (
+          sum + mileage.distance * env.NEXT_PUBLIC_MILEAGE_REIMBURSEMENT_RATE
+        )
       } else {
         const item = entry.data
         if (item.attachments) {
@@ -97,7 +103,9 @@ export function useExpenseForm() {
 
   const editingEntry = useMemo(() => {
     if (!state.modalState.editingId) return null
-    return state.entries.find((entry) => entry.id === state.modalState.editingId)
+    return state.entries.find(
+      (entry) => entry.id === state.modalState.editingId
+    )
   }, [state.modalState.editingId, state.entries])
 
   // Handlers
