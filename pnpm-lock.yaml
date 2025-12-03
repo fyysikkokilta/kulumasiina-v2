@@ -23,9 +23,6 @@ importers:
       '@t3-oss/env-nextjs':
         specifier: ^0.13.8
         version: 0.13.8(typescript@5.9.3)(zod@4.1.13)
-      '@tailwindcss/postcss':
-        specifier: ^4.1.17
-        version: 4.1.17
       antd:
         specifier: ^6.0.1
         version: 6.0.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -84,6 +81,9 @@ importers:
         specifier: ^4.1.13
         version: 4.1.13
     devDependencies:
+      '@tailwindcss/postcss':
+        specifier: ^4.1.17
+        version: 4.1.17
       '@tailwindcss/typography':
         specifier: ^0.5.19
         version: 0.5.19(tailwindcss@4.1.17)
