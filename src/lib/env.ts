@@ -7,10 +7,10 @@ export const env = createEnv({
     // Google OAuth Configuration
     GOOGLE_CLIENT_ID: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
-    GOOGLE_REDIRECT_URI: z.string().url(),
+    GOOGLE_REDIRECT_URI: z.url(),
 
     // Database Configuration
-    DATABASE_URL: z.string().url(),
+    DATABASE_URL: z.url(),
 
     // Admin Configuration
     ADMIN_EMAILS: z
@@ -38,7 +38,7 @@ export const env = createEnv({
 
     // Storage configuration
     STORAGE_DRIVER: z.enum(['local', 's3']).default('local'),
-    S3_ENDPOINT: z.string().url().optional(),
+    S3_ENDPOINT: z.url().optional(),
     S3_ACCESS_KEY: z.string().optional(),
     S3_SECRET_KEY: z.string().optional(),
     S3_BUCKET: z.string().optional(),
@@ -58,7 +58,6 @@ export const env = createEnv({
       .transform((val) => parseFloat(val)),
     NEXT_PUBLIC_PRIVACY_POLICY_URL: z
       .string()
-      .url()
       .default(
         'https://drive.google.com/drive/folders/12VBoHzXG7vEYGul87egYQZ3QN_-CKpBa'
       )

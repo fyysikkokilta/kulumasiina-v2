@@ -14,3 +14,7 @@ next-env.d.ts
 
 /.vscode
 /.idea
+
+# Test results
+playwright-report/
+test-results/
