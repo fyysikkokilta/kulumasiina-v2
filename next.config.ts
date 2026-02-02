@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   cacheComponents: true,
   experimental: {
-    optimizePackageImports: ['antd', '@ant-design/icons', 'drizzle-orm'],
+    optimizePackageImports: ['drizzle-orm'],
     serverActions: {
       bodySizeLimit: '8mb'
     }
