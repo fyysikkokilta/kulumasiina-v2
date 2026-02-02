@@ -50,7 +50,13 @@ const DEFAULT_COLUMN_FILTERS = [
 
 const DEFAULT_SORTING = [{ id: 'submissionDate', desc: true }]
 
-export function AdminEntryTable({ entries }: { entries: AdminEntries }) {
+export function AdminEntryTable({
+  entries,
+  oldArchivedCutoff
+}: {
+  entries: AdminEntries
+  oldArchivedCutoff: string
+}) {
   const t = useTranslations('AdminEntryTable')
 
   const [columnFilters, setColumnFilters] = useState<
@@ -116,8 +122,8 @@ export function AdminEntryTable({ entries }: { entries: AdminEntries }) {
     [entries]
   )
   const toBeDeleted = useMemo(
-    () => entries.filter(isOldArchived).length,
-    [entries]
+    () => entries.filter((e) => isOldArchived(e, oldArchivedCutoff)).length,
+    [entries, oldArchivedCutoff]
   )
 
   const getStatusColor = useCallback(

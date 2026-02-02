@@ -2,7 +2,6 @@ import dayjs from 'dayjs'
 
 import { EntryRow } from '@/components/AdminEntryTableColumns'
 import type { AdminEntries } from '@/data/getAdminEntries'
-import { env } from '@/lib/env'
 
 import { bookkeepingAccounts } from './bookkeeping-accounts'
 
@@ -15,16 +14,21 @@ export const STATUS_COLORS: Record<string, string> = {
   denied: 'red'
 }
 
-export function isOldArchived(entry: AdminEntries[number]): boolean {
+/**
+ * Returns true if the entry is archived and its paid/rejection date is before
+ * the given cutoff. Pass cutoffIso from the server to avoid using current time
+ * in a Client Component (Next.js prerender).
+ */
+export function isOldArchived(
+  entry: AdminEntries[number],
+  cutoffIso: string
+): boolean {
   if (!entry.archived) return false
   const date =
     entry.status === 'paid'
       ? entry.paidDate && dayjs(entry.paidDate)
       : entry.rejectionDate && dayjs(entry.rejectionDate)
-  const cutoff = dayjs().subtract(
-    env.NEXT_PUBLIC_ARCHIVED_ENTRIES_AGE_LIMIT_DAYS,
-    'days'
-  )
+  const cutoff = dayjs(cutoffIso)
   return !!(date && date.isBefore(cutoff))
 }
 
