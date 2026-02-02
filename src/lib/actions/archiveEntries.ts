@@ -9,12 +9,12 @@ import { entries } from '../db/schema'
 import { isAuthorizedMiddleware } from './isAuthorized'
 import { actionClient } from './safeActionClient'
 
-const ChangeStatusSchema = z.object({
+const ArchiveEntriesSchema = z.object({
   ids: z.array(z.uuid())
 })
 
 export const archiveEntriesAction = actionClient
-  .inputSchema(ChangeStatusSchema)
+  .inputSchema(ArchiveEntriesSchema)
   .use(isAuthorizedMiddleware)
   .action(async ({ parsedInput }) => {
     const now = new Date()

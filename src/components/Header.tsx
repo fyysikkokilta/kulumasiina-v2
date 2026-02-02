@@ -5,7 +5,7 @@ import { HeaderAuth } from './HeaderAuth'
 import { LanguageSwitcher } from './LanguageSwitcher'
 
 export async function Header() {
-  const t = await getTranslations('form.main')
+  const t = await getTranslations('ExpenseForm')
 
   return (
     <div className="flex items-center justify-between">

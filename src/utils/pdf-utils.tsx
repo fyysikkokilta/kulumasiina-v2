@@ -14,10 +14,10 @@ import path from 'path'
 import React from 'react'
 import sharp from 'sharp'
 
-import type { EntryWithItemsAndMileages } from './db/schema'
-import { env } from './env'
-import { getFile } from './storage'
-import { isPdf } from './validation'
+import type { EntryWithItemsAndMileages } from '@/lib/db/schema'
+import { env } from '@/lib/env'
+import { getFile } from '@/lib/storage'
+import { isPdf } from '@/utils/validation'
 
 // Helper function to format dates in Finnish timezone
 function formatDateInFinnishTimezone(date: Date): string {

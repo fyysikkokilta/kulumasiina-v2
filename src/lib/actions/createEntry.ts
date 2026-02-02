@@ -4,9 +4,10 @@ import { isValidIBAN } from 'ibantools'
 import { updateTag } from 'next/cache'
 import { z } from 'zod'
 
+import { validateFinnishSSN } from '@/utils/validation'
+
 import { db } from '../db'
 import { attachments, entries, items, mileages } from '../db/schema'
-import { validateFinnishSSN } from '../validation'
 import { actionClient } from './safeActionClient'
 
 const EntryCreateSchema = z.object({

@@ -1,259 +1,388 @@
 'use client'
 
-import { PlusOutlined } from '@ant-design/icons'
-import {
-  Button,
-  Checkbox,
-  Col,
-  DatePicker,
-  Form,
-  Input,
-  InputNumber,
-  Modal,
-  Row,
-  Select,
-  Space,
-  Typography,
-  Upload
-} from 'antd'
-import type { UploadFile } from 'antd/es/upload/interface'
-import { Dayjs } from 'dayjs'
+import { Button as BaseButton } from '@base-ui/react/button'
+import { Checkbox as Checkbox } from '@base-ui/react/checkbox'
+import { Dialog } from '@base-ui/react/dialog'
+import { Field } from '@base-ui/react/field'
+import { Form } from '@base-ui/react/form'
+import { NumberField } from '@base-ui/react/number-field'
+import { Check, Plus, Trash2, X } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
-import { useCallback, useEffect } from 'react'
+import { useAction } from 'next-safe-action/hooks'
+import { useRef, useState } from 'react'
+import { z } from 'zod'
 
-import { useItemForm } from '@/hooks/useItemForm'
-import { bookkeepingAccounts } from '@/lib/bookkeeping-accounts'
-import type {
-  ItemWithAttachments,
-  NewAttachment,
-  NewItemWithAttachments
-} from '@/lib/db/schema'
-
-import { PreviewModal } from './PreviewModal'
-
-export interface ItemFormData {
-  description: string
-  date: Dayjs
-  account: string
-  attachments: UploadFile[]
-  valueValues: { [key: string]: number | null }
-  isNotReceiptValues: { [key: string]: boolean }
-}
+import { EntryCommonFields } from '@/components/EntryCommonFields'
+import { PreviewModal } from '@/components/PreviewModal'
+import { Button } from '@/components/ui/Button'
+import { Required } from '@/components/ui/Required'
+import { uploadAttachmentAction } from '@/lib/actions/uploadAttachment'
+import type { FormItemWithAttachments } from '@/lib/db/schema'
+import { inputClass } from '@/utils/form-styles'
+import {
+  prepareAttachmentPreview,
+  type PreviewState
+} from '@/utils/preview-utils'
 
 interface ItemFormProps {
   visible: boolean
-  onOk: (
-    item: Omit<NewItemWithAttachments, 'entryId' | 'attachments'> & {
-      attachments: Omit<NewAttachment, 'itemId'>[]
-    }
-  ) => void
+  onOk: (item: FormItemWithAttachments) => void
   onCancel: () => void
-  editData?: Omit<
-    ItemWithAttachments | NewItemWithAttachments,
-    'entryId' | 'attachments'
-  > & {
-    attachments: Omit<NewAttachment, 'itemId'>[]
-  }
+  editData?: FormItemWithAttachments
+  isSubmitting?: boolean
 }
 
-export function ItemForm({ visible, onOk, onCancel, editData }: ItemFormProps) {
-  const [form] = Form.useForm<ItemFormData>()
-  const t = useTranslations('form.expense')
+export function ItemForm({
+  visible,
+  onOk,
+  onCancel,
+  editData,
+  isSubmitting = false
+}: ItemFormProps) {
+  const t = useTranslations('ItemForm')
   const locale = useLocale()
+  const [errors, setErrors] = useState<
+    Record<string, string | string[]> | undefined
+  >(undefined)
 
-  const {
-    fileList,
-    previewState,
-    handlePreview,
-    handleChange,
-    handleRemove,
-    beforeUpload,
-    customRequest,
-    handleCancel: handleModalCancel,
-    closePreview,
-    prepareEditState,
-    saveItem
-  } = useItemForm(form)
+  const formRef = useRef<HTMLFormElement>(null)
+  const addFileInputRef = useRef<HTMLInputElement>(null)
 
-  // Load existing attachments when editing
-  useEffect(() => {
-    if (editData && visible) {
-      prepareEditState(editData)
-    } else if (!visible) {
-      form.resetFields()
+  type AttachmentSlot = {
+    fileId: string
+    filename: string
+  }
+  const [attachments, setAttachments] = useState<AttachmentSlot[]>(
+    editData?.attachments?.map((a) => ({
+      fileId: a.fileId,
+      filename: a.filename
+    })) ?? []
+  )
+
+  const [previewState, setPreviewState] = useState<PreviewState | null>(null)
+
+  const { execute: uploadFileAction, status: uploadFileStatus } = useAction(
+    uploadAttachmentAction,
+    {
+      onSuccess: (result) => {
+        if (result?.data) {
+          setAttachments((prev) => [
+            ...prev,
+            { fileId: result.data.fileId, filename: result.data.filename }
+          ])
+        }
+      },
+      onError: () => {}
     }
-  }, [editData, visible, prepareEditState, form])
+  )
 
-  // Handle form submission
-  const handleOk = useCallback(async () => {
-    const result = await saveItem()
-    if (result) {
-      onOk(result)
-      // Reset form after 500ms to avoid clearing it while the modal is visible
-      setTimeout(() => {
-        form.resetFields()
-      }, 500)
+  const openPreview = async (slot: AttachmentSlot) => {
+    const isNotReceipt =
+      (
+        formRef.current?.elements.namedItem(
+          `attachments[${slot.fileId}].isNotReceipt`
+        ) as HTMLInputElement
+      )?.checked ?? false
+    const value = Number(
+      (
+        formRef.current?.elements.namedItem(
+          `attachments[${slot.fileId}].value`
+        ) as HTMLInputElement
+      )?.value ?? null
+    )
+    const state = await prepareAttachmentPreview({
+      fileId: slot.fileId,
+      filename: slot.filename,
+      isNotReceipt,
+      value
+    })
+    setPreviewState(state)
+  }
+
+  const itemFormSchema = z.object({
+    description: z.string().min(1, t('errors.description')).max(500),
+    date: z
+      .union([z.date(), z.string().min(1, t('errors.date'))])
+      .transform((val): Date => {
+        if (val instanceof Date) return val
+        return new Date((val as string) + 'T00:00:00')
+      })
+      .refine((d) => !Number.isNaN(d.getTime()), t('errors.date')),
+    account: z
+      .string()
+      .max(4, t('errors.account_invalid'))
+      .regex(/^[0-9]{0,4}$/, t('errors.account_invalid'))
+      .nullish(),
+    attachments: z
+      .array(
+        z.object({
+          fileId: z.uuid(),
+          filename: z.string().min(1).max(255),
+          value: z
+            .number()
+            .nullish()
+            .refine((val) => !val || val > 0, t('errors.value_min'))
+            .refine((val) => !val || val <= 1000000, t('errors.value_max')),
+          isNotReceipt: z.boolean().default(false)
+        })
+      )
+      .min(1, t('errors.attachments_min'))
+      .max(20, t('errors.attachments_max'))
+      .refine(
+        (val) => val.some((a) => !!a.value && !a.isNotReceipt),
+        t('errors.at_least_one_value')
+      )
+  })
+
+  const handleFormSubmit = async (
+    formValues: Record<string, string | number | boolean>
+  ) => {
+    if (isSubmitting || uploadFileStatus === 'executing') return
+
+    const parsedAttachments = attachments.map((slot) => {
+      const value = formValues[`attachments[${slot.fileId}].value`]
+        ? Number.parseFloat(
+            String(formValues[`attachments[${slot.fileId}].value`])
+          )
+        : undefined
+      const isNotReceipt =
+        formValues[`attachments[${slot.fileId}].isNotReceipt`] ?? false
+      return {
+        fileId: slot.fileId,
+        filename: slot.filename,
+        value: isNotReceipt ? null : value,
+        isNotReceipt
+      }
+    })
+
+    const toParse = {
+      description: formValues.description,
+      date: formValues.date,
+      account: formValues.account ?? null,
+      attachments: parsedAttachments
     }
-  }, [saveItem, onOk, form])
 
-  // Handle modal cancel
-  const handleCancel = useCallback(() => {
+    const result = itemFormSchema.safeParse(toParse)
+    if (!result.success) {
+      setErrors(z.flattenError(result.error).fieldErrors)
+      return
+    }
+
+    setErrors({})
+    onOk(result.data)
+    formRef.current?.reset()
+    setAttachments([])
+  }
+
+  const resetForm = () => {
+    formRef.current?.reset()
+    setErrors({})
+    setAttachments([])
     onCancel()
-    setTimeout(() => {
-      handleModalCancel()
-    }, 500)
-  }, [handleModalCancel, onCancel])
-
-  // Watch for checkbox changes to disable/enable value inputs
-  const disablevalue = Form.useWatch('isNotReceiptValues', form)
-
-  // Check if any files are uploading to disable submit button
-  const hasUploadingFiles = fileList.some((file) => file.status === 'uploading')
+  }
 
   return (
     <>
-      <Modal
-        title={editData ? t('edit') : t('add')}
-        open={visible}
-        onOk={handleOk}
-        onCancel={handleCancel}
-        width={800}
-        okButtonProps={{ disabled: hasUploadingFiles }}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="description"
-            label={t('description')}
-            rules={[{ required: true, message: t('description_error') }]}
+      <PreviewModal
+        previewState={previewState}
+        closePreview={() => setPreviewState(null)}
+      />
+      <Dialog.Root open={visible} onOpenChange={(open) => !open && resetForm()}>
+        <Dialog.Portal>
+          <Dialog.Backdrop className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50" />
+          <Dialog.Popup
+            className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] fixed top-1/2 left-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2 rounded-lg bg-white p-6 shadow-lg"
+            style={{
+              maxWidth: '800px',
+              maxHeight: '90vh',
+              overflow: 'auto'
+            }}
           >
-            <Input.TextArea
-              showCount
-              maxLength={500}
-              rows={3}
-              placeholder={t('description_placeholder')}
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="date"
-            label={t('date')}
-            rules={[{ required: true, message: t('date_error') }]}
-          >
-            <DatePicker format="DD.MM.YYYY" className="w-full" />
-          </Form.Item>
-
-          <Form.Item name="account" label={t('account')}>
-            <Select
-              showSearch
-              placeholder={t('account_placeholder')}
-              optionFilterProp="children"
-              filterOption={(input, option) =>
-                (option?.label ?? '')
-                  .toLowerCase()
-                  .includes(input.toLowerCase())
-              }
-              options={bookkeepingAccounts.map((account) => ({
-                value: account.value,
-                label: account.label
-              }))}
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="attachments"
-            label={t('attachments')}
-            rules={[
-              {
-                required: true,
-                message: t('attachments_error_1')
-              },
-              {
-                validator: () => {
-                  if (!Array.isArray(fileList) || fileList.length === 0) {
-                    return Promise.reject(new Error(t('attachments_error_1')))
-                  }
-
-                  if (fileList.length > 20) {
-                    return Promise.reject(new Error(t('attachments_error_max')))
-                  }
-
-                  if (Object.values(disablevalue || {}).every(Boolean)) {
-                    return Promise.reject(new Error(t('attachments_error_2')))
-                  }
-                  return Promise.resolve()
+            <Dialog.Title className="mb-4 text-lg font-semibold">
+              {editData ? t('edit') : t('add')}
+            </Dialog.Title>
+            <Form
+              ref={formRef}
+              id="item-form"
+              errors={errors}
+              onFormSubmit={handleFormSubmit}
+              className="mb-4 space-y-4"
+            >
+              <EntryCommonFields
+                t={t as (key: string) => string}
+                defaultDescription={editData?.description}
+                defaultDate={
+                  editData?.date
+                    ? new Date(editData.date).toISOString().slice(0, 10)
+                    : undefined
                 }
-              }
-            ]}
-          >
-            <Space orientation="vertical" className="w-full">
-              <Typography.Text type="secondary" className="mb-2">
-                {t('upload_note')}
-              </Typography.Text>
-              <Typography.Text type="secondary" className="mb-2 text-xs">
-                {t('attachments_max_note')}
-              </Typography.Text>
-              <Upload
-                listType="picture"
-                fileList={fileList}
-                onPreview={handlePreview}
-                onChange={handleChange}
-                onRemove={handleRemove}
-                accept="image/*,application/pdf"
-                customRequest={customRequest}
-                beforeUpload={beforeUpload}
-                itemRender={(originNode, file) => (
-                  <Col key={file.name} className="flex flex-col gap-2.5">
-                    {originNode}
-                    <Row gutter={10}>
-                      <Col span={12}>
-                        <Form.Item
-                          name={['valueValues', file.name]}
-                          rules={[
-                            {
-                              required: !disablevalue?.[file.name],
-                              message: t('value_error_1')
-                            },
-                            {
-                              pattern: /^(?!0+(?:[.,]0+)?$)\d+([.,]\d{1,2})?$/,
-                              message: t('value_error_2')
-                            }
-                          ]}
-                          className="mb-0"
+                defaultAccount={editData?.account ?? null}
+              />
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                  {t('attachments')}
+                  <Required />
+                </label>
+                <p className="mb-3 text-xs text-gray-500">
+                  {t('attachments_help')}
+                </p>
+
+                {errors?.attachments && (
+                  <p className="mt-2 text-sm text-red-600" role="alert">
+                    {typeof errors.attachments === 'string'
+                      ? errors.attachments
+                      : errors.attachments[0]}
+                  </p>
+                )}
+
+                {attachments.map((slot, i) => (
+                  <div
+                    key={slot.fileId}
+                    className="mt-3 rounded-lg border border-gray-200 bg-gray-50/80 p-3"
+                  >
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_140px_auto_auto] sm:items-end">
+                      <div>
+                        <span className="mb-1 block text-xs font-medium text-gray-600">
+                          {t('attachment_file')}
+                        </span>
+                        <BaseButton
+                          type="button"
+                          onClick={() => openPreview(slot)}
+                          className="truncate text-left text-sm font-medium text-blue-600 underline hover:text-blue-800"
+                          title={t('preview_file')}
+                          aria-label={`${slot.filename ?? ''} ${t('preview_file')}`}
                         >
-                          <InputNumber
-                            placeholder={t('value_placeholder')}
-                            disabled={disablevalue?.[file.name]}
-                            decimalSeparator=","
-                            suffix={t('value_unit')}
-                            inputMode="decimal"
-                            step="0.01"
+                          {slot.filename ?? ''}
+                        </BaseButton>
+                      </div>
+                      <Field.Root name={`attachments[${slot.fileId}].value`}>
+                        <Field.Label className="mb-1 block text-xs font-medium text-gray-600">
+                          {t('attachment_value')}
+                        </Field.Label>
+                        <div className="relative flex items-center">
+                          <NumberField.Root
+                            step={0.01}
                             min={0}
                             max={1000000}
-                            lang={locale}
-                          />
-                        </Form.Item>
-                      </Col>
-                      <Col span={12}>
-                        <Form.Item
-                          name={['isNotReceiptValues', file.name]}
-                          valuePropName="checked"
-                          className="mb-0"
+                            locale={locale}
+                            className="w-full"
+                            defaultValue={
+                              editData?.attachments?.[i]?.value ?? undefined
+                            }
+                          >
+                            <NumberField.Input
+                              placeholder={t('value_placeholder')}
+                              className={`${inputClass} pr-12`}
+                            />
+                          </NumberField.Root>
+                          <span className="absolute right-3 text-sm text-gray-500">
+                            {t('value_unit')}
+                          </span>
+                        </div>
+                        <Field.Error className="mt-1 text-sm text-red-600" />
+                      </Field.Root>
+                      <Field.Root
+                        name={`attachments[${slot.fileId}].isNotReceipt`}
+                      >
+                        <Field.Label className="mb-1 block text-xs font-medium text-gray-600">
+                          {t('is_not_receipt')}
+                        </Field.Label>
+                        <Checkbox.Root
+                          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          defaultChecked={
+                            editData?.attachments?.[i]?.isNotReceipt ?? false
+                          }
                         >
-                          <Checkbox>{t('is_not_receipt')}</Checkbox>
-                        </Form.Item>
-                      </Col>
-                    </Row>
-                  </Col>
-                )}
-              >
-                <Button icon={<PlusOutlined />}>{t('upload')}</Button>
-              </Upload>
-            </Space>
-          </Form.Item>
-        </Form>
-      </Modal>
+                          <Checkbox.Indicator
+                            keepMounted
+                            className="flex size-full h-5 w-5 items-center justify-center data-checked:text-blue-600 data-unchecked:text-white"
+                          >
+                            <Check className="h-6 w-6" />
+                          </Checkbox.Indicator>
+                        </Checkbox.Root>
+                        <Field.Error className="mt-1 text-sm text-red-600" />
+                      </Field.Root>
+                      <BaseButton
+                        type="button"
+                        onClick={() =>
+                          setAttachments((prev) =>
+                            prev.filter((s) => s.fileId !== slot.fileId)
+                          )
+                        }
+                        className="shrink-0 self-end rounded-md p-2 text-gray-500 hover:bg-gray-200 hover:text-red-600"
+                        aria-label={t('remove_attachment')}
+                      >
+                        <Trash2 className="h-5 w-5 text-red-600" />
+                      </BaseButton>
+                    </div>
+                  </div>
+                ))}
 
-      <PreviewModal previewState={previewState} closePreview={closePreview} />
+                {attachments.length < 20 && (
+                  <div className="mt-3 flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <input
+                        ref={addFileInputRef}
+                        type="file"
+                        accept="image/*,application/pdf"
+                        className="sr-only"
+                        aria-hidden
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) {
+                            uploadFileAction({
+                              file,
+                              mimeType: file.type
+                            })
+                            e.target.value = ''
+                          }
+                        }}
+                      />
+                      <Button
+                        variant="secondary"
+                        type="button"
+                        onClick={() => addFileInputRef.current?.click()}
+                        actionStatus={uploadFileStatus}
+                      >
+                        <Plus className="h-4 w-4" />
+                        {t('upload')}
+                      </Button>
+                    </div>
+                    {uploadFileStatus === 'hasErrored' && (
+                      <p className="text-sm text-red-600" role="alert">
+                        {t('errors.upload_failed')}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </Form>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="secondary" onClick={resetForm}>
+                {t('cancel')}
+              </Button>
+              <Button
+                type="submit"
+                form="item-form"
+                onClick={() => formRef.current?.requestSubmit()}
+                variant="primary"
+                actionStatus={isSubmitting ? 'executing' : 'idle'}
+                disabled={uploadFileStatus === 'executing'}
+              >
+                {t('ok')}
+              </Button>
+            </div>
+            <Dialog.Close
+              className="absolute top-4 right-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+              onClick={resetForm}
+            >
+              <X className="h-5 w-5" />
+              <span className="sr-only">{t('close')}</span>
+            </Dialog.Close>
+          </Dialog.Popup>
+        </Dialog.Portal>
+      </Dialog.Root>
     </>
   )
 }

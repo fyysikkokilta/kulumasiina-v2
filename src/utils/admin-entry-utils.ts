@@ -1,0 +1,46 @@
+import dayjs from 'dayjs'
+
+import { EntryRow } from '@/components/AdminEntryTableColumns'
+import type { AdminEntries } from '@/data/getAdminEntries'
+import { env } from '@/lib/env'
+
+import { bookkeepingAccounts } from './bookkeeping-accounts'
+
+export const PAGE_SIZES = [10, 25, 50] as const
+
+export const STATUS_COLORS: Record<string, string> = {
+  submitted: 'blue',
+  approved: 'green',
+  paid: 'purple',
+  denied: 'red'
+}
+
+export function isOldArchived(entry: AdminEntries[number]): boolean {
+  if (!entry.archived) return false
+  const date =
+    entry.status === 'paid'
+      ? entry.paidDate && dayjs(entry.paidDate)
+      : entry.rejectionDate && dayjs(entry.rejectionDate)
+  const cutoff = dayjs().subtract(
+    env.NEXT_PUBLIC_ARCHIVED_ENTRIES_AGE_LIMIT_DAYS,
+    'days'
+  )
+  return !!(date && date.isBefore(cutoff))
+}
+
+export function formatEntryForClipboard(entry: EntryRow): string {
+  const accounts = [
+    ...entry.items.map((i) => i.account),
+    ...entry.mileages.map((m) => m.account)
+  ]
+  const labels = [...new Set(accounts)]
+    .filter(Boolean)
+    .map((v) => bookkeepingAccounts.find((a) => a.value === v)?.label)
+    .filter(Boolean)
+    .sort()
+    .join(', ')
+  const km = entry.mileages.reduce((s, m) => s + m.distance, 0)
+  const kmStr = km > 0 ? ` (${km} km)` : ''
+  const totalStr = entry.total.toFixed(2).replace('.', ',')
+  return `${entry.name}, ${entry.title}${kmStr}; ${totalStr} € (${labels})`
+}

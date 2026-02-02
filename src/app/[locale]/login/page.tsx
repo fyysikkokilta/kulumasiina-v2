@@ -12,7 +12,7 @@ export default async function LoginPage({
   const { locale } = await params
   setRequestLocale(locale as Locale)
 
-  const t = await getTranslations('login')
+  const t = await getTranslations('Login')
 
   return (
     <div className="flex min-h-96 flex-col items-center justify-center space-y-8">

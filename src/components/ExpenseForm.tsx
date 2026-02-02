@@ -1,241 +1,329 @@
 'use client'
 
-import { PlusOutlined } from '@ant-design/icons'
-import { Button, Card, Divider, Form, Input, Result, Typography } from 'antd'
-import { isValidIBAN } from 'ibantools'
+import { Field } from '@base-ui/react/field'
+import { Form } from '@base-ui/react/form'
+import { Separator } from '@base-ui/react/separator'
+import { friendlyFormatIBAN, isValidIBAN } from 'ibantools'
+import { Plus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { useAction } from 'next-safe-action/hooks'
+import type { ReactNode } from 'react'
+import { useRef, useState } from 'react'
+import { z } from 'zod'
 
-import {
-  type ExpenseFormData,
-  type FormEntry,
-  useExpenseForm
-} from '@/hooks/useExpenseForm'
+import { Button } from '@/components/ui/Button'
+import { Card } from '@/components/ui/Card'
+import { Required } from '@/components/ui/Required'
 import { Link } from '@/i18n/navigation'
+import { createEntryAction } from '@/lib/actions/createEntry'
+import type { EntryType, FormEntry } from '@/lib/db/schema'
 import { env } from '@/lib/env'
-import { validateFinnishSSN } from '@/lib/validation'
+import { calculateFormEntriesTotal } from '@/utils/entry-total-utils'
+import { isEntryItem, isEntryMileage } from '@/utils/entry-utils'
+import { inputClass, textareaClass } from '@/utils/form-styles'
+import { validateFinnishSSN } from '@/utils/validation'
 
 import { ItemDisplay, MileageDisplay } from './EntryDisplay'
+import { FormResult } from './FormResult'
 import { ItemForm } from './ItemForm'
 import { MileageForm } from './MileageForm'
 
-// Result Component
-const FormResult = ({
-  status,
-  onReset
-}: {
-  status: 'success' | 'failure'
-  onReset: () => void
-}) => {
-  const t = useTranslations('form.main')
-  const isSuccess = status === 'success'
-
-  return (
-    <Result
-      status={isSuccess ? 'success' : 'error'}
-      title={t(`${status}.title`)}
-      subTitle={t(`${status}.sub_title`)}
-      extra={[
-        <Button type="primary" key="again" onClick={onReset}>
-          {t(isSuccess ? 'success.send_another' : 'failure.try_again')}
-        </Button>
-      ]}
-    />
-  )
-}
-
-// Entry Renderer Component
-const EntryRenderer = ({
-  entry,
-  onEdit,
-  onRemove
-}: {
-  entry: FormEntry
-  onEdit: (id: string) => void
-  onRemove: (id: string) => void
-}) => {
-  const commonProps = {
-    onEdit: () => onEdit(entry.id),
-    onRemove: () => onRemove(entry.id)
-  }
-
-  if (entry.type === 'item') {
-    return <ItemDisplay {...commonProps} item={entry.data} />
-  }
-
-  return (
-    <MileageDisplay
-      {...commonProps}
-      mileage={entry.data}
-      mileageRate={env.NEXT_PUBLIC_MILEAGE_REIMBURSEMENT_RATE}
-    />
-  )
-}
-
-// Main Component
 export function ExpenseForm() {
-  const [form] = Form.useForm<ExpenseFormData>()
-  const t = useTranslations('form.main')
+  const t = useTranslations('ExpenseForm')
 
-  const {
-    state,
-    actionStatus,
-    hasMileages,
-    total,
-    editingEntry,
-    handleSubmit,
-    openModal,
-    closeModal,
-    handleAddOrUpdateEntry,
-    handleRemoveEntry,
-    resetForm
-  } = useExpenseForm()
+  const [status, setStatus] = useState<'idle' | 'success' | 'failure'>('idle')
+  const [entries, setEntries] = useState<FormEntry[]>([])
+  const [modalState, setModalState] = useState<{
+    type: EntryType | null
+    isOpen: boolean
+    editingId: string | null
+  }>({
+    type: null,
+    isOpen: false,
+    editingId: null
+  })
 
-  // Form submit handler
-  const onFinish = (values: ExpenseFormData) => {
-    handleSubmit(values)
-    form.resetFields()
+  const { execute, status: actionStatus } = useAction(createEntryAction, {
+    onSuccess: () => {
+      setStatus('success')
+    },
+    onError: (error) => {
+      console.error('Form submission error:', error)
+      setStatus('failure')
+    }
+  })
+
+  const hasMileages = entries.some(isEntryMileage)
+
+  const mainFormSchema = z
+    .object({
+      name: z.string().min(1, t('errors.payee_name')).max(255),
+      contact: z.string().min(1, t('errors.payee_contact')).max(255),
+      iban: z
+        .string()
+        .min(1, t('errors.iban_required'))
+        .refine(
+          (val) => isValidIBAN(val.replace(/\s/g, '')),
+          t('errors.iban_invalid')
+        ),
+      title: z.string().min(1, t('errors.claim_title')).max(1000),
+      govId: z
+        .string()
+        .refine(
+          (val) => !val || validateFinnishSSN(val),
+          t('errors.personal_id_code_invalid')
+        )
+        .optional(),
+      // No need to validate items and mileages, they are validated in their forms
+      items: z.array(z.any()),
+      mileages: z.array(z.any())
+    })
+    .refine((data) => data.items.length > 0 || data.mileages.length > 0, {
+      message: t('errors.no_entries'),
+      path: ['items', 'mileages']
+    })
+    .refine((data) => data.mileages.length === 0 || !!data.govId, {
+      message: t('errors.personal_id_code_required'),
+      path: ['govId']
+    })
+
+  const total = calculateFormEntriesTotal(
+    entries.filter(isEntryItem).map((e) => e),
+    entries.filter(isEntryMileage).map((e) => e)
+  )
+  const editingEntry = modalState.editingId
+    ? (entries.find((entry) => entry.id === modalState.editingId) ?? null)
+    : null
+
+  const openModal = (type: EntryType, editingId?: string) => {
+    setModalState({ type, isOpen: true, editingId: editingId ?? null })
+  }
+
+  const closeModal = () => {
+    setModalState({ type: null, isOpen: false, editingId: null })
+  }
+
+  const handleAddOrUpdateEntry = (data: FormEntry) => {
+    setEntries((prev) => {
+      const newEntries = [...prev]
+      if (modalState.editingId) {
+        const index = newEntries.findIndex((e) => e.id === modalState.editingId)
+        if (index !== -1) newEntries[index] = { ...newEntries[index], ...data }
+      } else {
+        const typeCount = newEntries.filter(
+          isEntryItem(data) ? isEntryItem : isEntryMileage
+        ).length
+        if (typeCount >= 20) return prev
+        newEntries.push({ ...data, id: crypto.randomUUID() })
+      }
+      return newEntries
+    })
+    setModalState({ type: null, isOpen: false, editingId: null })
+  }
+
+  const [errors, setErrors] = useState<
+    Record<string, string | string[]> | undefined
+  >(undefined)
+  const formRef = useRef<HTMLFormElement>(null)
+
+  const resetForm = () => {
+    setErrors(undefined)
+    formRef.current?.reset()
+    setStatus('idle')
+    setEntries([])
+    setModalState({ type: null, isOpen: false, editingId: null })
+  }
+
+  const handleFormSubmit = async (
+    formValues: Record<string, string | number>
+  ) => {
+    if (actionStatus === 'executing') return
+
+    const toParse = {
+      name: formValues.name,
+      contact: formValues.contact,
+      iban: friendlyFormatIBAN(
+        String(formValues.iban ?? '').replace(/\s/g, '')
+      ),
+      title: formValues.title,
+      govId: formValues.govId ?? (hasMileages ? '' : undefined),
+      items: entries.filter(isEntryItem),
+      mileages: entries.filter(isEntryMileage)
+    }
+
+    const result = mainFormSchema.safeParse(toParse)
+
+    if (!result.success) {
+      setErrors(z.flattenError(result.error).fieldErrors)
+      return
+    }
+
+    execute({
+      name: result.data.name,
+      contact: result.data.contact,
+      govId: result.data.govId,
+      title: result.data.title,
+      iban: result.data.iban,
+      items: result.data.items,
+      mileages: result.data.mileages
+    })
+
+    setErrors(undefined)
   }
 
   // Early return for result states
-  if (state.status !== 'idle') {
-    return <FormResult status={state.status} onReset={resetForm} />
+  if (status !== 'idle') {
+    return <FormResult status={status} onReset={resetForm} />
   }
 
   return (
     <div className="mx-auto max-w-2xl">
       <Form
-        form={form}
-        layout="vertical"
-        onFinish={onFinish}
+        ref={formRef}
+        onFormSubmit={handleFormSubmit}
+        errors={errors}
         className="space-y-4"
       >
         {/* Basic Information Fields */}
-        <Form.Item
-          name="name"
-          label={t('payee_name')}
-          rules={[{ required: true, message: t('payee_name_error') }]}
-        >
-          <Input
+        <Field.Root name="name">
+          <Field.Label className="mb-1.5 block text-sm font-medium text-gray-700">
+            {t('payee_name')}
+            <Required />
+          </Field.Label>
+          <Field.Control
             placeholder={t('payee_name_placeholder')}
             maxLength={255}
             autoComplete="off"
+            className={inputClass}
           />
-        </Form.Item>
+          <Field.Error className="mt-1 text-sm text-red-600" />
+        </Field.Root>
 
-        <Form.Item
-          name="contact"
-          label={t('payee_contact')}
-          rules={[{ required: true, message: t('payee_contact_error') }]}
-        >
-          <Input
+        <Field.Root name="contact">
+          <Field.Label className="mb-1.5 block text-sm font-medium text-gray-700">
+            {t('payee_contact')}
+            <Required />
+          </Field.Label>
+          <Field.Control
             placeholder={t('payee_contact_placeholder')}
             maxLength={255}
             autoComplete="off"
+            className={inputClass}
           />
-        </Form.Item>
+          <Field.Error className="mt-1 text-sm text-red-600" />
+        </Field.Root>
 
-        <Form.Item
-          name="iban"
-          label={t('iban')}
-          rules={[
-            {
-              required: true,
-              validator: (_, value: string) => {
-                if (!value) {
-                  return Promise.reject(new Error(t('iban_error_1')))
-                }
-                if (isValidIBAN(value.replace(/\s/g, ''))) {
-                  return Promise.resolve()
-                }
-                return Promise.reject(new Error(t('iban_error_2')))
-              }
-            }
-          ]}
-        >
-          <Input placeholder={t('iban_placeholder')} autoComplete="off" />
-        </Form.Item>
-
-        <Form.Item
-          name="title"
-          label={t('claim_title')}
-          rules={[{ required: true, message: t('claim_title_error') }]}
-        >
-          <Input.TextArea
-            showCount
-            placeholder={t('claim_title_placeholder')}
-            maxLength={1000}
+        <Field.Root name="iban">
+          <Field.Label className="mb-1.5 block text-sm font-medium text-gray-700">
+            {t('iban')}
+            <Required />
+          </Field.Label>
+          <Field.Control
+            placeholder={t('iban_placeholder')}
             autoComplete="off"
-            rows={2}
+            className={inputClass}
           />
-        </Form.Item>
+          <Field.Error className="mt-1 text-sm text-red-600" />
+        </Field.Root>
+
+        <Field.Root name="title">
+          <Field.Label className="mb-1.5 block text-sm font-medium text-gray-700">
+            {t('claim_title')}
+            <Required />
+          </Field.Label>
+          <Field.Control
+            render={
+              <textarea
+                placeholder={t('claim_title_placeholder')}
+                maxLength={1000}
+                autoComplete="off"
+                rows={2}
+                className={textareaClass}
+              />
+            }
+          />
+          <Field.Error className="mt-1 text-sm text-red-600" />
+        </Field.Root>
 
         {hasMileages && (
-          <Form.Item
-            label={t('personal_id_code')}
-            name="govId"
-            rules={[
-              {
-                required: hasMileages,
-                message: t('personal_id_code_error')
-              },
-              {
-                validator: (_, value: string) => {
-                  if (validateFinnishSSN(value)) {
-                    return Promise.resolve()
-                  }
-                  return Promise.reject(
-                    new Error(t('personal_id_code_invalid'))
-                  )
-                }
-              }
-            ]}
-          >
-            <Input
+          <Field.Root name="govId">
+            <Field.Label className="mb-1.5 block text-sm font-medium text-gray-700">
+              {t('personal_id_code')}
+              <Required />
+            </Field.Label>
+            <Field.Control
               placeholder={t('personal_id_code_placeholder')}
-              disabled={actionStatus === 'executing'}
               maxLength={11}
-              style={{ textTransform: 'uppercase' }}
+              className={inputClass}
+              autoComplete="off"
+              onChange={(e) => {
+                const input = e.currentTarget
+                input.value = e.target.value.toUpperCase()
+              }}
             />
-          </Form.Item>
+            <Field.Error className="mt-1 text-sm text-red-600" />
+          </Field.Root>
         )}
 
-        <Divider />
+        <Separator className="my-4" />
+
+        {errors?.items && (
+          <p className="mb-4 text-sm text-red-600">
+            {Array.isArray(errors.items) ? errors.items[0] : errors.items}
+          </p>
+        )}
+        {errors?.mileages && (
+          <p className="mb-4 text-sm text-red-600">
+            {Array.isArray(errors.mileages)
+              ? errors.mileages[0]
+              : errors.mileages}
+          </p>
+        )}
 
         {/* Entries Section */}
-        {state.entries.length > 0 && (
+        {entries.length > 0 && (
           <div className="mb-4 text-center text-sm text-gray-500">
-            <Typography.Text>
+            <span>
               {t('entries_count', {
-                items: state.entries.filter((entry) => entry.type === 'item')
-                  .length,
-                mileages: state.entries.filter(
-                  (entry) => entry.type === 'mileage'
-                ).length,
-                maxItems: 20,
-                maxMileages: 20
+                items: entries.filter(isEntryItem).length.toString(),
+                mileages: entries.filter(isEntryMileage).length.toString(),
+                maxItems: '20',
+                maxMileages: '20'
               })}
-            </Typography.Text>
+            </span>
           </div>
         )}
-        {state.entries.length > 0 && (
+        {entries.length > 0 && (
           <div className="mb-6 space-y-4">
-            <Typography.Title level={4}>{t('entries')}</Typography.Title>
+            <h4 className="text-lg font-semibold">{t('entries')}</h4>
 
-            {state.entries.map((entry) => (
-              <EntryRenderer
-                key={entry.id}
-                entry={entry}
-                onEdit={() => openModal(entry.type, entry.id)}
-                onRemove={handleRemoveEntry}
-              />
-            ))}
+            {entries.map((entry) =>
+              isEntryItem(entry) ? (
+                <ItemDisplay
+                  onEdit={() => openModal('item', entry.id)}
+                  onRemove={() =>
+                    setEntries((prev) => prev.filter((e) => e.id !== entry.id))
+                  }
+                  key={entry.id}
+                  item={entry}
+                />
+              ) : (
+                <MileageDisplay
+                  onEdit={() => openModal('mileage', entry.id)}
+                  onRemove={() =>
+                    setEntries((prev) => prev.filter((e) => e.id !== entry.id))
+                  }
+                  key={entry.id}
+                  mileage={entry}
+                  mileageRate={env.NEXT_PUBLIC_MILEAGE_REIMBURSEMENT_RATE}
+                />
+              )
+            )}
 
             <Card size="small" className="bg-gray-50">
               <div className="flex items-center justify-between">
-                <Typography.Text strong>{`${t('total')}:`}</Typography.Text>
-                <Typography.Text strong className="text-lg">
-                  {`${total.toFixed(2)} €`}
-                </Typography.Text>
+                <strong>{`${t('total')}:`}</strong>
+                <strong className="text-lg">{`${total.toFixed(2)} €`}</strong>
               </div>
             </Card>
           </div>
@@ -245,95 +333,57 @@ export function ExpenseForm() {
         <div className="mb-6 flex flex-col items-center gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex gap-4">
             <Button
-              type="default"
-              icon={<PlusOutlined />}
+              type="button"
+              variant="secondary"
               onClick={() => openModal('item')}
               disabled={
-                state.entries.filter((entry) => entry.type === 'item').length >=
-                20
+                entries.filter((entry) => 'attachments' in entry).length >= 20
               }
               title={
-                state.entries.filter((entry) => entry.type === 'item').length >=
-                20
+                entries.filter((entry) => 'attachments' in entry).length >= 20
                   ? t('max_items_reached')
                   : undefined
               }
             >
+              <Plus className="h-4 w-4" />
               {t('add_expense')}
             </Button>
             <Button
-              type="default"
-              icon={<PlusOutlined />}
+              type="button"
+              variant="secondary"
               onClick={() => openModal('mileage')}
               disabled={
-                state.entries.filter((entry) => entry.type === 'mileage')
-                  .length >= 20
+                entries.filter((entry) => 'distance' in entry).length >= 20
               }
               title={
-                state.entries.filter((entry) => entry.type === 'mileage')
-                  .length >= 20
+                entries.filter((entry) => 'distance' in entry).length >= 20
                   ? t('max_mileages_reached')
                   : undefined
               }
             >
+              <Plus className="h-4 w-4" />
               {t('add_mileage')}
             </Button>
           </div>
           <div>
             <Button
-              type="primary"
-              htmlType="submit"
-              loading={actionStatus === 'executing'}
-              size="large"
-              disabled={state.entries.length === 0}
+              type="submit"
+              variant="primary"
+              actionStatus={actionStatus}
+              disabled={actionStatus === 'executing' || entries.length === 0}
             >
               {t('submit')}
             </Button>
           </div>
         </div>
 
-        {/* Modals */}
-        {state.modalState.type === 'item' && (
-          <ItemForm
-            visible={state.modalState.isOpen}
-            onOk={(data) =>
-              handleAddOrUpdateEntry({
-                id: crypto.randomUUID(),
-                data,
-                type: 'item'
-              })
-            }
-            onCancel={closeModal}
-            editData={
-              editingEntry?.type === 'item' ? editingEntry.data : undefined
-            }
-          />
-        )}
-
-        {state.modalState.type === 'mileage' && (
-          <MileageForm
-            visible={state.modalState.isOpen}
-            onOk={(data) =>
-              handleAddOrUpdateEntry({
-                id: crypto.randomUUID(),
-                data,
-                type: 'mileage'
-              })
-            }
-            onCancel={closeModal}
-            editData={
-              editingEntry?.type === 'mileage' ? editingEntry.data : undefined
-            }
-          />
-        )}
-
-        <Divider />
+        <Separator className="my-4" />
 
         {/* Privacy Policy */}
         <div className="text-center text-gray-500">
-          <Typography.Text>
+          <span>
             {t.rich('privacy_policy', {
-              privacy_policy: (chunks) => (
+              privacy_policy: (chunks: ReactNode) => (
                 <Link
                   href={env.NEXT_PUBLIC_PRIVACY_POLICY_URL}
                   className="text-blue-500 hover:text-blue-700"
@@ -342,9 +392,38 @@ export function ExpenseForm() {
                 </Link>
               )
             })}
-          </Typography.Text>
+          </span>
         </div>
       </Form>
+
+      {/* Modals rendered outside main form so Enter/OK only submit the modal form */}
+      {modalState.type === 'item' && (
+        <ItemForm
+          visible={modalState.isOpen}
+          onOk={(data) =>
+            handleAddOrUpdateEntry({
+              id: editingEntry?.id,
+              ...data
+            })
+          }
+          onCancel={closeModal}
+          editData={isEntryItem(editingEntry) ? editingEntry : undefined}
+        />
+      )}
+
+      {modalState.type === 'mileage' && (
+        <MileageForm
+          visible={modalState.isOpen}
+          onOk={(data) =>
+            handleAddOrUpdateEntry({
+              id: editingEntry?.id,
+              ...data
+            })
+          }
+          onCancel={closeModal}
+          editData={isEntryMileage(editingEntry) ? editingEntry : undefined}
+        />
+      )}
     </div>
   )
 }

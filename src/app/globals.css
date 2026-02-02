@@ -1,1 +1,14 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+/* Pointer cursor for interactive elements */
+button,
+[role='button'],
+select,
+[role='combobox'],
+[role='listbox'],
+a[href],
+input[type='checkbox'],
+input[type='radio'],
+label[for] {
+  cursor: pointer;
+}

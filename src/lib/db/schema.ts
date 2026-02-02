@@ -127,6 +127,17 @@ export type EntryWithItemsAndMileages = Entry & {
   mileages: Mileage[]
 }
 
-export type NewItemWithAttachments = NewItem & {
-  attachments: NewAttachment[]
+export type FormItemWithAttachments = Omit<
+  ItemWithAttachments | NewItem,
+  'entryId' | 'attachments'
+> & {
+  attachments: Omit<NewAttachment, 'itemId'>[]
 }
+
+export type FormMileage = Omit<Mileage | NewMileage, 'entryId'>
+
+export type EntryType = 'item' | 'mileage'
+
+export type FormEntry = {
+  id?: string
+} & (FormItemWithAttachments | FormMileage)

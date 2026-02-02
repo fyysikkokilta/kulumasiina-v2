@@ -12,23 +12,20 @@ import { actionClient } from './safeActionClient'
 const ApproveEntriesSchema = z.object({
   ids: z.array(z.uuid()),
   date: z.date(),
-  approval_note: z.string().max(100)
+  approvalNote: z.string().min(1).max(100)
 })
 
 export const approveEntriesAction = actionClient
   .inputSchema(ApproveEntriesSchema)
   .use(isAuthorizedMiddleware)
   .action(async ({ parsedInput }) => {
-    const approvalDate = new Date(parsedInput.date)
-    const now = new Date()
-
     await db
       .update(entries)
       .set({
         status: 'approved',
-        approvalDate,
-        approvalNote: parsedInput.approval_note,
-        updatedAt: now
+        approvalDate: parsedInput.date,
+        approvalNote: parsedInput.approvalNote,
+        updatedAt: new Date()
       })
       .where(inArray(entries.id, parsedInput.ids))
 
