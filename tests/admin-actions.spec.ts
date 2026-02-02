@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test'
 import { loginAdmin } from './utils/admin-login'
 import {
   applyArchivedFilter,
+  applyStatusFilter,
   ensureRowExpanded,
   gotoAdmin,
   rowById,
@@ -17,18 +18,17 @@ test.describe('admin actions', () => {
   test.beforeEach(async ({ page }) => {
     await seedTestData()
     await loginAdmin(page)
+    await gotoAdmin(page)
   })
 
   test('can approve a submitted entry', async ({ page }) => {
-    await gotoAdmin(page)
-
     const submittedRow = rowById(page, testEntryIds.submitted)
     await ensureRowExpanded(submittedRow)
     await page.getByRole('button', { name: 'Approve' }).first().click()
 
-    const modal = page.locator('.ant-modal')
+    const modal = page.getByRole('dialog')
     await expect(
-      modal.locator('.ant-modal-title', { hasText: 'Approve Entries' })
+      modal.getByRole('heading', { name: 'Approve Entries' })
     ).toBeVisible()
     await modal.getByLabel('Approval Note').fill('Playwright approval')
     await modal.getByRole('button', { name: 'Approve' }).click()
@@ -38,8 +38,6 @@ test.describe('admin actions', () => {
   })
 
   test('can deny a submitted entry', async ({ page }) => {
-    await gotoAdmin(page)
-
     const submittedRow = rowById(page, testEntryIds.submittedSecond)
     await ensureRowExpanded(submittedRow)
     await page.getByRole('button', { name: 'Deny' }).first().click()
@@ -49,15 +47,13 @@ test.describe('admin actions', () => {
   })
 
   test('can pay an approved entry', async ({ page }) => {
-    await gotoAdmin(page)
-
     const approvedRow = rowById(page, testEntryIds.approved)
     await ensureRowExpanded(approvedRow)
     await page.getByRole('button', { name: 'Pay' }).first().click()
 
-    const modal = page.locator('.ant-modal')
+    const modal = page.getByRole('dialog')
     await expect(
-      modal.locator('.ant-modal-title', { hasText: 'Mark as Paid' })
+      modal.getByRole('heading', { name: 'Mark as Paid' })
     ).toBeVisible()
     await modal.getByRole('button', { name: 'Mark as Paid' }).click()
 
@@ -66,8 +62,6 @@ test.describe('admin actions', () => {
   })
 
   test('can reset a denied entry', async ({ page }) => {
-    await gotoAdmin(page)
-
     const deniedRow = rowById(page, testEntryIds.denied)
     await ensureRowExpanded(deniedRow)
     await page.getByRole('button', { name: 'Reset' }).first().click()
@@ -77,16 +71,16 @@ test.describe('admin actions', () => {
   })
 
   test('can archive a paid entry', async ({ page }) => {
-    await gotoAdmin(page)
-
     const paidRow = rowById(page, testEntryIds.paid)
     await ensureRowExpanded(paidRow)
-    await page.getByRole('button', { name: 'Archive' }).first().click()
-
-    await ensureRowExpanded(paidRow)
-    await expect(statusTag(paidRow, 'PAID')).toBeVisible()
+    await page
+      .getByRole('button', { name: 'Archive', exact: true })
+      .first()
+      .click()
 
     await applyArchivedFilter(page)
+    await ensureRowExpanded(paidRow)
+    await expect(statusTag(paidRow, 'PAID')).toBeVisible()
     await expect(statusTag(paidRow, 'ARCHIVED')).toBeVisible()
   })
 
@@ -94,7 +88,7 @@ test.describe('admin actions', () => {
     await gotoAdmin(page)
 
     const submittedRows = page.locator(
-      `tr.ant-table-row[data-row-key="${testEntryIds.submitted}"], tr.ant-table-row[data-row-key="${testEntryIds.submittedSecond}"]`
+      `tr[data-row-key="${testEntryIds.submitted}"], tr[data-row-key="${testEntryIds.submittedSecond}"]`
     )
 
     await selectRow(submittedRows.nth(0))
@@ -107,19 +101,17 @@ test.describe('admin actions', () => {
   })
 
   test('bulk approve selected entries', async ({ page }) => {
-    await gotoAdmin(page)
-
     const submittedRows = page.locator(
-      `tr.ant-table-row[data-row-key="${testEntryIds.submitted}"], tr.ant-table-row[data-row-key="${testEntryIds.submittedSecond}"]`
+      `tr[data-row-key="${testEntryIds.submitted}"], tr[data-row-key="${testEntryIds.submittedSecond}"]`
     )
 
     await selectRow(submittedRows.nth(0))
     await selectRow(submittedRows.nth(1))
 
     await page.getByRole('button', { name: /Approve Selected/ }).click()
-    const modal = page.locator('.ant-modal')
+    const modal = page.getByRole('dialog')
     await expect(
-      modal.locator('.ant-modal-title', { hasText: 'Approve Entries' })
+      modal.getByRole('heading', { name: 'Approve Entries' })
     ).toBeVisible()
     await modal.getByLabel('Approval Note').fill('Bulk approval')
     await modal.getByRole('button', { name: 'Approve' }).click()
@@ -134,14 +126,70 @@ test.describe('admin actions', () => {
   })
 
   test('disables mixed-status selections', async ({ page }) => {
+    const submittedRow = rowById(page, testEntryIds.submitted)
+    await selectRow(submittedRow)
+
+    const approvedRowCheckbox = rowById(page, testEntryIds.approved)
+      .getByRole('checkbox')
+      .first()
+    await expect(approvedRowCheckbox).toBeDisabled()
+  })
+
+  test('copy to clipboard copies selected entry text', async ({
+    page,
+    context
+  }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
     await gotoAdmin(page)
 
     const submittedRow = rowById(page, testEntryIds.submitted)
     await selectRow(submittedRow)
+    await page.getByRole('button', { name: /Copy to clipboard/ }).click()
 
-    const approvedRowCheckbox = rowById(page, testEntryIds.approved).locator(
-      '.ant-checkbox-input'
+    const clipboardText = await page.evaluate(() =>
+      navigator.clipboard.readText()
     )
-    await expect(approvedRowCheckbox).toBeDisabled()
+    expect(clipboardText).toContain('Test Submitted')
+    expect(clipboardText).toContain('Submitted entry')
+  })
+
+  test('filter by status shows only matching rows', async ({ page }) => {
+    await applyStatusFilter(page, 'Submitted')
+
+    await expect(rowById(page, testEntryIds.submitted)).toBeVisible()
+    await expect(rowById(page, testEntryIds.submittedSecond)).toBeVisible()
+    await expect(rowById(page, testEntryIds.approved)).not.toBeVisible()
+  })
+
+  test('approve modal shows validation when approval note is empty', async ({
+    page
+  }) => {
+    await gotoAdmin(page)
+
+    const submittedRow = rowById(page, testEntryIds.submitted)
+    await ensureRowExpanded(submittedRow)
+    await page.getByRole('button', { name: 'Approve' }).first().click()
+
+    const modal = page.getByRole('dialog')
+    await expect(
+      modal.getByRole('heading', { name: 'Approve Entries' })
+    ).toBeVisible()
+    await modal.getByRole('button', { name: 'Approve' }).click()
+
+    await expect(
+      modal.getByText(/Please enter approval note|approval note/)
+    ).toBeVisible()
+  })
+
+  test('clear filters button appears when filters are applied', async ({
+    page
+  }) => {
+    await expect(page.getByRole('button', { name: 'Reset' })).not.toBeVisible()
+
+    await applyStatusFilter(page, 'Submitted')
+    // Wait for filter popover to close
+    await expect(page.getByRole('button', { name: 'OK' })).not.toBeVisible()
+
+    await expect(page.getByRole('button', { name: 'Reset' })).toBeVisible()
   })
 })

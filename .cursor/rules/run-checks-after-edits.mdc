@@ -1,0 +1,52 @@
+---
+description: Always run type checking and linting after code changes
+alwaysApply: true
+---
+
+# Run Checks After Edits
+
+After making any code changes, always run type checking and linting to ensure code quality.
+
+## Required Commands
+
+Run these commands in sequence after editing code:
+
+```bash
+# 1. Type checking
+pnpm type:check
+
+# 2. Linting (with autofix)
+pnpm lint --fix
+```
+
+## When to Run
+
+- ✅ After editing any TypeScript/JavaScript files
+- ✅ After creating new components
+- ✅ After refactoring code
+- ✅ After fixing bugs
+- ✅ Before completing a task
+
+## Expected Behavior
+
+1. **Type checking passes**: No TypeScript errors
+2. **Linting passes**: All lint rules satisfied (or only warnings remain)
+3. **Fix issues**: If errors occur, fix them before proceeding
+
+## Example Workflow
+
+```bash
+# Make code changes...
+# Then verify:
+
+pnpm type:check
+# ✓ No errors
+
+pnpm lint --cache --fix
+# ✓ Fixed 5 issues automatically
+# ⚠ 2 warnings (acceptable)
+```
+
+## Don't Skip
+
+Never skip these checks. They catch errors early and maintain code quality across the project.

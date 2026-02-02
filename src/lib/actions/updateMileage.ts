@@ -25,20 +25,25 @@ const MileageUpdateSchema = z.object({
     .string()
     .max(4)
     .regex(/^[0-9]{0,4}$/, 'Account must be 0-4 digits')
+    .nullish()
 })
 
 export const updateMileageAction = actionClient
   .inputSchema(MileageUpdateSchema)
   .use(isAuthorizedMiddleware)
   .action(async ({ parsedInput }) => {
-    const { id, ...updateData } = parsedInput
-    const now = new Date()
+    const { id, description, date, route, distance, plateNo, account } =
+      parsedInput
     await db
       .update(mileages)
       .set({
-        ...updateData,
-        plateNo: updateData.plateNo,
-        updatedAt: now
+        description,
+        date,
+        route,
+        distance,
+        plateNo,
+        account,
+        updatedAt: new Date()
       })
       .where(eq(mileages.id, id))
 

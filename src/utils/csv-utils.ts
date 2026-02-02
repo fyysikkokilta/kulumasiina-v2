@@ -1,8 +1,8 @@
 import { PDFDocument } from '@cantoo/pdf-lib'
 import archiver from 'archiver'
 
-import type { EntryWithItemsAndMileages } from './db/schema'
-import { env } from './env'
+import type { EntryWithItemsAndMileages } from '@/lib/db/schema'
+import { env } from '@/lib/env'
 
 interface CsvRow {
   unitPrice: number

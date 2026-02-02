@@ -5,8 +5,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { attachments } from '@/lib/db/schema'
 import { getFile } from '@/lib/storage'
-import { isPdf } from '@/lib/validation'
 import isAuthorized, { JWT_COOKIE } from '@/utils/isAuthorized'
+import { isPdf } from '@/utils/validation'
 
 export async function GET(
   request: NextRequest,

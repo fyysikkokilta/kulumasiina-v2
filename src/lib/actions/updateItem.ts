@@ -16,7 +16,8 @@ const ItemUpdateSchema = z.object({
   account: z
     .string()
     .max(4)
-    .regex(/^[0-9]{0,4}$/, 'Account must be 0-4 digits'),
+    .regex(/^[0-9]{0,4}$/, 'Account must be 0-4 digits')
+    .nullish(),
   attachments: z
     .array(
       z.object({
@@ -24,7 +25,7 @@ const ItemUpdateSchema = z.object({
         filename: z.string().min(1).max(255),
         value: z
           .number()
-          .nullable()
+          .nullish()
           .refine((val) => !val || val > 0),
         isNotReceipt: z.boolean()
       })
@@ -36,26 +37,31 @@ export const updateItemAction = actionClient
   .inputSchema(ItemUpdateSchema)
   .use(isAuthorizedMiddleware)
   .action(async ({ parsedInput }) => {
-    const { id, attachments: attachmentUpdates, ...updateData } = parsedInput
-    const now = new Date()
+    const {
+      id,
+      description,
+      date,
+      account,
+      attachments: attachmentUpdates
+    } = parsedInput
     await db.transaction(async (tx) => {
       await tx
         .update(items)
         .set({
-          ...updateData,
-          updatedAt: now
+          description,
+          date,
+          account,
+          updatedAt: new Date()
         })
         .where(eq(items.id, id))
       await tx.delete(attachments).where(eq(attachments.itemId, id))
       await tx.insert(attachments).values(
-        attachmentUpdates.map((attachment) => ({
+        attachmentUpdates.map(({ fileId, filename, value, isNotReceipt }) => ({
           itemId: id,
-          fileId: attachment.fileId,
-          filename: attachment.filename,
-          value: attachment.value,
-          isNotReceipt: attachment.isNotReceipt,
-          createdAt: now,
-          updatedAt: now
+          fileId,
+          filename,
+          value,
+          isNotReceipt
         }))
       )
     })

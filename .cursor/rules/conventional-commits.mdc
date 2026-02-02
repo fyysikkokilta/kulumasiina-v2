@@ -1,0 +1,85 @@
+---
+description: Enforce conventional commit message format
+alwaysApply: true
+---
+
+# Conventional Commits
+
+All commit messages must follow the [Conventional Commits](https://www.conventionalcommits.org/) format:
+
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+## Types
+
+- **feat**: A new feature
+- **fix**: A bug fix
+- **docs**: Documentation only changes
+- **style**: Changes that don't affect code meaning (white-space, formatting)
+- **refactor**: Code change that neither fixes a bug nor adds a feature
+- **perf**: Performance improvement
+- **test**: Adding or updating tests
+- **build**: Changes to build system or dependencies
+- **ci**: Changes to CI configuration
+- **chore**: Other changes that don't modify src or test files
+
+## Examples
+
+### Good Commit Messages
+
+```bash
+# Simple feature
+feat: add user authentication
+
+# Feature with scope
+feat(auth): implement OAuth2 login flow
+
+# Bug fix with body
+fix: resolve navigation crash on mobile
+
+Users reported app crashes when navigating between screens.
+Fixed by adding null checks before accessing navigation state.
+
+# Breaking change
+feat!: redesign API response format
+
+BREAKING CHANGE: All API responses now use snake_case instead of camelCase
+```
+
+### Bad Commit Messages
+
+```bash
+# ❌ No type
+"added new feature"
+
+# ❌ Capitalized description
+feat: Add user authentication
+
+# ❌ Period at end
+feat: add user authentication.
+
+# ❌ Vague description  
+fix: fix bug
+
+# ❌ Too detailed in subject
+feat: add user authentication with email, password, and OAuth support including Google and GitHub
+```
+
+## Rules
+
+1. **Type is required**: Must start with a valid type
+2. **Lowercase description**: Description must be lowercase
+3. **No period**: Don't end description with a period
+4. **Imperative mood**: Use "add" not "added" or "adds"
+5. **Concise subject**: Keep subject line under 72 characters
+6. **Scope optional**: Use scope in parentheses when it adds clarity
+7. **Breaking changes**: Use `!` after type or `BREAKING CHANGE:` in footer
+
+## When Creating Commits
+
+Always format commit messages using this structure. If creating multiple commits, ensure each follows the convention independently.

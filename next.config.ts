@@ -8,7 +8,10 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   cacheComponents: true,
   experimental: {
-    optimizePackageImports: ['antd', '@ant-design/icons', 'drizzle-orm']
+    optimizePackageImports: ['antd', '@ant-design/icons', 'drizzle-orm'],
+    serverActions: {
+      bodySizeLimit: '8mb'
+    }
   },
   transpilePackages: ['@t3-oss/env-nextjs', '@t3-oss/env-core'],
   async headers() {

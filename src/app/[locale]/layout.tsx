@@ -1,9 +1,7 @@
-import { AntdRegistry } from '@ant-design/nextjs-registry'
-import { Divider } from 'antd'
+import { Separator } from '@base-ui/react/separator'
 import { notFound } from 'next/navigation'
 import { hasLocale, Locale, NextIntlClientProvider } from 'next-intl'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
-import { Suspense } from 'react'
 
 import { Header } from '@/components/Header'
 import { routing } from '@/i18n/routing'
@@ -37,25 +35,18 @@ export default async function LocaleLayout({
 
   setRequestLocale(locale)
 
-  const t = await getTranslations('common')
-
   return (
     <html lang={locale}>
       <body>
-        {/* Antd uses Date.now and Math.random... */}
-        <Suspense fallback={t('loading')}>
-          <AntdRegistry>
-            <NextIntlClientProvider>
-              <div className="mx-6 my-8 min-h-screen">
-                <div className="mx-auto w-full max-w-6xl">
-                  <Header />
-                  <Divider />
-                  <div>{children}</div>
-                </div>
-              </div>
-            </NextIntlClientProvider>
-          </AntdRegistry>
-        </Suspense>
+        <NextIntlClientProvider>
+          <div className="mx-6 my-8 min-h-screen">
+            <div className="mx-auto w-full max-w-6xl">
+              <Header />
+              <Separator className="my-4" />
+              <div>{children}</div>
+            </div>
+          </div>
+        </NextIntlClientProvider>
       </body>
     </html>
   )

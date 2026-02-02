@@ -1,28 +1,22 @@
 'use client'
 
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
-import { Button, Card, Tag, Typography } from 'antd'
+import { Button as BaseButton } from '@base-ui/react/button'
 import dayjs from 'dayjs'
+import { Edit, Trash2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-import type {
-  NewAttachment,
-  NewItemWithAttachments,
-  NewMileage
-} from '@/lib/db/schema'
-
-const { Text } = Typography
+import { Card } from '@/components/ui/Card'
+import { Tag } from '@/components/ui/Tag'
+import type { FormItemWithAttachments, FormMileage } from '@/lib/db/schema'
 
 interface ItemDisplayProps {
-  item: Omit<NewItemWithAttachments, 'entryId' | 'attachments'> & {
-    attachments: Omit<NewAttachment, 'itemId'>[]
-  }
+  item: FormItemWithAttachments
   onEdit: () => void
   onRemove: () => void
 }
 
 export function ItemDisplay({ item, onEdit, onRemove }: ItemDisplayProps) {
-  const t = useTranslations('form.main')
+  const t = useTranslations('ExpenseForm')
 
   return (
     <Card
@@ -31,38 +25,35 @@ export function ItemDisplay({ item, onEdit, onRemove }: ItemDisplayProps) {
       title={
         <div className="flex items-center justify-between">
           <span>{t('expense_item')}</span>
-          <div className="space-x-2">
-            <Button
-              type="link"
-              size="small"
-              icon={<EditOutlined />}
+          <div className="flex gap-2">
+            <BaseButton
               onClick={onEdit}
+              className="inline-flex items-center justify-center gap-2 rounded-md px-3 py-1 text-xs font-medium text-blue-600 transition-colors hover:text-blue-800 hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
             >
+              <Edit className="h-4 w-4" />
               {t('edit')}
-            </Button>
-            <Button
-              type="link"
-              size="small"
-              danger
-              icon={<DeleteOutlined />}
+            </BaseButton>
+            <BaseButton
               onClick={onRemove}
+              className="inline-flex items-center justify-center gap-2 rounded-md px-3 py-1 text-xs font-medium text-red-600 transition-colors hover:text-red-800 hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
             >
+              <Trash2 className="h-4 w-4" />
               {t('remove')}
-            </Button>
+            </BaseButton>
           </div>
         </div>
       }
     >
       <div className="space-y-2">
         <div className="flex items-start justify-between gap-4">
-          <Text strong>{dayjs(item.date).format('DD.MM.YYYY')}</Text>
+          <strong>{dayjs(item.date).format('DD.MM.YYYY')}</strong>
           <Tag color="green">
             {item.attachments.length}{' '}
             {t('attachments', { attachments: item.attachments.length })}
           </Tag>
         </div>
         <div className="flex items-start justify-between gap-4">
-          <Text>{item.description}</Text>
+          <span>{item.description}</span>
           <Tag className="h-fit" color="blue">
             {item.attachments
               .reduce((acc, attachment) => acc + (attachment.value || 0), 0)
@@ -76,7 +67,7 @@ export function ItemDisplay({ item, onEdit, onRemove }: ItemDisplayProps) {
 }
 
 interface MileageDisplayProps {
-  mileage: Omit<NewMileage, 'entryId'>
+  mileage: FormMileage
   mileageRate: number
   onEdit: () => void
   onRemove: () => void
@@ -88,7 +79,7 @@ export function MileageDisplay({
   onEdit,
   onRemove
 }: MileageDisplayProps) {
-  const t = useTranslations('form.main')
+  const t = useTranslations('ExpenseForm')
   const total = mileage.distance * mileageRate
 
   return (
@@ -98,37 +89,34 @@ export function MileageDisplay({
       title={
         <div className="flex items-center justify-between">
           <span>{t('mileage')}</span>
-          <div className="space-x-2">
-            <Button
-              type="link"
-              size="small"
-              icon={<EditOutlined />}
+          <div className="flex gap-2">
+            <BaseButton
               onClick={onEdit}
+              className="inline-flex items-center justify-center gap-2 rounded-md px-3 py-1 text-xs font-medium text-blue-600 transition-colors hover:text-blue-800 hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
             >
+              <Edit className="h-4 w-4" />
               {t('edit')}
-            </Button>
-            <Button
-              type="link"
-              size="small"
-              danger
-              icon={<DeleteOutlined />}
+            </BaseButton>
+            <BaseButton
               onClick={onRemove}
+              className="inline-flex items-center justify-center gap-2 rounded-md px-3 py-1 text-xs font-medium text-red-600 transition-colors hover:text-red-800 hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
             >
+              <Trash2 className="h-4 w-4" />
               {t('remove')}
-            </Button>
+            </BaseButton>
           </div>
         </div>
       }
     >
       <div className="space-y-2">
         <div className="flex items-start justify-between gap-4">
-          <Text strong>{dayjs(mileage.date).format('DD.MM.YYYY')}</Text>
+          <strong>{dayjs(mileage.date).format('DD.MM.YYYY')}</strong>
           <Tag className="h-fit" color="green">
             {`${mileage.distance} km`}
           </Tag>
         </div>
         <div className="flex items-start justify-between gap-4">
-          <Text>{mileage.description}</Text>
+          <span>{mileage.description}</span>
           <Tag className="h-fit" color="blue">
             {`${total.toFixed(2)} €`}
           </Tag>

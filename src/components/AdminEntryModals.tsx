@@ -1,19 +1,18 @@
-import { Key } from 'react'
+import type { Key } from 'react'
 
 import type {
+  FormItemWithAttachments,
+  FormMileage,
   ItemWithAttachments,
-  Mileage,
-  NewAttachment,
-  NewItemWithAttachments,
-  NewMileage
+  Mileage
 } from '@/lib/db/schema'
+import { type PreviewState } from '@/utils/preview-utils'
 
 import { ApproveModal } from './ApproveModal'
 import { DeleteOldArchivedModal } from './DeleteOldArchivedModal'
 import { ItemForm } from './ItemForm'
 import { MileageForm } from './MileageForm'
 import { PayModal } from './PayModal'
-import type { PreviewState } from './PreviewModal'
 import { PreviewModal } from './PreviewModal'
 
 export type EditState = {
@@ -29,43 +28,47 @@ export type EditState = {
     }
 )
 
-interface AdminEntryModalsProps {
-  approveModalVisible: boolean
-  setApproveModalVisible: (v: boolean) => void
-  payModalVisible: boolean
-  setPayModalVisible: (v: boolean) => void
-  deleteOldArchivedModalVisible: boolean
-  setDeleteOldArchivedModalVisible: (v: boolean) => void
-  modalEntryIds: string[]
-  setSelectedRowKeys: (v: Key[]) => void
-  editState: EditState | null
-  setEditState: (v: EditState | null) => void
-  handleItemUpdate: (
-    itemData: Omit<NewItemWithAttachments, 'entryId' | 'attachments'> & {
-      attachments: Omit<NewAttachment, 'itemId'>[]
-    }
-  ) => void
-  handleMileageUpdate: (mileageData: Omit<NewMileage, 'entryId'>) => void
-  previewState: PreviewState
-  closePreview: () => void
+export interface AdminEntryModalsProps {
+  modals: {
+    approveModalVisible: boolean
+    setApproveModalVisible: (v: boolean) => void
+    payModalVisible: boolean
+    setPayModalVisible: (v: boolean) => void
+    deleteOldArchivedModalVisible: boolean
+    setDeleteOldArchivedModalVisible: (v: boolean) => void
+    modalEntryIds: string[]
+    setSelectedRowKeys: (v: Key[]) => void
+    editState: EditState | null
+    setEditState: (v: EditState | null) => void
+    handleItemUpdate: (itemData: FormItemWithAttachments) => void
+    handleMileageUpdate: (mileageData: FormMileage) => void
+    updateItemStatus: string
+    updateMileageStatus: string
+    previewState: PreviewState | null
+    closePreview: () => void
+  }
 }
 
-export function AdminEntryModals({
-  approveModalVisible,
-  setApproveModalVisible,
-  payModalVisible,
-  setPayModalVisible,
-  deleteOldArchivedModalVisible,
-  setDeleteOldArchivedModalVisible,
-  modalEntryIds,
-  setSelectedRowKeys,
-  editState,
-  setEditState,
-  handleItemUpdate,
-  handleMileageUpdate,
-  previewState,
-  closePreview
-}: AdminEntryModalsProps) {
+export function AdminEntryModals({ modals }: AdminEntryModalsProps) {
+  const {
+    approveModalVisible,
+    setApproveModalVisible,
+    payModalVisible,
+    setPayModalVisible,
+    deleteOldArchivedModalVisible,
+    setDeleteOldArchivedModalVisible,
+    modalEntryIds,
+    setSelectedRowKeys,
+    editState,
+    setEditState,
+    handleItemUpdate,
+    handleMileageUpdate,
+    updateItemStatus,
+    updateMileageStatus,
+    previewState,
+    closePreview
+  } = modals
+
   return (
     <>
       <ApproveModal
@@ -103,6 +106,7 @@ export function AdminEntryModals({
           onOk={handleItemUpdate}
           onCancel={() => setEditState(null)}
           editData={editState.data}
+          isSubmitting={updateItemStatus === 'executing'}
         />
       )}
 
@@ -112,6 +116,7 @@ export function AdminEntryModals({
           onOk={handleMileageUpdate}
           onCancel={() => setEditState(null)}
           editData={editState.data}
+          isSubmitting={updateMileageStatus === 'executing'}
         />
       )}
 

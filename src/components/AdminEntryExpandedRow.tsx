@@ -1,70 +1,95 @@
-import { Button, Select, Space, Tag, Typography } from 'antd'
+import { Button as BaseButton } from '@base-ui/react/button'
 import dayjs from 'dayjs'
 import { useTranslations } from 'next-intl'
+import { type HookActionStatus, useAction } from 'next-safe-action/hooks'
 
-import { bookkeepingAccounts } from '@/lib/bookkeeping-accounts'
-import type { ItemWithAttachments, Mileage } from '@/lib/db/schema'
+import {
+  AccountSelect,
+  accountSelectTriggerClass
+} from '@/components/AccountSelect'
+import type { EditState } from '@/components/AdminEntryModals'
+import { Button } from '@/components/ui/Button'
+import { Tag } from '@/components/ui/Tag'
+import { updateBookkeepingAccountAction } from '@/lib/actions/updateBookkeepingAccount'
 import type { EntryWithItemsAndMileages } from '@/lib/db/schema'
 import { env } from '@/lib/env'
+import {
+  prepareAttachmentPreview,
+  type PreviewState
+} from '@/utils/preview-utils'
 
 interface AdminEntryExpandedRowProps {
   record: EntryWithItemsAndMileages
-  handleAccountUpdate: (id: string, account: string, isMileage: boolean) => void
-  handleEditItem: (item: ItemWithAttachments, entryId: string) => void
-  handleEditMileage: (mileage: Mileage, entryId: string) => void
-  handleArchive: (ids?: string[]) => void
-  handleApprove: (ids?: string[]) => void
-  handleDeny: (ids?: string[]) => void
-  handlePay: (ids?: string[]) => void
-  handleReset: (ids?: string[]) => void
-  handlePreviewAttachment: (
-    fileId: string,
-    filename: string,
-    isNotReceipt: boolean,
-    value: number | null
-  ) => void
+  onApprove: (ids?: string[]) => void
+  onDeny: (ids?: string[]) => void
+  onPay: (ids?: string[]) => void
+  onReset: (ids?: string[]) => void
+  onArchive: (ids?: string[]) => void
+  denyStatus?: HookActionStatus
+  archiveStatus?: HookActionStatus
+  resetStatus?: HookActionStatus
+  setEditState: (state: EditState | null) => void
+  setPreviewState: (state: PreviewState) => void
 }
 
 export function AdminEntryExpandedRow({
   record,
-  handleAccountUpdate,
-  handleEditItem,
-  handleEditMileage,
-  handleArchive,
-  handleApprove,
-  handleDeny,
-  handlePay,
-  handleReset,
-  handlePreviewAttachment
+  onApprove,
+  onDeny,
+  onPay,
+  onReset,
+  onArchive,
+  denyStatus = 'idle',
+  archiveStatus = 'idle',
+  resetStatus = 'idle',
+  setEditState,
+  setPreviewState
 }: AdminEntryExpandedRowProps) {
-  const t = useTranslations('admin')
+  const t = useTranslations('AdminEntryTable')
+
+  const onPreviewAttachment = async (
+    fileId: string,
+    filename: string,
+    isNotReceipt: boolean,
+    value: number | null
+  ) => {
+    const state = await prepareAttachmentPreview({
+      fileId,
+      filename,
+      isNotReceipt,
+      value,
+      fetchOptions: { next: { revalidate: 60 * 60 * 24 } }
+    })
+    setPreviewState(state)
+  }
+
+  const {
+    execute: updateBookkeepingAccount,
+    status: updateBookkeepingAccountStatus
+  } = useAction(updateBookkeepingAccountAction, {
+    onSuccess: () => {},
+    onError: () => {}
+  })
+
   return (
     <div className="rounded border border-gray-200 bg-white p-4 shadow">
       <div className="mb-4 flex flex-col md:flex-row md:items-center md:gap-8">
-        <Typography.Text className="text-nowrap" strong>
-          {`${t('table.title')}: `}
-        </Typography.Text>
-        <Typography.Text>{record.title}</Typography.Text>
+        <strong className="text-nowrap">{`${t('table.title')}: `}</strong>
+        <span>{record.title}</span>
       </div>
       <div className="mb-4 flex flex-col md:flex-row md:items-center md:gap-8">
-        <Typography.Text className="text-nowrap" strong>
-          {`${t('table.contact')}: `}
-        </Typography.Text>
-        <Typography.Text>{record.contact}</Typography.Text>
+        <strong className="text-nowrap">{`${t('table.contact')}: `}</strong>
+        <span>{record.contact}</span>
       </div>
 
       <div className="mb-4 flex flex-col md:flex-row md:items-center md:gap-8">
-        <Typography.Text className="text-nowrap" strong>
-          {`${t('table.iban')}: `}
-        </Typography.Text>
-        <Typography.Text>{record.iban}</Typography.Text>
+        <strong className="text-nowrap">{`${t('table.iban')}: `}</strong>
+        <span>{record.iban}</span>
       </div>
 
       {record.items.length > 0 && (
         <div className="mb-4">
-          <Typography.Text className="text-nowrap" strong>
-            {`${t('table.items')}: `}
-          </Typography.Text>
+          <strong className="text-nowrap">{`${t('table.items')}: `}</strong>
           {record.items.map((item) => (
             <div
               key={item.id}
@@ -72,7 +97,7 @@ export function AdminEntryExpandedRow({
             >
               <div className="flex flex-col gap-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <Typography.Text className="text-gray-600">
+                  <span className="text-gray-600">
                     {`${dayjs(item.date).format('DD.MM.YYYY')} - `}
                     {item.attachments
                       .reduce((acc, att) => {
@@ -83,67 +108,68 @@ export function AdminEntryExpandedRow({
                       }, 0)
                       .toFixed(2)}
                     {' €'}
-                  </Typography.Text>
+                  </span>
                   <div className="flex flex-wrap items-center gap-2">
-                    <Select
-                      size="small"
-                      value={item.account || undefined}
-                      placeholder={t('table.select_account')}
-                      style={{ minWidth: 200 }}
-                      showSearch={{
-                        optionFilterProp: 'children',
-                        filterOption: (input, option) =>
-                          (option?.label ?? '')
-                            .toLowerCase()
-                            .includes(input.toLowerCase())
-                      }}
-                      disabled={!!record.archived}
-                      options={bookkeepingAccounts.map((account) => ({
-                        value: account.value,
-                        label: account.label
-                      }))}
-                      onChange={(value) =>
-                        handleAccountUpdate(item.id, value, false)
+                    <AccountSelect
+                      placeholder={
+                        t('table.select_account') || t('table.select')
                       }
+                      value={item.account || ''}
+                      onChange={(value) =>
+                        updateBookkeepingAccount({
+                          id: item.id,
+                          account: value,
+                          isMileage: false
+                        })
+                      }
+                      disabled={!!record.archived}
+                      actionStatus={updateBookkeepingAccountStatus}
+                      triggerClassName={accountSelectTriggerClass}
+                      size="sm"
                     />
                     <Button
+                      variant="secondary"
                       size="small"
-                      onClick={() => handleEditItem(item, record.id)}
+                      onClick={() =>
+                        setEditState({
+                          type: 'item',
+                          data: item,
+                          entryId: record.id
+                        })
+                      }
                       disabled={!!record.archived}
                     >
                       {t('actions.edit')}
                     </Button>
                   </div>
                 </div>
-                <Typography.Text className="text-sm text-gray-600">
+                <span className="text-sm text-gray-600">
                   {`${t('table.description')}: ${item.description}`}
-                </Typography.Text>
+                </span>
                 {item.attachments.length > 0 && (
                   <div className="mt-2 flex items-start gap-2">
-                    <Typography.Text className="text-sm whitespace-nowrap text-gray-600">
+                    <span className="text-sm whitespace-nowrap text-gray-600">
                       {`${t('table.attachments')}: `}
-                    </Typography.Text>
+                    </span>
                     <div className="flex flex-wrap gap-3">
                       {item.attachments.map((attachment) => (
                         <div
                           key={attachment.id}
                           className="flex items-center gap-2 whitespace-nowrap"
                         >
-                          <Button
-                            type="link"
-                            size="small"
-                            className="h-auto p-0 text-blue-600 hover:text-blue-800"
+                          <BaseButton
                             onClick={() =>
-                              handlePreviewAttachment(
+                              onPreviewAttachment(
                                 attachment.fileId,
                                 attachment.filename,
                                 attachment.isNotReceipt,
                                 attachment.value
                               )
                             }
+                            className="h-auto p-0 text-xs font-medium text-blue-600 transition-colors hover:text-blue-800 hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
                           >
                             {attachment.filename}
-                          </Button>
+                          </BaseButton>
                           {attachment.isNotReceipt ? (
                             <Tag color="orange">{t('table.not_receipt')}</Tag>
                           ) : attachment.value ? (
@@ -162,9 +188,7 @@ export function AdminEntryExpandedRow({
 
       {record.mileages.length > 0 && (
         <div className="mb-4">
-          <Typography.Text className="text-nowrap" strong>
-            {`${t('table.mileages')}: `}
-          </Typography.Text>
+          <strong className="text-nowrap">{`${t('table.mileages')}: `}</strong>
           {record.mileages.map((mileage) => (
             <div
               key={mileage.id}
@@ -172,50 +196,53 @@ export function AdminEntryExpandedRow({
             >
               <div className="flex flex-col gap-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <Typography.Text className="text-gray-600">
+                  <span className="text-gray-600">
                     {`${dayjs(mileage.date).format('DD.MM.YYYY')} - ${mileage.distance} km - `}
                     {`${(mileage.distance * env.NEXT_PUBLIC_MILEAGE_REIMBURSEMENT_RATE).toFixed(2)} €`}
-                  </Typography.Text>
+                  </span>
                   <div className="flex flex-wrap items-center gap-2">
-                    <Select
-                      size="small"
-                      value={mileage.account || undefined}
-                      placeholder={t('table.select_account')}
-                      style={{ minWidth: 200 }}
-                      disabled={!!record.archived}
-                      showSearch={{
-                        optionFilterProp: 'children',
-                        filterOption: (input, option) =>
-                          (option?.label ?? '')
-                            .toLowerCase()
-                            .includes(input.toLowerCase())
-                      }}
-                      options={bookkeepingAccounts.map((account) => ({
-                        value: account.value,
-                        label: account.label
-                      }))}
-                      onChange={(value) =>
-                        handleAccountUpdate(mileage.id, value, true)
+                    <AccountSelect
+                      placeholder={
+                        t('table.select_account') || t('table.select')
                       }
+                      value={mileage.account || ''}
+                      onChange={(value) =>
+                        updateBookkeepingAccount({
+                          id: mileage.id,
+                          account: value,
+                          isMileage: true
+                        })
+                      }
+                      disabled={!!record.archived}
+                      actionStatus={updateBookkeepingAccountStatus}
+                      triggerClassName={accountSelectTriggerClass}
+                      size="sm"
                     />
                     <Button
+                      variant="secondary"
                       size="small"
-                      onClick={() => handleEditMileage(mileage, record.id)}
+                      onClick={() =>
+                        setEditState({
+                          type: 'mileage',
+                          data: mileage,
+                          entryId: record.id
+                        })
+                      }
                       disabled={!!record.archived}
                     >
                       {t('actions.edit')}
                     </Button>
                   </div>
                 </div>
-                <Typography.Text className="text-sm text-gray-600">
+                <span className="text-sm text-gray-600">
                   {`${t('table.description')}: ${mileage.description}`}
-                </Typography.Text>
-                <Typography.Text className="text-sm text-gray-600">
+                </span>
+                <span className="text-sm text-gray-600">
                   {`${t('table.route')}: ${mileage.route}`}
-                </Typography.Text>
-                <Typography.Text className="text-sm text-gray-600">
+                </span>
+                <span className="text-sm text-gray-600">
                   {`${t('table.plate_number')}: ${mileage.plateNo}`}
-                </Typography.Text>
+                </span>
               </div>
             </div>
           ))}
@@ -223,41 +250,54 @@ export function AdminEntryExpandedRow({
       )}
 
       <div className="mb-4">
-        <Typography.Text className="text-nowrap" strong>
-          {`${t('table.id')}: `}
-        </Typography.Text>
-        <Typography.Text className="text-nowrap">{record.id}</Typography.Text>
+        <strong className="text-nowrap">{`${t('table.id')}: `}</strong>
+        <span className="text-nowrap">{record.id}</span>
       </div>
 
       <div className="mt-4">
-        <Space>
+        <div className="flex gap-2">
           {record.status === 'submitted' && (
             <>
-              <Button onClick={() => handleApprove([record.id])}>
+              <Button
+                variant="secondary"
+                onClick={() => onApprove([record.id])}
+              >
                 {t('actions.approve')}
               </Button>
-              <Button onClick={() => handleDeny([record.id])}>
+              <Button
+                variant="secondary"
+                onClick={() => onDeny([record.id])}
+                actionStatus={denyStatus}
+              >
                 {t('actions.deny')}
               </Button>
             </>
           )}
           {record.status === 'approved' && (
-            <Button onClick={() => handlePay([record.id])}>
+            <Button variant="secondary" onClick={() => onPay([record.id])}>
               {t('actions.pay')}
             </Button>
           )}
           {record.status !== 'submitted' && !record.archived && (
-            <Button onClick={() => handleReset([record.id])}>
+            <Button
+              variant="secondary"
+              onClick={() => onReset([record.id])}
+              actionStatus={resetStatus}
+            >
               {t('actions.reset')}
             </Button>
           )}
           {(record.status === 'paid' || record.status === 'denied') &&
             !record.archived && (
-              <Button danger onClick={() => handleArchive([record.id])}>
+              <Button
+                variant="danger"
+                onClick={() => onArchive([record.id])}
+                actionStatus={archiveStatus}
+              >
                 {t('actions.archive')}
               </Button>
             )}
-        </Space>
+        </div>
       </div>
     </div>
   )
