@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   cacheComponents: true,
   experimental: {
-    optimizePackageImports: ['drizzle-orm'],
+    optimizePackageImports: ['@base-ui/react'],
     serverActions: {
       bodySizeLimit: '8mb'
     }
