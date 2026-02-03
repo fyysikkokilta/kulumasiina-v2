@@ -1,15 +1,14 @@
 'use client'
 
-import { Button as BaseButton } from '@base-ui/react/button'
-import { Checkbox as Checkbox } from '@base-ui/react/checkbox'
+import { Checkbox } from '@base-ui/react/checkbox'
 import { Dialog } from '@base-ui/react/dialog'
 import { Field } from '@base-ui/react/field'
 import { Form } from '@base-ui/react/form'
 import { NumberField } from '@base-ui/react/number-field'
 import { Check, Plus, Trash2, X } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
-import { useAction } from 'next-safe-action/hooks'
-import { useRef, useState } from 'react'
+import { HookActionStatus, useAction } from 'next-safe-action/hooks'
+import { useEffect, useRef, useState } from 'react'
 import { z } from 'zod'
 
 import { EntryCommonFields } from '@/components/EntryCommonFields'
@@ -23,13 +22,14 @@ import {
   prepareAttachmentPreview,
   type PreviewState
 } from '@/utils/preview-utils'
+import { dateSchema } from '@/utils/validation'
 
 interface ItemFormProps {
   visible: boolean
   onOk: (item: FormItemWithAttachments) => void
   onCancel: () => void
-  editData?: FormItemWithAttachments
-  isSubmitting?: boolean
+  editData: FormItemWithAttachments | null
+  submittingStatus?: HookActionStatus
 }
 
 export function ItemForm({
@@ -37,7 +37,7 @@ export function ItemForm({
   onOk,
   onCancel,
   editData,
-  isSubmitting = false
+  submittingStatus
 }: ItemFormProps) {
   const t = useTranslations('ItemForm')
   const locale = useLocale()
@@ -53,13 +53,26 @@ export function ItemForm({
     filename: string
   }
   const [attachments, setAttachments] = useState<AttachmentSlot[]>(
-    editData?.attachments?.map((a) => ({
+    editData?.attachments.map((a) => ({
       fileId: a.fileId,
       filename: a.filename
     })) ?? []
   )
 
   const [previewState, setPreviewState] = useState<PreviewState | null>(null)
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      setErrors(undefined)
+      setPreviewState(null)
+      setAttachments(
+        editData?.attachments?.map((a) => ({
+          fileId: a.fileId,
+          filename: a.filename
+        })) ?? []
+      )
+    })
+  }, [editData, visible])
 
   const { execute: uploadFileAction, status: uploadFileStatus } = useAction(
     uploadAttachmentAction,
@@ -101,13 +114,7 @@ export function ItemForm({
 
   const itemFormSchema = z.object({
     description: z.string().min(1, t('errors.description')).max(500),
-    date: z
-      .union([z.date(), z.string().min(1, t('errors.date'))])
-      .transform((val): Date => {
-        if (val instanceof Date) return val
-        return new Date((val as string) + 'T00:00:00')
-      })
-      .refine((d) => !Number.isNaN(d.getTime()), t('errors.date')),
+    date: dateSchema(t('errors.date')),
     account: z
       .string()
       .max(4, t('errors.account_invalid'))
@@ -137,7 +144,9 @@ export function ItemForm({
   const handleFormSubmit = async (
     formValues: Record<string, string | number | boolean>
   ) => {
-    if (isSubmitting || uploadFileStatus === 'executing') return
+    if (submittingStatus === 'executing' || uploadFileStatus === 'executing') {
+      return
+    }
 
     const parsedAttachments = attachments.map((slot) => {
       const value = formValues[`attachments[${slot.fileId}].value`]
@@ -204,12 +213,13 @@ export function ItemForm({
             <Form
               ref={formRef}
               id="item-form"
+              // Reset form when edit data changes
+              key={editData?.id ?? ''}
               errors={errors}
               onFormSubmit={handleFormSubmit}
               className="mb-4 space-y-4"
             >
               <EntryCommonFields
-                t={t as (key: string) => string}
                 defaultDescription={editData?.description}
                 defaultDate={
                   editData?.date
@@ -246,15 +256,15 @@ export function ItemForm({
                         <span className="mb-1 block text-xs font-medium text-gray-600">
                           {t('attachment_file')}
                         </span>
-                        <BaseButton
+                        <Button
                           type="button"
                           onClick={() => openPreview(slot)}
-                          className="truncate text-left text-sm font-medium text-blue-600 underline hover:text-blue-800"
+                          variant="secondary"
                           title={t('preview_file')}
                           aria-label={`${slot.filename ?? ''} ${t('preview_file')}`}
                         >
                           {slot.filename ?? ''}
-                        </BaseButton>
+                        </Button>
                       </div>
                       <Field.Root name={`attachments[${slot.fileId}].value`}>
                         <Field.Label className="mb-1 block text-xs font-medium text-gray-600">
@@ -303,18 +313,19 @@ export function ItemForm({
                         </Checkbox.Root>
                         <Field.Error className="mt-1 text-sm text-red-600" />
                       </Field.Root>
-                      <BaseButton
+                      <Button
                         type="button"
                         onClick={() =>
                           setAttachments((prev) =>
                             prev.filter((s) => s.fileId !== slot.fileId)
                           )
                         }
-                        className="shrink-0 self-end rounded-md p-2 text-gray-500 hover:bg-gray-200 hover:text-red-600"
+                        variant="danger"
+                        size="small"
                         aria-label={t('remove_attachment')}
                       >
-                        <Trash2 className="h-5 w-5 text-red-600" />
-                      </BaseButton>
+                        <Trash2 className="h-5 w-5" />
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -328,6 +339,7 @@ export function ItemForm({
                         accept="image/*,application/pdf"
                         className="sr-only"
                         aria-hidden
+                        tabIndex={-1}
                         onChange={(e) => {
                           const file = e.target.files?.[0]
                           if (file) {
@@ -367,8 +379,7 @@ export function ItemForm({
                 form="item-form"
                 onClick={() => formRef.current?.requestSubmit()}
                 variant="primary"
-                actionStatus={isSubmitting ? 'executing' : 'idle'}
-                disabled={uploadFileStatus === 'executing'}
+                actionStatus={submittingStatus}
               >
                 {t('ok')}
               </Button>

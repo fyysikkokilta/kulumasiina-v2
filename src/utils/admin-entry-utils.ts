@@ -7,7 +7,10 @@ import { bookkeepingAccounts } from './bookkeeping-accounts'
 
 export const PAGE_SIZES = [10, 25, 50] as const
 
-export const STATUS_COLORS: Record<string, string> = {
+export const STATUS_COLORS: Record<
+  'submitted' | 'approved' | 'paid' | 'denied',
+  'blue' | 'green' | 'purple' | 'red'
+> = {
   submitted: 'blue',
   approved: 'green',
   paid: 'purple',

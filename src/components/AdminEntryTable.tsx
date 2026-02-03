@@ -2,7 +2,6 @@
 
 import { Select } from '@base-ui/react/select'
 import {
-  type ColumnDef,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -15,7 +14,15 @@ import { useTranslations } from 'next-intl'
 import { useAction } from 'next-safe-action/hooks'
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 
-import type { EditState } from '@/components/AdminEntryModals'
+import { AdminEntryExpandedRow } from '@/components/AdminEntryExpandedRow'
+import { getAdminEntryTableColumns } from '@/components/AdminEntryTableColumns'
+import { ApproveModal } from '@/components/ApproveModal'
+import { DeleteOldArchivedModal } from '@/components/DeleteOldArchivedModal'
+import { ItemForm } from '@/components/ItemForm'
+import { MileageForm } from '@/components/MileageForm'
+import { PayModal } from '@/components/PayModal'
+import { PreviewModal } from '@/components/PreviewModal'
+import { Button } from '@/components/ui/Button'
 import { Tag } from '@/components/ui/Tag'
 import type { AdminEntries } from '@/data/getAdminEntries'
 import { archiveEntriesAction } from '@/lib/actions/archiveEntries'
@@ -23,7 +30,12 @@ import { denyEntriesAction } from '@/lib/actions/denyEntries'
 import { resetEntriesAction } from '@/lib/actions/resetEntries'
 import { updateItemAction } from '@/lib/actions/updateItem'
 import { updateMileageAction } from '@/lib/actions/updateMileage'
-import type { FormItemWithAttachments, FormMileage } from '@/lib/db/schema'
+import type {
+  FormItemWithAttachments,
+  FormMileage,
+  ItemWithAttachments,
+  Mileage
+} from '@/lib/db/schema'
 import {
   formatEntryForClipboard,
   isOldArchived,
@@ -31,15 +43,8 @@ import {
   STATUS_COLORS
 } from '@/utils/admin-entry-utils'
 import { calculateFormEntriesTotal } from '@/utils/entry-total-utils'
-import { type PreviewState } from '@/utils/preview-utils'
-
-import { AdminEntryExpandedRow } from './AdminEntryExpandedRow'
-import { AdminEntryModals } from './AdminEntryModals'
-import {
-  type EntryRow,
-  getAdminEntryTableColumns
-} from './AdminEntryTableColumns'
-import { Button } from './ui/Button'
+import { isEntryItem, isEntryMileage } from '@/utils/entry-utils'
+import type { PreviewState } from '@/utils/preview-utils'
 
 const DEFAULT_COLUMN_FILTERS = [
   { id: 'submissionDate', value: {} as { start?: string; end?: string } },
@@ -73,7 +78,9 @@ export function AdminEntryTable({
   const [deleteOldArchivedModalVisible, setDeleteOldArchivedModalVisible] =
     useState(false)
   const [modalEntryIds, setModalEntryIds] = useState<string[]>([])
-  const [editState, setEditState] = useState<EditState | null>(null)
+  const [editState, setEditState] = useState<
+    ItemWithAttachments | Mileage | null
+  >(null)
   const [previewState, setPreviewState] = useState<PreviewState | null>(null)
 
   const { execute: denyEntries, status: denyStatus } = useAction(
@@ -127,28 +134,27 @@ export function AdminEntryTable({
   )
 
   const getStatusColor = useCallback(
-    (status: string) => STATUS_COLORS[status] ?? 'default',
+    (status: keyof typeof STATUS_COLORS) => STATUS_COLORS[status],
     []
   )
   const getStatusText = useCallback(
-    (status: string) =>
-      status ? t(`status.${status}` as 'status.submitted') : '',
+    (status: keyof typeof STATUS_COLORS) => t(`status.${status}`),
     [t]
   )
   const getTargetIds = (ids?: string[]) =>
     ids ?? selectedRowKeys.map((k) => String(k))
 
   const handleItemUpdate = (itemData: FormItemWithAttachments) => {
-    if (!editState?.data) return
+    if (!editState || !editState.id) return
     updateItem({
-      id: editState.data.id,
+      id: editState.id,
       ...itemData
     })
   }
   const handleMileageUpdate = (mileageData: FormMileage) => {
-    if (!editState?.data) return
+    if (!editState || !editState.id) return
     updateMileage({
-      id: editState.data.id,
+      id: editState.id,
       ...mileageData
     })
   }
@@ -195,6 +201,26 @@ export function AdminEntryTable({
     [tableData]
   )
 
+  const hasFilters = columnFilters.some((f) => {
+    if (f.id === 'submissionDate') {
+      const v = f.value as { start?: string; end?: string }
+      return Boolean(v?.start || v?.end)
+    }
+    const value = f.value as string[]
+    if (f.id === 'name') return value.length > 0
+    if (f.id === 'status') return value.length > 0
+    if (f.id === 'archived') return value.length !== 1 || value[0] !== 'active'
+  })
+
+  const hasSorting = sorting.some(
+    (s) => s.id !== 'submissionDate' || s.desc !== true
+  )
+
+  const clearFilters = useCallback(() => {
+    setSorting(DEFAULT_SORTING)
+    setColumnFilters(DEFAULT_COLUMN_FILTERS)
+  }, [])
+
   const columns = useMemo(
     () =>
       getAdminEntryTableColumns({
@@ -203,14 +229,26 @@ export function AdminEntryTable({
         expandedIds,
         getStatusColor,
         getStatusText,
-        uniqueNames
+        uniqueNames,
+        hasFiltersOrSorting: hasFilters || hasSorting,
+        onClearFilters: clearFilters
       }),
-    [t, toggleExpand, expandedIds, getStatusColor, getStatusText, uniqueNames]
+    [
+      t,
+      toggleExpand,
+      expandedIds,
+      getStatusColor,
+      getStatusText,
+      uniqueNames,
+      hasFilters,
+      hasSorting,
+      clearFilters
+    ]
   )
 
   const table = useReactTable({
     data: tableData,
-    columns: columns as ColumnDef<EntryRow>[],
+    columns,
     getRowId: (row) => row.id,
     state: {
       columnFilters,
@@ -262,66 +300,58 @@ export function AdminEntryTable({
   const safePage = pagination.pageIndex
   const start = safePage * pagination.pageSize
 
-  const hasFilters = columnFilters.some((f) => {
-    if (f.id === 'submissionDate') {
-      const v = f.value as { start?: string; end?: string }
-      return Boolean(v?.start || v?.end)
-    }
-    if (f.id === 'name') return (f.value as string[]).length > 0
-    if (f.id === 'status') return (f.value as string[]).length > 0
-    if (f.id === 'archived')
-      return (
-        (f.value as string[]).length !== 1 ||
-        (f.value as string[])[0] !== 'active'
-      )
-  })
-
-  const hasSorting = sorting.some(
-    (s) => s.id !== 'submissionDate' || s.desc !== true
-  )
-
-  const clearFilters = () => {
-    setSorting(DEFAULT_SORTING)
-    setColumnFilters(DEFAULT_COLUMN_FILTERS)
-  }
-
   return (
     <>
-      <AdminEntryModals
-        modals={{
-          approveModalVisible,
-          setApproveModalVisible,
-          payModalVisible,
-          setPayModalVisible,
-          deleteOldArchivedModalVisible,
-          setDeleteOldArchivedModalVisible,
-          modalEntryIds,
-          setSelectedRowKeys,
-          editState,
-          setEditState,
-          handleItemUpdate,
-          handleMileageUpdate,
-          updateItemStatus,
-          updateMileageStatus,
-          previewState,
-          closePreview
+      <ApproveModal
+        visible={approveModalVisible}
+        onCancel={() => setApproveModalVisible(false)}
+        entryIds={modalEntryIds}
+        onSuccess={() => {
+          setApproveModalVisible(false)
+          setSelectedRowKeys([])
         }}
       />
+
+      <PayModal
+        visible={payModalVisible}
+        onCancel={() => setPayModalVisible(false)}
+        entryIds={modalEntryIds}
+        onSuccess={() => {
+          setPayModalVisible(false)
+          setSelectedRowKeys([])
+        }}
+      />
+
+      <DeleteOldArchivedModal
+        visible={deleteOldArchivedModalVisible}
+        onCancel={() => setDeleteOldArchivedModalVisible(false)}
+        onSuccess={() => {
+          setDeleteOldArchivedModalVisible(false)
+          setSelectedRowKeys([])
+        }}
+      />
+
+      <ItemForm
+        visible={isEntryItem(editState)}
+        onOk={handleItemUpdate}
+        onCancel={() => setEditState(null)}
+        editData={isEntryItem(editState) ? editState : null}
+        submittingStatus={updateItemStatus}
+      />
+
+      <MileageForm
+        visible={isEntryMileage(editState)}
+        onOk={handleMileageUpdate}
+        onCancel={() => setEditState(null)}
+        editData={isEntryMileage(editState) ? editState : null}
+        submittingStatus={updateMileageStatus}
+      />
+
+      <PreviewModal previewState={previewState} closePreview={closePreview} />
+
       <div className="space-y-4">
-        <div className="flex min-h-12 items-center gap-4">
-          <div className="w-24 shrink-0">
-            {(hasFilters || hasSorting) && (
-              <Button
-                variant="secondary"
-                size="small"
-                type="button"
-                onClick={clearFilters}
-              >
-                {t('filter.reset')}
-              </Button>
-            )}
-          </div>
-          <div className="flex min-h-10 min-w-0 flex-1 items-center gap-4">
+        <div className="flex min-h-12 items-center justify-between gap-4">
+          <div className="flex min-w-0 flex-1 items-center gap-4">
             {selectedRowKeys.length > 0 && (
               <div className="rounded-md border border-blue-200 bg-blue-50 px-3 py-2">
                 <span>
@@ -344,7 +374,7 @@ export function AdminEntryTable({
                             | 'gray'
                         }
                       >
-                        {t(`status.${selectedStatus}` as 'status.submitted')}
+                        {t(`status.${selectedStatus}`)}
                       </Tag>
                       {')'}
                     </span>
@@ -355,91 +385,93 @@ export function AdminEntryTable({
                 </span>
               </div>
             )}
-            <div className="flex min-w-[320px] shrink-0 flex-wrap items-center justify-end gap-2">
-              {allSelectedSubmitted && noneArchived && (
-                <Button
-                  variant="primary"
-                  onClick={() => handleApprove()}
-                  disabled={selectedRowKeys.length === 0}
-                >
-                  {t('bulk_actions.approve_selected')}
-                </Button>
-              )}
-              {allSelectedSubmitted && noneArchived && (
-                <Button
-                  variant="secondary"
-                  onClick={() => handleDeny()}
-                  disabled={selectedRowKeys.length === 0}
-                  actionStatus={denyStatus}
-                >
-                  {t('bulk_actions.deny_selected')}
-                </Button>
-              )}
-              {allSelectedApproved && noneArchived && (
-                <Button
-                  variant="secondary"
-                  onClick={() => handlePay()}
-                  disabled={selectedRowKeys.length === 0}
-                >
-                  {t('bulk_actions.mark_as_paid')}
-                </Button>
-              )}
-              {(allSelectedApproved || allSelectedDenied || allSelectedPaid) &&
-                noneArchived && (
-                  <Button
-                    variant="secondary"
-                    onClick={() => handleReset()}
-                    disabled={selectedRowKeys.length === 0}
-                    actionStatus={resetStatus}
-                  >
-                    {t('bulk_actions.reset_selected')}
-                  </Button>
-                )}
-              {(allSelectedDenied || allSelectedPaid) && noneArchived && (
-                <Button
-                  variant="danger"
-                  type="button"
-                  onClick={() => handleArchive()}
-                  disabled={selectedRowKeys.length === 0}
-                  actionStatus={archiveStatus}
-                >
-                  {t('bulk_actions.archive_selected')}
-                </Button>
-              )}
-              {allSelectedPaid && (
+          </div>
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+            {allSelectedSubmitted && noneArchived && (
+              <Button
+                variant="primary"
+                onClick={() => handleApprove()}
+                disabled={selectedRowKeys.length === 0}
+              >
+                {t('bulk_actions.approve_selected')}
+              </Button>
+            )}
+            {allSelectedSubmitted && noneArchived && (
+              <Button
+                variant="secondary"
+                onClick={() => handleDeny()}
+                disabled={selectedRowKeys.length === 0}
+                actionStatus={denyStatus}
+              >
+                {t('bulk_actions.deny_selected')}
+              </Button>
+            )}
+            {allSelectedApproved && noneArchived && (
+              <Button
+                variant="secondary"
+                onClick={() => handlePay()}
+                disabled={selectedRowKeys.length === 0}
+              >
+                {t('bulk_actions.mark_as_paid')}
+              </Button>
+            )}
+            {(allSelectedApproved || allSelectedDenied || allSelectedPaid) &&
+              noneArchived && (
                 <Button
                   variant="secondary"
-                  type="button"
-                  onClick={handleMultiZipDownload}
+                  onClick={() => handleReset()}
                   disabled={selectedRowKeys.length === 0}
+                  actionStatus={resetStatus}
                 >
-                  {t('bulk_actions.download_zip')}
+                  {t('bulk_actions.reset_selected')}
                 </Button>
               )}
-              {toBeDeleted > 0 && (
-                <Button
-                  variant="danger"
-                  type="button"
-                  onClick={() => setDeleteOldArchivedModalVisible(true)}
-                >
-                  {t('bulk_actions.remove_old_archived')}
-                </Button>
-              )}
-              {selectedRowKeys.length > 0 && (
-                <Button
-                  variant="secondary"
-                  type="button"
-                  onClick={handleCopyClipboardText}
-                >
-                  {t('bulk_actions.copy_clipboard_text')}
-                </Button>
-              )}
-            </div>
+            {(allSelectedDenied || allSelectedPaid) && noneArchived && (
+              <Button
+                variant="danger"
+                type="button"
+                onClick={() => handleArchive()}
+                disabled={selectedRowKeys.length === 0}
+                actionStatus={archiveStatus}
+              >
+                {t('bulk_actions.archive_selected')}
+              </Button>
+            )}
+            {allSelectedPaid && (
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={handleMultiZipDownload}
+                disabled={selectedRowKeys.length === 0}
+              >
+                {t('bulk_actions.download_zip')}
+              </Button>
+            )}
+            {selectedRowKeys.length > 0 && (
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={handleCopyClipboardText}
+              >
+                {t('bulk_actions.copy_clipboard_text')}
+              </Button>
+            )}
+            {toBeDeleted > 0 && (
+              <Button
+                variant="danger"
+                type="button"
+                onClick={() => setDeleteOldArchivedModalVisible(true)}
+              >
+                {t('bulk_actions.remove_old_archived', {
+                  count: String(toBeDeleted)
+                })}
+              </Button>
+            )}
           </div>
         </div>
 
         <div
-          className="overflow-x-auto rounded bg-white p-2 shadow"
+          className="overflow-x-auto rounded bg-white p-1.5 shadow"
           style={{ minWidth: '900px' }}
         >
           <table className="w-full border-collapse">
@@ -449,7 +481,7 @@ export function AdminEntryTable({
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="border-b border-gray-200 px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-600 uppercase"
+                      className="border-b border-gray-200 px-3 py-2 text-left text-xs font-medium tracking-wider text-gray-600 uppercase"
                       style={{
                         width: header.column.getSize() ?? undefined
                       }}
@@ -470,7 +502,7 @@ export function AdminEntryTable({
                 <tr>
                   <td
                     colSpan={columns.length}
-                    className="px-4 py-8 text-center text-gray-500"
+                    className="px-3 py-8 text-center text-gray-500"
                   >
                     {t('table_pagination.no_data_available')}
                   </td>
@@ -487,7 +519,7 @@ export function AdminEntryTable({
                         {row.getVisibleCells().map((cell) => (
                           <td
                             key={cell.id}
-                            className="border-b border-gray-100 px-4 py-3 text-sm text-gray-900"
+                            className="border-b border-gray-100 px-3 py-2 text-sm text-gray-900"
                           >
                             {flexRender(
                               cell.column.columnDef.cell,
@@ -500,7 +532,7 @@ export function AdminEntryTable({
                         <tr>
                           <td
                             colSpan={columns.length}
-                            className="bg-gray-50/50 p-4"
+                            className="bg-gray-50/50 p-3"
                           >
                             <AdminEntryExpandedRow
                               record={row.original}

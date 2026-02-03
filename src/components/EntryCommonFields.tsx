@@ -2,25 +2,24 @@
 
 import { Field } from '@base-ui/react/field'
 import { Input } from '@base-ui/react/input'
+import { useTranslations } from 'next-intl'
 
 import { AccountSelect } from '@/components/AccountSelect'
 import { Required } from '@/components/ui/Required'
 import { inputClass, textareaClass } from '@/utils/form-styles'
 
 export interface EntryCommonFieldsProps {
-  /** Translation function (e.g. useTranslations('ItemForm') or useTranslations('MileageForm')) */
-  t: (key: string) => string
   defaultDescription?: string
   defaultDate?: string
   defaultAccount?: string | null
 }
 
 export function EntryCommonFields({
-  t,
   defaultDescription,
   defaultDate,
   defaultAccount
 }: EntryCommonFieldsProps) {
+  const t = useTranslations('EntryCommonFields')
   return (
     <>
       <Field.Root name="description">

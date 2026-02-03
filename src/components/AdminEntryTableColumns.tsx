@@ -1,13 +1,14 @@
 'use client'
 
 import { Checkbox } from '@base-ui/react/checkbox'
-import { type ColumnDef, createColumnHelper } from '@tanstack/react-table'
+import { createColumnHelper } from '@tanstack/react-table'
 import {
   ArrowUpDown,
   Check,
   ChevronDown,
   ChevronRight,
-  Minus
+  Minus,
+  RotateCcw
 } from 'lucide-react'
 
 import {
@@ -18,20 +19,25 @@ import { MultiSelectFilterPopover } from '@/components/admin/MultiSelectFilterPo
 import { Button } from '@/components/ui/Button'
 import { Tag } from '@/components/ui/Tag'
 import type { AdminEntries } from '@/data/getAdminEntries'
+import { STATUS_COLORS } from '@/utils/admin-entry-utils'
 
 export type EntryRow = AdminEntries[number] & { key: string; total: number }
 
 const columnHelper = createColumnHelper<EntryRow>()
 
-const STATUS_VALUES = ['', 'submitted', 'approved', 'paid', 'denied'] as const
+const STATUS_VALUES = Object.keys(
+  STATUS_COLORS
+) as (keyof typeof STATUS_COLORS)[]
 
 export interface AdminEntryTableColumnsParams {
   t: ReturnType<typeof import('next-intl').useTranslations<'AdminEntryTable'>>
   toggleExpand: (id: string) => void
   expandedIds: Record<string, boolean>
-  getStatusColor: (status: string) => string
-  getStatusText: (status: string) => string
+  getStatusColor: (status: keyof typeof STATUS_COLORS) => string
+  getStatusText: (status: keyof typeof STATUS_COLORS) => string
   uniqueNames: string[]
+  hasFiltersOrSorting: boolean
+  onClearFilters: () => void
 }
 
 export function getAdminEntryTableColumns({
@@ -40,7 +46,9 @@ export function getAdminEntryTableColumns({
   expandedIds,
   getStatusColor,
   getStatusText,
-  uniqueNames
+  uniqueNames,
+  hasFiltersOrSorting,
+  onClearFilters
 }: AdminEntryTableColumnsParams) {
   return [
     columnHelper.display({
@@ -91,7 +99,19 @@ export function getAdminEntryTableColumns({
     }),
     columnHelper.display({
       id: 'expand',
-      header: () => null,
+      header: () =>
+        hasFiltersOrSorting ? (
+          <Button
+            variant="ghost"
+            size="small"
+            type="button"
+            onClick={onClearFilters}
+            className="m-0 rounded"
+            aria-label={t('filter.reset')}
+          >
+            <RotateCcw className="h-3.5 w-3.5" aria-hidden />
+          </Button>
+        ) : null,
       cell: ({ row }) => {
         const isExpanded = !!expandedIds[row.original.id]
         return (
@@ -148,15 +168,14 @@ export function getAdminEntryTableColumns({
       enableSorting: true,
       enableColumnFilter: true,
       filterFn: (row, _columnId, filterValue: DateRangeValue) => {
-        const v = filterValue as DateRangeValue | undefined
-        if (!v?.start && !v?.end) return true
+        if (!filterValue?.start && !filterValue?.end) return true
         const rowDate = new Date(row.getValue('submissionDate')).getTime()
-        if (v.start) {
-          const start = new Date(v.start).getTime()
+        if (filterValue.start) {
+          const start = new Date(filterValue.start).getTime()
           if (rowDate < start) return false
         }
-        if (v.end) {
-          const end = new Date(v.end).setHours(23, 59, 59, 999)
+        if (filterValue.end) {
+          const end = new Date(filterValue.end).setHours(23, 59, 59, 999)
           if (rowDate > end) return false
         }
         return true
@@ -164,8 +183,7 @@ export function getAdminEntryTableColumns({
     }),
     columnHelper.accessor('name', {
       header: ({ column }) => {
-        const filterValue =
-          (column.getFilterValue() as string[] | undefined) ?? []
+        const filterValue = column.getFilterValue() as string[]
         return (
           <div className="flex items-center gap-1">
             <MultiSelectFilterPopover
@@ -177,6 +195,7 @@ export function getAdminEntryTableColumns({
               resetLabel={t('filter.reset')}
               okLabel={t('filter.ok')}
               aria-label={t('filter.filter')}
+              emptyListMessage={t('filter.no_names_found')}
             />
             <span className="select-none">{t('table.name')}</span>
           </div>
@@ -191,9 +210,8 @@ export function getAdminEntryTableColumns({
       enableSorting: false,
       enableColumnFilter: true,
       filterFn: (row, _columnId, filterValue: string[]) => {
-        const names = (filterValue as string[] | undefined) ?? []
-        if (names.length === 0) return true
-        return names.includes(String(row.getValue('name')))
+        if (filterValue.length === 0) return true
+        return filterValue.includes(String(row.getValue('name')))
       }
     }),
     columnHelper.accessor('title', {
@@ -218,14 +236,13 @@ export function getAdminEntryTableColumns({
     }),
     columnHelper.accessor('status', {
       header: ({ column }) => {
-        const filterValue =
-          (column.getFilterValue() as string[] | undefined) ?? []
+        const filterValue = column.getFilterValue() as string[]
         return (
           <div className="flex items-center gap-1">
             <MultiSelectFilterPopover
               value={filterValue}
               onChange={(v) => column.setFilterValue(v)}
-              options={STATUS_VALUES.filter((v) => v !== '').map((v) => ({
+              options={STATUS_VALUES.map((v) => ({
                 value: v,
                 label: t(`filter.${v}`)
               }))}
@@ -258,24 +275,22 @@ export function getAdminEntryTableColumns({
       enableSorting: false,
       enableColumnFilter: true,
       filterFn: (row, _columnId, filterValue: string[]) => {
-        const selected = (filterValue as string[] | undefined) ?? []
-        if (selected.length === 0) return true
-        return selected.includes(row.getValue('status'))
+        if (filterValue.length === 0) return true
+        return filterValue.includes(row.getValue('status'))
       }
     }),
     columnHelper.accessor((row) => (row.archived ? 'archived' : 'active'), {
       id: 'archived',
       header: ({ column }) => {
-        const filterValue =
-          (column.getFilterValue() as string[] | undefined) ?? []
+        const filterValue = column.getFilterValue() as string[]
         return (
           <div className="flex items-center gap-1">
             <MultiSelectFilterPopover
               value={filterValue}
               onChange={(v) => column.setFilterValue(v)}
               options={[
-                { value: 'active', label: t('filter.active_only') },
-                { value: 'archived', label: t('filter.archived_only') }
+                { value: 'active', label: t('filter.active') },
+                { value: 'archived', label: t('filter.archived') }
               ]}
               showSearch={false}
               resetLabel={t('filter.reset')}
@@ -297,9 +312,8 @@ export function getAdminEntryTableColumns({
       enableSorting: false,
       enableColumnFilter: true,
       filterFn: (row, _columnId, filterValue: string[]) => {
-        const selected = (filterValue as string[] | undefined) ?? []
-        if (selected.length === 0) return true
-        return selected.includes(row.getValue('archived'))
+        if (filterValue.length === 0) return true
+        return filterValue.includes(row.getValue('archived'))
       }
     }),
     columnHelper.display({
@@ -332,5 +346,5 @@ export function getAdminEntryTableColumns({
       ),
       size: 140
     })
-  ] as ColumnDef<EntryRow>[]
+  ]
 }

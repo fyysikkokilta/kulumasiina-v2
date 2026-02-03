@@ -30,21 +30,24 @@ export const selectionBanner = (page: Page) =>
 export const applyArchivedFilter = async (page: Page) => {
   const archivedHeader = page.locator('th').filter({ hasText: 'Archived' })
   await archivedHeader.getByRole('button').click()
+  // Wait for filter popover to open (OK button visible)
+  await page.getByRole('button', { name: 'OK' }).waitFor({ state: 'visible' })
   // Use force since checkboxes are actually hidden
   await page
-    .getByRole('checkbox', { name: 'Active only' })
+    .getByRole('checkbox', { name: 'Active' })
     .first()
     .click({ force: true })
   await page
-    .getByRole('checkbox', { name: 'Archived only' })
+    .getByRole('checkbox', { name: 'Archived' })
     .first()
     .click({ force: true })
   await page.getByRole('button', { name: 'OK' }).click()
 }
 
 export const applyStatusFilter = async (page: Page, optionLabel: string) => {
-  const statusHeader = page.locator('th').filter({ hasText: /status/i })
+  const statusHeader = page.locator('th').filter({ hasText: 'Status' })
   await statusHeader.getByRole('button', { name: 'Filter' }).click()
+  await page.getByRole('button', { name: 'OK' }).waitFor({ state: 'visible' })
   // Use force since checkboxes are actually hidden
   await page
     .getByRole('checkbox', { name: optionLabel })

@@ -16,7 +16,7 @@ import { Card } from '@/components/ui/Card'
 import { Required } from '@/components/ui/Required'
 import { Link } from '@/i18n/navigation'
 import { createEntryAction } from '@/lib/actions/createEntry'
-import type { EntryType, FormEntry } from '@/lib/db/schema'
+import type { FormEntry } from '@/lib/db/schema'
 import { env } from '@/lib/env'
 import { calculateFormEntriesTotal } from '@/utils/entry-total-utils'
 import { isEntryItem, isEntryMileage } from '@/utils/entry-utils'
@@ -28,20 +28,15 @@ import { FormResult } from './FormResult'
 import { ItemForm } from './ItemForm'
 import { MileageForm } from './MileageForm'
 
+const NEW_ITEM_ID = 'new-item'
+const NEW_MILEAGE_ID = 'new-mileage'
+
 export function ExpenseForm() {
   const t = useTranslations('ExpenseForm')
 
   const [status, setStatus] = useState<'idle' | 'success' | 'failure'>('idle')
   const [entries, setEntries] = useState<FormEntry[]>([])
-  const [modalState, setModalState] = useState<{
-    type: EntryType | null
-    isOpen: boolean
-    editingId: string | null
-  }>({
-    type: null,
-    isOpen: false,
-    editingId: null
-  })
+  const [editingId, setEditingId] = useState<string | null>(null)
 
   const { execute, status: actionStatus } = useAction(createEntryAction, {
     onSuccess: () => {
@@ -91,23 +86,27 @@ export function ExpenseForm() {
     entries.filter(isEntryItem).map((e) => e),
     entries.filter(isEntryMileage).map((e) => e)
   )
-  const editingEntry = modalState.editingId
-    ? (entries.find((entry) => entry.id === modalState.editingId) ?? null)
+  const editingEntry = editingId
+    ? (entries.find((entry) => entry.id === editingId) ?? null)
     : null
 
-  const openModal = (type: EntryType, editingId?: string) => {
-    setModalState({ type, isOpen: true, editingId: editingId ?? null })
+  const openModal = (editingId: string | null) => {
+    setEditingId(editingId)
   }
 
   const closeModal = () => {
-    setModalState({ type: null, isOpen: false, editingId: null })
+    setEditingId(null)
   }
 
   const handleAddOrUpdateEntry = (data: FormEntry) => {
     setEntries((prev) => {
       const newEntries = [...prev]
-      if (modalState.editingId) {
-        const index = newEntries.findIndex((e) => e.id === modalState.editingId)
+      if (
+        editingId &&
+        editingId !== NEW_ITEM_ID &&
+        editingId !== NEW_MILEAGE_ID
+      ) {
+        const index = newEntries.findIndex((e) => e.id === editingId)
         if (index !== -1) newEntries[index] = { ...newEntries[index], ...data }
       } else {
         const typeCount = newEntries.filter(
@@ -118,7 +117,7 @@ export function ExpenseForm() {
       }
       return newEntries
     })
-    setModalState({ type: null, isOpen: false, editingId: null })
+    setEditingId(null)
   }
 
   const [errors, setErrors] = useState<
@@ -131,7 +130,7 @@ export function ExpenseForm() {
     formRef.current?.reset()
     setStatus('idle')
     setEntries([])
-    setModalState({ type: null, isOpen: false, editingId: null })
+    setEditingId(null)
   }
 
   const handleFormSubmit = async (
@@ -300,7 +299,7 @@ export function ExpenseForm() {
             {entries.map((entry) =>
               isEntryItem(entry) ? (
                 <ItemDisplay
-                  onEdit={() => openModal('item', entry.id)}
+                  onEdit={() => openModal(entry.id ?? null)}
                   onRemove={() =>
                     setEntries((prev) => prev.filter((e) => e.id !== entry.id))
                   }
@@ -309,7 +308,7 @@ export function ExpenseForm() {
                 />
               ) : (
                 <MileageDisplay
-                  onEdit={() => openModal('mileage', entry.id)}
+                  onEdit={() => openModal(entry.id ?? null)}
                   onRemove={() =>
                     setEntries((prev) => prev.filter((e) => e.id !== entry.id))
                   }
@@ -335,7 +334,7 @@ export function ExpenseForm() {
             <Button
               type="button"
               variant="secondary"
-              onClick={() => openModal('item')}
+              onClick={() => openModal(NEW_ITEM_ID)}
               disabled={
                 entries.filter((entry) => 'attachments' in entry).length >= 20
               }
@@ -351,7 +350,7 @@ export function ExpenseForm() {
             <Button
               type="button"
               variant="secondary"
-              onClick={() => openModal('mileage')}
+              onClick={() => openModal(NEW_MILEAGE_ID)}
               disabled={
                 entries.filter((entry) => 'distance' in entry).length >= 20
               }
@@ -397,33 +396,29 @@ export function ExpenseForm() {
       </Form>
 
       {/* Modals rendered outside main form so Enter/OK only submit the modal form */}
-      {modalState.type === 'item' && (
-        <ItemForm
-          visible={modalState.isOpen}
-          onOk={(data) =>
-            handleAddOrUpdateEntry({
-              id: editingEntry?.id,
-              ...data
-            })
-          }
-          onCancel={closeModal}
-          editData={isEntryItem(editingEntry) ? editingEntry : undefined}
-        />
-      )}
+      <ItemForm
+        visible={isEntryItem(editingEntry) || editingId === NEW_ITEM_ID}
+        onOk={(data) =>
+          handleAddOrUpdateEntry({
+            id: editingEntry?.id,
+            ...data
+          })
+        }
+        onCancel={closeModal}
+        editData={isEntryItem(editingEntry) ? editingEntry : null}
+      />
 
-      {modalState.type === 'mileage' && (
-        <MileageForm
-          visible={modalState.isOpen}
-          onOk={(data) =>
-            handleAddOrUpdateEntry({
-              id: editingEntry?.id,
-              ...data
-            })
-          }
-          onCancel={closeModal}
-          editData={isEntryMileage(editingEntry) ? editingEntry : undefined}
-        />
-      )}
+      <MileageForm
+        visible={isEntryMileage(editingEntry) || editingId === NEW_MILEAGE_ID}
+        onOk={(data) =>
+          handleAddOrUpdateEntry({
+            id: editingEntry?.id,
+            ...data
+          })
+        }
+        onCancel={closeModal}
+        editData={isEntryMileage(editingEntry) ? editingEntry : null}
+      />
     </div>
   )
 }

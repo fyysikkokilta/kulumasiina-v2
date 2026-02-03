@@ -1,3 +1,20 @@
+import { z } from 'zod'
+
+/**
+ * Zod schema for form date fields. Accepts either a Date or a non-empty date
+ * string (e.g. from input type="date"), normalizes to local midnight, and
+ * validates that the result is a valid date.
+ */
+export function dateSchema(errorMessage: string) {
+  return z
+    .union([z.date(), z.string().min(1, errorMessage)])
+    .transform((val): Date => {
+      if (val instanceof Date) return val
+      return new Date((val as string) + 'T00:00:00')
+    })
+    .refine((d) => !Number.isNaN(d.getTime()), errorMessage)
+}
+
 /**
  * Validates Finnish social security number (henkilötunnus)
  * Format: DDMMYY-NNNC or DDMMYY+NNNC or DDMMYYANNC

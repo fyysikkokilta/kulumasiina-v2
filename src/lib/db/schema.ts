@@ -136,8 +136,4 @@ export type FormItemWithAttachments = Omit<
 
 export type FormMileage = Omit<Mileage | NewMileage, 'entryId'>
 
-export type EntryType = 'item' | 'mileage'
-
-export type FormEntry = {
-  id?: string
-} & (FormItemWithAttachments | FormMileage)
+export type FormEntry = FormItemWithAttachments | FormMileage

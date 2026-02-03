@@ -9,7 +9,7 @@
     "start": "next start",
     "typegen": "next typegen",
     "type:check": "tsc --noEmit",
-    "lint": "eslint . --cache",
+    "lint": "eslint .",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",

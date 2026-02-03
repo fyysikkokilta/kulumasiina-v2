@@ -7,11 +7,13 @@ import { Input } from '@base-ui/react/input'
 import { X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useAction } from 'next-safe-action/hooks'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { z } from 'zod'
 
 import { Button } from '@/components/ui/Button'
 import { approveEntriesAction } from '@/lib/actions/approveEntries'
 import { inputClass } from '@/utils/form-styles'
+import { dateSchema } from '@/utils/validation'
 
 interface ApproveModalProps {
   visible: boolean
@@ -32,41 +34,46 @@ export function ApproveModal({
   >(undefined)
   const t = useTranslations('ApproveModal')
 
+  useEffect(() => {
+    queueMicrotask(() => setErrors(undefined))
+  }, [entryIds, visible])
+
+  const approveFormSchema = z.object({
+    date: dateSchema(t('date_error')),
+    approvalNote: z
+      .string()
+      .min(1, t('approval_note_error'))
+      .max(100, t('approval_note_error'))
+  })
+
   const { execute, status } = useAction(approveEntriesAction, {
     onSuccess: () => {
       setErrors(undefined)
-      formRef.current?.reset()
       onSuccess?.()
       onCancel()
     }
   })
 
   const handleFormSubmit = (formValues: Record<string, string>) => {
-    const dateStr = formValues.date?.trim()
-    const approvalNote = formValues.approvalNote?.trim() ?? ''
-    const newErrors: Record<string, string> = {}
-    if (!dateStr) {
-      newErrors.date = t('date_error')
+    const toParse = {
+      date: formValues.date?.trim() ?? '',
+      approvalNote: formValues.approvalNote?.trim() ?? ''
     }
-    if (!approvalNote) {
-      newErrors.approvalNote = t('approval_note_error')
-    }
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
-      return
-    }
-    const date = new Date(dateStr)
-    if (Number.isNaN(date.getTime())) {
-      setErrors({ date: t('date_error') })
+    const result = approveFormSchema.safeParse(toParse)
+    if (!result.success) {
+      setErrors(z.flattenError(result.error).fieldErrors)
       return
     }
     setErrors(undefined)
-    execute({ ids: entryIds, date, approvalNote })
+    execute({
+      ids: entryIds,
+      date: new Date(result.data.date),
+      approvalNote: result.data.approvalNote
+    })
   }
 
   const handleCancel = () => {
     setErrors(undefined)
-    formRef.current?.reset()
     onCancel()
   }
 
@@ -90,6 +97,7 @@ export function ApproveModal({
           </Dialog.Title>
           <Form
             ref={formRef}
+            key={visible ? entryIds.join(',') : 'closed'}
             errors={errors}
             onFormSubmit={handleFormSubmit}
             className="mb-4 space-y-4"

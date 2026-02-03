@@ -34,7 +34,7 @@ export function MultiSelectFilterPopover({
   resetLabel,
   okLabel,
   showSearch = true,
-  emptyListMessage = 'No matches',
+  emptyListMessage = '',
   'aria-label': ariaLabel
 }: MultiSelectFilterPopoverProps) {
   const [open, setOpen] = useState(false)
