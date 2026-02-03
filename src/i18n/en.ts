@@ -56,13 +56,19 @@ const en = {
       no_entries: 'Please add at least one expense or mileage entry!'
     }
   },
+  EntryCommonFields: {
+    description: 'Description',
+    description_placeholder: 'Description of the entry',
+    date: 'Date',
+    select_date: 'Select date',
+    account: 'Bookkeeping Account',
+    select: 'Select...',
+    account_placeholder:
+      "Leave this blank if you don't know the correct account."
+  },
   ItemForm: {
     add: 'Add an expense',
     edit: 'Edit expense',
-    description: 'Description',
-    description_placeholder: 'Description of the expense',
-    date: 'Date',
-    select_date: 'Select date',
     attachments: 'Attachments',
     attachments_help: 'Images and PDF (max 20, 8 MB each).',
     attachment_file: 'File',
@@ -73,14 +79,10 @@ const en = {
     value_placeholder: '0.00',
     value_unit: '€',
     is_not_receipt: 'Extra attachment',
-    account: 'Bookkeeping Account',
-    account_placeholder:
-      "Leave this blank if you don't know the correct account.",
     upload_note: 'Most common image file types and PDF files are supported.',
     close: 'Close',
     cancel: 'Cancel',
     ok: 'OK',
-    select: 'Select...',
     errors: {
       description: 'Please provide a description!',
       date: 'Please provide a date for the expense!',
@@ -96,10 +98,6 @@ const en = {
   MileageForm: {
     add: 'Add a mileage',
     edit: 'Edit mileage',
-    description: 'Description',
-    description_placeholder: 'Description of the mileage',
-    date: 'Date',
-    select_date: 'Select date',
     route: 'Route',
     route_placeholder: 'Guild room - venue (address) - Guild room',
     distance: 'Distance',
@@ -107,13 +105,9 @@ const en = {
     distance_unit: 'km',
     plate_number: 'Plate Number',
     plate_number_placeholder: 'ABC-123',
-    account: 'Bookkeeping Account',
-    account_placeholder:
-      "Leave this blank if you don't know the correct account.",
     close: 'Close',
     cancel: 'Cancel',
     ok: 'OK',
-    select: 'Select...',
     errors: {
       description: 'Please provide a description!',
       date: 'Please provide a date for the mileage!',
@@ -191,8 +185,8 @@ const en = {
     filter: {
       all_statuses: 'All statuses',
       all: 'All',
-      active_only: 'Active only',
-      archived_only: 'Archived only',
+      active: 'Active',
+      archived: 'Archived',
       submitted: 'Submitted',
       approved: 'Approved',
       paid: 'Paid',
@@ -206,7 +200,8 @@ const en = {
       date_placeholder: 'From date',
       start_date: 'Start date',
       end_date: 'End date',
-      search_in_filters: 'Search in filters'
+      search_in_filters: 'Search in filters',
+      no_names_found: 'Name not found'
     },
     actions: {
       pdf: 'PDF',
@@ -232,7 +227,7 @@ const en = {
       reset_selected: 'Reset Selected',
       archive_selected: 'Archive Selected',
       download_zip: 'Download ZIP',
-      remove_old_archived: 'Remove Old Archived Entries',
+      remove_old_archived: 'Remove Old Archived Entries ({count})',
       copy_clipboard_text: 'Copy to clipboard'
     }
   },

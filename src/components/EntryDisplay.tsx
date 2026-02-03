@@ -1,10 +1,10 @@
 'use client'
 
-import { Button as BaseButton } from '@base-ui/react/button'
 import dayjs from 'dayjs'
 import { Edit, Trash2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Tag } from '@/components/ui/Tag'
 import type { FormItemWithAttachments, FormMileage } from '@/lib/db/schema'
@@ -26,20 +26,14 @@ export function ItemDisplay({ item, onEdit, onRemove }: ItemDisplayProps) {
         <div className="flex items-center justify-between">
           <span>{t('expense_item')}</span>
           <div className="flex gap-2">
-            <BaseButton
-              onClick={onEdit}
-              className="inline-flex items-center justify-center gap-2 rounded-md px-3 py-1 text-xs font-medium text-blue-600 transition-colors hover:text-blue-800 hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
-            >
+            <Button onClick={onEdit} variant="ghost" size="small">
               <Edit className="h-4 w-4" />
               {t('edit')}
-            </BaseButton>
-            <BaseButton
-              onClick={onRemove}
-              className="inline-flex items-center justify-center gap-2 rounded-md px-3 py-1 text-xs font-medium text-red-600 transition-colors hover:text-red-800 hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
-            >
+            </Button>
+            <Button onClick={onRemove} variant="danger" size="small">
               <Trash2 className="h-4 w-4" />
               {t('remove')}
-            </BaseButton>
+            </Button>
           </div>
         </div>
       }
@@ -90,20 +84,14 @@ export function MileageDisplay({
         <div className="flex items-center justify-between">
           <span>{t('mileage')}</span>
           <div className="flex gap-2">
-            <BaseButton
-              onClick={onEdit}
-              className="inline-flex items-center justify-center gap-2 rounded-md px-3 py-1 text-xs font-medium text-blue-600 transition-colors hover:text-blue-800 hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
-            >
+            <Button onClick={onEdit} variant="ghost" size="small">
               <Edit className="h-4 w-4" />
               {t('edit')}
-            </BaseButton>
-            <BaseButton
-              onClick={onRemove}
-              className="inline-flex items-center justify-center gap-2 rounded-md px-3 py-1 text-xs font-medium text-red-600 transition-colors hover:text-red-800 hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
-            >
+            </Button>
+            <Button onClick={onRemove} variant="danger" size="small">
               <Trash2 className="h-4 w-4" />
               {t('remove')}
-            </BaseButton>
+            </Button>
           </div>
         </div>
       }

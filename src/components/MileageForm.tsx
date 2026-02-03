@@ -6,7 +6,8 @@ import { Form } from '@base-ui/react/form'
 import { NumberField } from '@base-ui/react/number-field'
 import { X } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
-import { useRef, useState } from 'react'
+import { HookActionStatus } from 'next-safe-action/hooks'
+import { useEffect, useRef, useState } from 'react'
 import { z } from 'zod'
 
 import { EntryCommonFields } from '@/components/EntryCommonFields'
@@ -14,13 +15,14 @@ import { Button } from '@/components/ui/Button'
 import { Required } from '@/components/ui/Required'
 import type { FormMileage } from '@/lib/db/schema'
 import { inputClass, textareaClass } from '@/utils/form-styles'
+import { dateSchema } from '@/utils/validation'
 
 interface MileageFormProps {
   visible: boolean
   onOk: (mileage: FormMileage) => void
   onCancel: () => void
-  editData?: FormMileage
-  isSubmitting?: boolean
+  editData: FormMileage | null
+  submittingStatus?: HookActionStatus
 }
 
 export function MileageForm({
@@ -28,7 +30,7 @@ export function MileageForm({
   onOk,
   onCancel,
   editData,
-  isSubmitting = false
+  submittingStatus
 }: MileageFormProps) {
   const t = useTranslations('MileageForm')
   const locale = useLocale()
@@ -38,15 +40,13 @@ export function MileageForm({
 
   const formRef = useRef<HTMLFormElement>(null)
 
+  useEffect(() => {
+    queueMicrotask(() => setErrors(undefined))
+  }, [editData, visible])
+
   const mileageFormSchema = z.object({
     description: z.string().min(1, t('errors.description')).max(500),
-    date: z
-      .union([z.date(), z.string().min(1, t('errors.date'))])
-      .transform((val): Date => {
-        if (val instanceof Date) return val
-        return new Date((val as string) + 'T00:00:00')
-      })
-      .refine((d) => !Number.isNaN(d.getTime()), t('errors.date')),
+    date: dateSchema(t('errors.date')),
     route: z.string().min(1, t('errors.route')).max(500),
     distance: z.coerce
       .number()
@@ -67,7 +67,7 @@ export function MileageForm({
   const handleFormSubmit = async (
     formValues: Record<string, string | number>
   ) => {
-    if (isSubmitting) return
+    if (submittingStatus === 'executing') return
 
     const result = mileageFormSchema.safeParse(formValues)
 
@@ -105,12 +105,13 @@ export function MileageForm({
           <Form
             ref={formRef}
             id="mileage-form"
+            // Reset form when edit data changes
+            key={editData?.id ?? 'new'}
             errors={errors}
             onFormSubmit={handleFormSubmit}
             className="mb-4 space-y-4"
           >
             <EntryCommonFields
-              t={t as (key: string) => string}
               defaultDescription={editData?.description}
               defaultDate={
                 editData?.date
@@ -184,8 +185,7 @@ export function MileageForm({
               form="mileage-form"
               onClick={() => formRef.current?.requestSubmit()}
               variant="primary"
-              actionStatus={isSubmitting ? 'executing' : 'idle'}
-              disabled={isSubmitting}
+              actionStatus={submittingStatus}
             >
               {t('ok')}
             </Button>

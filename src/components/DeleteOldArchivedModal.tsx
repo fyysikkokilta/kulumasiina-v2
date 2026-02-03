@@ -34,10 +34,6 @@ export function DeleteOldArchivedModal({
     }
   )
 
-  const handleFormSubmit = () => {
-    deleteOldArchivedEntries()
-  }
-
   return (
     <Dialog.Root open={visible} onOpenChange={(open) => !open && onCancel()}>
       <Dialog.Portal>
@@ -58,7 +54,10 @@ export function DeleteOldArchivedModal({
           <Dialog.Description className="sr-only">
             {t('title')}
           </Dialog.Description>
-          <Form onFormSubmit={handleFormSubmit} className="space-y-4">
+          <Form
+            onFormSubmit={() => deleteOldArchivedEntries()}
+            className="space-y-4"
+          >
             <p className="text-red-600">{t('text_1')}</p>
             <p>{t('text_2')}</p>
             <div className="flex gap-2">

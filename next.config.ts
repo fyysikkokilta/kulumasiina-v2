@@ -8,7 +8,10 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   cacheComponents: true,
   experimental: {
+    globalNotFound: true,
     optimizePackageImports: ['@base-ui/react'],
+    inlineCss: true,
+    rootParams: true,
     serverActions: {
       bodySizeLimit: '8mb'
     }

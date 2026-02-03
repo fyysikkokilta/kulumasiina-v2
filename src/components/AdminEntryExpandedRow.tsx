@@ -1,4 +1,3 @@
-import { Button as BaseButton } from '@base-ui/react/button'
 import dayjs from 'dayjs'
 import { useTranslations } from 'next-intl'
 import { type HookActionStatus, useAction } from 'next-safe-action/hooks'
@@ -7,11 +6,14 @@ import {
   AccountSelect,
   accountSelectTriggerClass
 } from '@/components/AccountSelect'
-import type { EditState } from '@/components/AdminEntryModals'
 import { Button } from '@/components/ui/Button'
 import { Tag } from '@/components/ui/Tag'
 import { updateBookkeepingAccountAction } from '@/lib/actions/updateBookkeepingAccount'
-import type { EntryWithItemsAndMileages } from '@/lib/db/schema'
+import type {
+  EntryWithItemsAndMileages,
+  ItemWithAttachments,
+  Mileage
+} from '@/lib/db/schema'
 import { env } from '@/lib/env'
 import {
   prepareAttachmentPreview,
@@ -28,7 +30,7 @@ interface AdminEntryExpandedRowProps {
   denyStatus?: HookActionStatus
   archiveStatus?: HookActionStatus
   resetStatus?: HookActionStatus
-  setEditState: (state: EditState | null) => void
+  setEditState: (state: ItemWithAttachments | Mileage | null) => void
   setPreviewState: (state: PreviewState) => void
 }
 
@@ -130,13 +132,7 @@ export function AdminEntryExpandedRow({
                     <Button
                       variant="secondary"
                       size="small"
-                      onClick={() =>
-                        setEditState({
-                          type: 'item',
-                          data: item,
-                          entryId: record.id
-                        })
-                      }
+                      onClick={() => setEditState(item)}
                       disabled={!!record.archived}
                     >
                       {t('actions.edit')}
@@ -157,7 +153,7 @@ export function AdminEntryExpandedRow({
                           key={attachment.id}
                           className="flex items-center gap-2 whitespace-nowrap"
                         >
-                          <BaseButton
+                          <Button
                             onClick={() =>
                               onPreviewAttachment(
                                 attachment.fileId,
@@ -166,10 +162,12 @@ export function AdminEntryExpandedRow({
                                 attachment.value
                               )
                             }
-                            className="h-auto p-0 text-xs font-medium text-blue-600 transition-colors hover:text-blue-800 hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
+                            variant="ghost"
+                            size="small"
+                            disabled={!!record.archived}
                           >
                             {attachment.filename}
-                          </BaseButton>
+                          </Button>
                           {attachment.isNotReceipt ? (
                             <Tag color="orange">{t('table.not_receipt')}</Tag>
                           ) : attachment.value ? (
@@ -221,13 +219,7 @@ export function AdminEntryExpandedRow({
                     <Button
                       variant="secondary"
                       size="small"
-                      onClick={() =>
-                        setEditState({
-                          type: 'mileage',
-                          data: mileage,
-                          entryId: record.id
-                        })
-                      }
+                      onClick={() => setEditState(mileage)}
                       disabled={!!record.archived}
                     >
                       {t('actions.edit')}

@@ -1,7 +1,9 @@
+import '@/app/globals.css'
+
 import { Separator } from '@base-ui/react/separator'
-import { notFound } from 'next/navigation'
-import { hasLocale, Locale, NextIntlClientProvider } from 'next-intl'
-import { getTranslations, setRequestLocale } from 'next-intl/server'
+import { locale } from 'next/root-params'
+import { NextIntlClientProvider } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 
 import { Header } from '@/components/Header'
 import { routing } from '@/i18n/routing'
@@ -10,13 +12,8 @@ export const generateStaticParams = async () => {
   return routing.locales.map((locale) => ({ locale }))
 }
 
-export async function generateMetadata({ params }: LayoutProps<'/[locale]'>) {
-  const { locale } = await params
-  const nextIntlLocale = locale as Locale
-  const t = await getTranslations({
-    locale: nextIntlLocale,
-    namespace: 'metadata'
-  })
+export async function generateMetadata() {
+  const t = await getTranslations('metadata')
   return {
     title: t('title'),
     description: t('description')
@@ -24,19 +21,12 @@ export async function generateMetadata({ params }: LayoutProps<'/[locale]'>) {
 }
 
 export default async function LocaleLayout({
-  children,
-  params
+  children
 }: LayoutProps<'/[locale]'>) {
-  const { locale } = await params
-
-  if (!hasLocale(routing.locales, locale)) {
-    notFound()
-  }
-
-  setRequestLocale(locale)
+  const curLocale = await locale()
 
   return (
-    <html lang={locale}>
+    <html lang={curLocale}>
       <body>
         <NextIntlClientProvider>
           <div className="mx-6 my-8 min-h-screen">

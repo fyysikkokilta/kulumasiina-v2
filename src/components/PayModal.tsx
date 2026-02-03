@@ -7,11 +7,13 @@ import { Input } from '@base-ui/react/input'
 import { X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useAction } from 'next-safe-action/hooks'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { z } from 'zod'
 
 import { Button } from '@/components/ui/Button'
 import { payEntriesAction } from '@/lib/actions/payEntries'
 import { inputClass } from '@/utils/form-styles'
+import { dateSchema } from '@/utils/validation'
 
 interface PayModalProps {
   visible: boolean
@@ -32,33 +34,35 @@ export function PayModal({
   >(undefined)
   const t = useTranslations('PayModal')
 
+  useEffect(() => {
+    queueMicrotask(() => setErrors(undefined))
+  }, [entryIds, visible])
+
+  const payFormSchema = z.object({
+    date: dateSchema(t('date_error'))
+  })
+
   const { execute, status } = useAction(payEntriesAction, {
     onSuccess: () => {
       setErrors(undefined)
-      formRef.current?.reset()
       onSuccess?.()
       onCancel()
     }
   })
 
   const handleFormSubmit = (formValues: Record<string, string>) => {
-    const dateStr = formValues.date?.trim()
-    if (!dateStr) {
-      setErrors({ date: t('date_error') })
-      return
-    }
-    const date = new Date(dateStr)
-    if (Number.isNaN(date.getTime())) {
-      setErrors({ date: t('date_error') })
+    const toParse = { date: formValues.date?.trim() ?? '' }
+    const result = payFormSchema.safeParse(toParse)
+    if (!result.success) {
+      setErrors(z.flattenError(result.error).fieldErrors)
       return
     }
     setErrors(undefined)
-    execute({ ids: entryIds, date })
+    execute({ ids: entryIds, date: new Date(result.data.date) })
   }
 
   const handleCancel = () => {
     setErrors(undefined)
-    formRef.current?.reset()
     onCancel()
   }
 
@@ -82,6 +86,7 @@ export function PayModal({
           </Dialog.Title>
           <Form
             ref={formRef}
+            key={visible ? entryIds.join(',') : 'closed'}
             errors={errors}
             onFormSubmit={handleFormSubmit}
             className="mb-4 space-y-4"

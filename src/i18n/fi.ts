@@ -55,13 +55,19 @@ const fi = {
       no_entries: 'Lisää vähintään yksi kulu tai matka!'
     }
   },
-  ItemForm: {
-    add: 'Lisää kulu',
-    edit: 'Muokkaa kulua',
+  EntryCommonFields: {
     description: 'Kuvaus',
     description_placeholder: 'Kuvaus kulusta',
     date: 'Päivämäärä',
     select_date: 'Valitse päivämäärä',
+    account: 'Kirjanpito-tili',
+    select: 'Valitse...',
+    account_placeholder:
+      'Voit jättää tämän tyhjäksi, jos et tiedä oikeaa tiliä.'
+  },
+  ItemForm: {
+    add: 'Lisää kulu',
+    edit: 'Muokkaa kulua',
     attachments: 'Tositteet',
     attachments_help: 'Kuvat ja PDF (max 20 kpl, 8 MB / tiedosto).',
     attachment_file: 'Tiedosto',
@@ -72,15 +78,11 @@ const fi = {
     value_placeholder: '0.00',
     value_unit: '€',
     is_not_receipt: 'Lisäliite',
-    account: 'Kirjanpito-tili',
-    account_placeholder:
-      'Voit jättää tämän tyhjäksi, jos et tiedä oikeaa tiliä.',
     upload_note:
       'Yleisimmät kuvatiedostotyypit ja PDF-tiedostot ovat tuettuja.',
     close: 'Sulje',
     cancel: 'Peruuta',
     ok: 'OK',
-    select: 'Valitse...',
     errors: {
       description: 'Anna kuvaus!',
       date: 'Anna päivämäärä!',
@@ -97,10 +99,6 @@ const fi = {
   MileageForm: {
     add: 'Lisää matka',
     edit: 'Muokkaa matkaa',
-    description: 'Kuvaus',
-    description_placeholder: 'Kuvaus matkasta',
-    date: 'Päivämäärä',
-    select_date: 'Valitse päivämäärä',
     route: 'Reitti',
     route_placeholder: 'kiltahuone -> kohde (osoite) -> kiltahuone',
     distance: 'Matkan pituus',
@@ -108,13 +106,9 @@ const fi = {
     distance_unit: 'km',
     plate_number: 'Rekisterinumero',
     plate_number_placeholder: 'ABC-123',
-    account: 'Kirjanpito-tili',
-    account_placeholder:
-      'Voit jättää tämän tyhjäksi, jos et tiedä oikeaa tiliä.',
     close: 'Sulje',
     cancel: 'Peruuta',
     ok: 'OK',
-    select: 'Valitse...',
     errors: {
       description: 'Anna kuvaus!',
       date: 'Anna päivämäärä!',
@@ -193,8 +187,8 @@ const fi = {
     filter: {
       all_statuses: 'Kaikki tilat',
       all: 'Kaikki',
-      active_only: 'Vain aktiiviset',
-      archived_only: 'Vain arkistoidut',
+      active: 'Aktiiviset',
+      archived: 'Arkistoidut',
       submitted: 'Vastaanotettu',
       approved: 'Hyväksytty',
       paid: 'Maksettu',
@@ -208,7 +202,8 @@ const fi = {
       date_placeholder: 'Päivämäärästä',
       start_date: 'Aloituspäivä',
       end_date: 'Lopetuspäivä',
-      search_in_filters: 'Hae suodattimista'
+      search_in_filters: 'Hae suodattimista',
+      no_names_found: 'Nimeä ei löytynyt'
     },
     actions: {
       pdf: 'PDF',
@@ -235,7 +230,7 @@ const fi = {
       reset_selected: 'Nollaa valitut',
       archive_selected: 'Arkistoi valitut',
       download_zip: 'Lataa ZIP',
-      remove_old_archived: 'Poista vanhat arkistoidut hakemukset',
+      remove_old_archived: 'Poista vanhat arkistoidut hakemukset ({count})',
       copy_clipboard_text: 'Kopioi leikepöydälle'
     }
   },
