@@ -15,7 +15,6 @@ import { Button } from '@/components/ui/Button'
 import { Required } from '@/components/ui/Required'
 import type { FormMileage } from '@/lib/db/schema'
 import { inputClass, textareaClass } from '@/utils/form-styles'
-import { dateSchema } from '@/utils/validation'
 
 interface MileageFormProps {
   visible: boolean
@@ -46,7 +45,7 @@ export function MileageForm({
 
   const mileageFormSchema = z.object({
     description: z.string().min(1, t('errors.description')).max(500),
-    date: dateSchema(t('errors.date')),
+    date: z.iso.date(t('errors.date')).transform((val) => new Date(val)),
     route: z.string().min(1, t('errors.route')).max(500),
     distance: z.coerce
       .number()
@@ -76,14 +75,14 @@ export function MileageForm({
       return
     }
 
-    setErrors({})
+    setErrors(undefined)
     onOk(result.data)
     formRef.current?.reset()
   }
 
   const resetForm = () => {
     formRef.current?.reset()
-    setErrors({})
+    setErrors(undefined)
     onCancel()
   }
 

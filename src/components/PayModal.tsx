@@ -13,7 +13,6 @@ import { z } from 'zod'
 import { Button } from '@/components/ui/Button'
 import { payEntriesAction } from '@/lib/actions/payEntries'
 import { inputClass } from '@/utils/form-styles'
-import { dateSchema } from '@/utils/validation'
 
 interface PayModalProps {
   visible: boolean
@@ -39,7 +38,7 @@ export function PayModal({
   }, [entryIds, visible])
 
   const payFormSchema = z.object({
-    date: dateSchema(t('date_error'))
+    date: z.iso.date(t('date_error')).transform((val) => new Date(val))
   })
 
   const { execute, status } = useAction(payEntriesAction, {
@@ -51,17 +50,19 @@ export function PayModal({
   })
 
   const handleFormSubmit = (formValues: Record<string, string>) => {
-    const toParse = { date: formValues.date?.trim() ?? '' }
+    const toParse = { date: formValues.date }
     const result = payFormSchema.safeParse(toParse)
     if (!result.success) {
       setErrors(z.flattenError(result.error).fieldErrors)
       return
     }
     setErrors(undefined)
-    execute({ ids: entryIds, date: new Date(result.data.date) })
+    execute({ ids: entryIds, date: result.data.date })
+    formRef.current?.reset()
   }
 
   const handleCancel = () => {
+    formRef.current?.reset()
     setErrors(undefined)
     onCancel()
   }

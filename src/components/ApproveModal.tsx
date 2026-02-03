@@ -13,7 +13,6 @@ import { z } from 'zod'
 import { Button } from '@/components/ui/Button'
 import { approveEntriesAction } from '@/lib/actions/approveEntries'
 import { inputClass } from '@/utils/form-styles'
-import { dateSchema } from '@/utils/validation'
 
 interface ApproveModalProps {
   visible: boolean
@@ -39,7 +38,7 @@ export function ApproveModal({
   }, [entryIds, visible])
 
   const approveFormSchema = z.object({
-    date: dateSchema(t('date_error')),
+    date: z.iso.date(t('date_error')).transform((val) => new Date(val)),
     approvalNote: z
       .string()
       .min(1, t('approval_note_error'))
@@ -56,8 +55,8 @@ export function ApproveModal({
 
   const handleFormSubmit = (formValues: Record<string, string>) => {
     const toParse = {
-      date: formValues.date?.trim() ?? '',
-      approvalNote: formValues.approvalNote?.trim() ?? ''
+      date: formValues.date,
+      approvalNote: formValues.approvalNote
     }
     const result = approveFormSchema.safeParse(toParse)
     if (!result.success) {
@@ -67,12 +66,14 @@ export function ApproveModal({
     setErrors(undefined)
     execute({
       ids: entryIds,
-      date: new Date(result.data.date),
+      date: result.data.date,
       approvalNote: result.data.approvalNote
     })
+    formRef.current?.reset()
   }
 
   const handleCancel = () => {
+    formRef.current?.reset()
     setErrors(undefined)
     onCancel()
   }
