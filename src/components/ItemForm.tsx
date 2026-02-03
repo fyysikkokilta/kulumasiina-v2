@@ -22,7 +22,6 @@ import {
   prepareAttachmentPreview,
   type PreviewState
 } from '@/utils/preview-utils'
-import { dateSchema } from '@/utils/validation'
 
 interface ItemFormProps {
   visible: boolean
@@ -114,7 +113,7 @@ export function ItemForm({
 
   const itemFormSchema = z.object({
     description: z.string().min(1, t('errors.description')).max(500),
-    date: dateSchema(t('errors.date')),
+    date: z.iso.date(t('errors.date')).transform((val) => new Date(val)),
     account: z
       .string()
       .max(4, t('errors.account_invalid'))
@@ -177,7 +176,7 @@ export function ItemForm({
       return
     }
 
-    setErrors({})
+    setErrors(undefined)
     onOk(result.data)
     formRef.current?.reset()
     setAttachments([])
@@ -185,7 +184,7 @@ export function ItemForm({
 
   const resetForm = () => {
     formRef.current?.reset()
-    setErrors({})
+    setErrors(undefined)
     setAttachments([])
     onCancel()
   }
