@@ -1,0 +1,290 @@
+diff --git a/build/lib/index.esm.js b/build/lib/index.esm.js
+index 3093c8a503a657b9ba69cc6527add857ae37a05b..7ae475207c005e9919bf12fb8fecadef9b72d43d 100644
+--- a/build/lib/index.esm.js
++++ b/build/lib/index.esm.js
+@@ -111,8 +111,9 @@ function memo(getDeps, fn, opts) {
+   let deps = [];
+   let result;
+   return depArgs => {
++    const isDebug = opts.key && (opts.debug == null ? void 0 : opts.debug());
+     let depTime;
+-    if (opts.key && opts.debug) depTime = Date.now();
++    if (isDebug) depTime = Date.now();
+     const newDeps = getDeps(depArgs);
+     const depsChanged = newDeps.length !== deps.length || newDeps.some((dep, index) => deps[index] !== dep);
+     if (!depsChanged) {
+@@ -120,26 +121,24 @@ function memo(getDeps, fn, opts) {
+     }
+     deps = newDeps;
+     let resultTime;
+-    if (opts.key && opts.debug) resultTime = Date.now();
++    if (isDebug) resultTime = Date.now();
+     result = fn(...newDeps);
+     opts == null || opts.onChange == null || opts.onChange(result);
+-    if (opts.key && opts.debug) {
+-      if (opts != null && opts.debug()) {
+-        const depEndTime = Math.round((Date.now() - depTime) * 100) / 100;
+-        const resultEndTime = Math.round((Date.now() - resultTime) * 100) / 100;
+-        const resultFpsPercentage = resultEndTime / 16;
+-        const pad = (str, num) => {
+-          str = String(str);
+-          while (str.length < num) {
+-            str = ' ' + str;
+-          }
+-          return str;
+-        };
+-        console.info(`%c⏱ ${pad(resultEndTime, 5)} /${pad(depEndTime, 5)} ms`, `
++    if (isDebug) {
++      const depEndTime = Math.round((Date.now() - depTime) * 100) / 100;
++      const resultEndTime = Math.round((Date.now() - resultTime) * 100) / 100;
++      const resultFpsPercentage = resultEndTime / 16;
++      const pad = (str, num) => {
++        str = String(str);
++        while (str.length < num) {
++          str = ' ' + str;
++        }
++        return str;
++      };
++      console.info(`%c⏱ ${pad(resultEndTime, 5)} /${pad(depEndTime, 5)} ms`, `
+             font-size: .6rem;
+             font-weight: bold;
+             color: hsl(${Math.max(0, Math.min(120 - 120 * resultFpsPercentage, 120))}deg 100% 31%);`, opts == null ? void 0 : opts.key);
+-      }
+     }
+     return result;
+   };
+diff --git a/build/lib/index.mjs b/build/lib/index.mjs
+index b00ad055d1f95ef714072fba3ea0a528ea545ded..dfd0eee05ce6eeb8152f1be2bb00c621fe315a36 100644
+--- a/build/lib/index.mjs
++++ b/build/lib/index.mjs
+@@ -111,8 +111,9 @@ function memo(getDeps, fn, opts) {
+   let deps = [];
+   let result;
+   return depArgs => {
++    const isDebug = opts.key && (opts.debug == null ? void 0 : opts.debug());
+     let depTime;
+-    if (opts.key && opts.debug) depTime = Date.now();
++    if (isDebug) depTime = Date.now();
+     const newDeps = getDeps(depArgs);
+     const depsChanged = newDeps.length !== deps.length || newDeps.some((dep, index) => deps[index] !== dep);
+     if (!depsChanged) {
+@@ -120,26 +121,24 @@ function memo(getDeps, fn, opts) {
+     }
+     deps = newDeps;
+     let resultTime;
+-    if (opts.key && opts.debug) resultTime = Date.now();
++    if (isDebug) resultTime = Date.now();
+     result = fn(...newDeps);
+     opts == null || opts.onChange == null || opts.onChange(result);
+-    if (opts.key && opts.debug) {
+-      if (opts != null && opts.debug()) {
+-        const depEndTime = Math.round((Date.now() - depTime) * 100) / 100;
+-        const resultEndTime = Math.round((Date.now() - resultTime) * 100) / 100;
+-        const resultFpsPercentage = resultEndTime / 16;
+-        const pad = (str, num) => {
+-          str = String(str);
+-          while (str.length < num) {
+-            str = ' ' + str;
+-          }
+-          return str;
+-        };
+-        console.info(`%c⏱ ${pad(resultEndTime, 5)} /${pad(depEndTime, 5)} ms`, `
++    if (isDebug) {
++      const depEndTime = Math.round((Date.now() - depTime) * 100) / 100;
++      const resultEndTime = Math.round((Date.now() - resultTime) * 100) / 100;
++      const resultFpsPercentage = resultEndTime / 16;
++      const pad = (str, num) => {
++        str = String(str);
++        while (str.length < num) {
++          str = ' ' + str;
++        }
++        return str;
++      };
++      console.info(`%c⏱ ${pad(resultEndTime, 5)} /${pad(depEndTime, 5)} ms`, `
+             font-size: .6rem;
+             font-weight: bold;
+             color: hsl(${Math.max(0, Math.min(120 - 120 * resultFpsPercentage, 120))}deg 100% 31%);`, opts == null ? void 0 : opts.key);
+-      }
+     }
+     return result;
+   };
+diff --git a/build/lib/utils.js b/build/lib/utils.js
+index a153f7d296446d21cf14aff45c76ba9fc5289242..6f89bc418d12ce6f185bf4d62e59166240dd2058 100644
+--- a/build/lib/utils.js
++++ b/build/lib/utils.js
+@@ -56,8 +56,9 @@ function memo(getDeps, fn, opts) {
+   let deps = [];
+   let result;
+   return depArgs => {
++    const isDebug = opts.key && (opts.debug == null ? void 0 : opts.debug());
+     let depTime;
+-    if (opts.key && opts.debug) depTime = Date.now();
++    if (isDebug) depTime = Date.now();
+     const newDeps = getDeps(depArgs);
+     const depsChanged = newDeps.length !== deps.length || newDeps.some((dep, index) => deps[index] !== dep);
+     if (!depsChanged) {
+@@ -65,26 +66,24 @@ function memo(getDeps, fn, opts) {
+     }
+     deps = newDeps;
+     let resultTime;
+-    if (opts.key && opts.debug) resultTime = Date.now();
++    if (isDebug) resultTime = Date.now();
+     result = fn(...newDeps);
+     opts == null || opts.onChange == null || opts.onChange(result);
+-    if (opts.key && opts.debug) {
+-      if (opts != null && opts.debug()) {
+-        const depEndTime = Math.round((Date.now() - depTime) * 100) / 100;
+-        const resultEndTime = Math.round((Date.now() - resultTime) * 100) / 100;
+-        const resultFpsPercentage = resultEndTime / 16;
+-        const pad = (str, num) => {
+-          str = String(str);
+-          while (str.length < num) {
+-            str = ' ' + str;
+-          }
+-          return str;
+-        };
+-        console.info(`%c⏱ ${pad(resultEndTime, 5)} /${pad(depEndTime, 5)} ms`, `
++    if (isDebug) {
++      const depEndTime = Math.round((Date.now() - depTime) * 100) / 100;
++      const resultEndTime = Math.round((Date.now() - resultTime) * 100) / 100;
++      const resultFpsPercentage = resultEndTime / 16;
++      const pad = (str, num) => {
++        str = String(str);
++        while (str.length < num) {
++          str = ' ' + str;
++        }
++        return str;
++      };
++      console.info(`%c⏱ ${pad(resultEndTime, 5)} /${pad(depEndTime, 5)} ms`, `
+             font-size: .6rem;
+             font-weight: bold;
+             color: hsl(${Math.max(0, Math.min(120 - 120 * resultFpsPercentage, 120))}deg 100% 31%);`, opts == null ? void 0 : opts.key);
+-      }
+     }
+     return result;
+   };
+diff --git a/build/umd/index.development.js b/build/umd/index.development.js
+index a38aa6df0ecd64f8a3ea5b8301464649a2372b90..a6a21787abae38cbd3a14d99f360c1d315a2e89f 100644
+--- a/build/umd/index.development.js
++++ b/build/umd/index.development.js
+@@ -117,8 +117,9 @@
+     let deps = [];
+     let result;
+     return depArgs => {
++      const isDebug = opts.key && (opts.debug == null ? void 0 : opts.debug());
+       let depTime;
+-      if (opts.key && opts.debug) depTime = Date.now();
++      if (isDebug) depTime = Date.now();
+       const newDeps = getDeps(depArgs);
+       const depsChanged = newDeps.length !== deps.length || newDeps.some((dep, index) => deps[index] !== dep);
+       if (!depsChanged) {
+@@ -126,26 +127,24 @@
+       }
+       deps = newDeps;
+       let resultTime;
+-      if (opts.key && opts.debug) resultTime = Date.now();
++      if (isDebug) resultTime = Date.now();
+       result = fn(...newDeps);
+       opts == null || opts.onChange == null || opts.onChange(result);
+-      if (opts.key && opts.debug) {
+-        if (opts != null && opts.debug()) {
+-          const depEndTime = Math.round((Date.now() - depTime) * 100) / 100;
+-          const resultEndTime = Math.round((Date.now() - resultTime) * 100) / 100;
+-          const resultFpsPercentage = resultEndTime / 16;
+-          const pad = (str, num) => {
+-            str = String(str);
+-            while (str.length < num) {
+-              str = ' ' + str;
+-            }
+-            return str;
+-          };
+-          console.info(`%c⏱ ${pad(resultEndTime, 5)} /${pad(depEndTime, 5)} ms`, `
++      if (isDebug) {
++        const depEndTime = Math.round((Date.now() - depTime) * 100) / 100;
++        const resultEndTime = Math.round((Date.now() - resultTime) * 100) / 100;
++        const resultFpsPercentage = resultEndTime / 16;
++        const pad = (str, num) => {
++          str = String(str);
++          while (str.length < num) {
++            str = ' ' + str;
++          }
++          return str;
++        };
++        console.info(`%c⏱ ${pad(resultEndTime, 5)} /${pad(depEndTime, 5)} ms`, `
+             font-size: .6rem;
+             font-weight: bold;
+             color: hsl(${Math.max(0, Math.min(120 - 120 * resultFpsPercentage, 120))}deg 100% 31%);`, opts == null ? void 0 : opts.key);
+-        }
+       }
+       return result;
+     };
+diff --git a/src/utils.ts b/src/utils.ts
+index 77be57d750df2d83e6324c6b1026f17b3a22ff74..5666b8e44d38ef0fd6786de22a0f3e232aa54356 100644
+--- a/src/utils.ts
++++ b/src/utils.ts
+@@ -146,8 +146,9 @@ export function memo<TDeps extends readonly any[], TDepArgs, TResult>(
+   let result: TResult | undefined
+ 
+   return depArgs => {
++    const isDebug = opts.key && opts.debug?.()
+     let depTime: number
+-    if (opts.key && opts.debug) depTime = Date.now()
++    if (isDebug) depTime = Date.now()
+ 
+     const newDeps = getDeps(depArgs)
+ 
+@@ -162,37 +163,35 @@ export function memo<TDeps extends readonly any[], TDepArgs, TResult>(
+     deps = newDeps
+ 
+     let resultTime: number
+-    if (opts.key && opts.debug) resultTime = Date.now()
++    if (isDebug) resultTime = Date.now()
+ 
+     result = fn(...newDeps)
+     opts?.onChange?.(result)
+ 
+-    if (opts.key && opts.debug) {
+-      if (opts?.debug()) {
+-        const depEndTime = Math.round((Date.now() - depTime!) * 100) / 100
+-        const resultEndTime = Math.round((Date.now() - resultTime!) * 100) / 100
+-        const resultFpsPercentage = resultEndTime / 16
+-
+-        const pad = (str: number | string, num: number) => {
+-          str = String(str)
+-          while (str.length < num) {
+-            str = ' ' + str
+-          }
+-          return str
++    if (isDebug) {
++      const depEndTime = Math.round((Date.now() - depTime!) * 100) / 100
++      const resultEndTime = Math.round((Date.now() - resultTime!) * 100) / 100
++      const resultFpsPercentage = resultEndTime / 16
++
++      const pad = (str: number | string, num: number) => {
++        str = String(str)
++        while (str.length < num) {
++          str = ' ' + str
+         }
++        return str
++      }
+ 
+-        console.info(
+-          `%c⏱ ${pad(resultEndTime, 5)} /${pad(depEndTime, 5)} ms`,
+-          `
++      console.info(
++        `%c⏱ ${pad(resultEndTime, 5)} /${pad(depEndTime, 5)} ms`,
++        `
+             font-size: .6rem;
+             font-weight: bold;
+             color: hsl(${Math.max(
+               0,
+               Math.min(120 - 120 * resultFpsPercentage, 120)
+             )}deg 100% 31%);`,
+-          opts?.key
+-        )
+-      }
++        opts?.key
++      )
+     }
+ 
+     return result!

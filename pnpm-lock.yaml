@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@tanstack/table-core':
+    hash: 4615589fb3a0ee7875a912c12cc543a2194b9c859ac31267f4e759483e967553
+    path: patches/@tanstack__table-core.patch
+
 importers:
 
   .:
@@ -4825,11 +4830,11 @@ snapshots:
 
   '@tanstack/react-table@8.21.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
-      '@tanstack/table-core': 8.21.3
+      '@tanstack/table-core': 8.21.3(patch_hash=4615589fb3a0ee7875a912c12cc543a2194b9c859ac31267f4e759483e967553)
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
 
-  '@tanstack/table-core@8.21.3': {}
+  '@tanstack/table-core@8.21.3(patch_hash=4615589fb3a0ee7875a912c12cc543a2194b9c859ac31267f4e759483e967553)': {}
 
   '@tybys/wasm-util@0.10.1':
     dependencies:

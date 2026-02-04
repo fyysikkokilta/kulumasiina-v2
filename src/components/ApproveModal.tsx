@@ -107,11 +107,7 @@ export function ApproveModal({
               <Field.Label className="mb-1.5 block text-sm font-medium text-gray-700">
                 {t('date')}
               </Field.Label>
-              <Input
-                type="date"
-                defaultValue={new Date().toISOString().slice(0, 10)}
-                className={inputClass}
-              />
+              <Input type="date" className={inputClass} />
               <Field.Error className="mt-1 text-sm text-red-600" />
             </Field.Root>
 
@@ -120,7 +116,6 @@ export function ApproveModal({
                 {t('approval_note')}
               </Field.Label>
               <Input
-                defaultValue=""
                 maxLength={100}
                 placeholder={t('approval_note_placeholder')}
                 className={inputClass}

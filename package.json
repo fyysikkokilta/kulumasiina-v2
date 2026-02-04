@@ -79,7 +79,10 @@
       "sharp",
       "simple-git-hooks",
       "unrs-resolver"
-    ]
+    ],
+    "patchedDependencies": {
+      "@tanstack/table-core": "patches/@tanstack__table-core.patch"
+    }
   },
   "packageManager": "pnpm@10.28.2"
 }
