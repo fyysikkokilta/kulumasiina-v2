@@ -1,15 +1,15 @@
-# Kulumasiina v2 - Next.js 15 with Drizzle ORM
+# Kulumasiina v2
 
 A modern expense management system built with Next.js 15, featuring server-side rendering, server actions, Drizzle ORM, and Tailwind CSS.
 
 ## Features
 
-- **Next.js 15** with App Router and Turbo mode
-- **React 19** with compatibility patches
+- **Next.js 16** with App Router
+- **React 19**
 - **Drizzle ORM** with PostgreSQL database
 - **Server Actions** using next-safe-action for all mutating operations
 - **Server Components** for data fetching
-- **Tailwind CSS v4** for styling (with Ant Design components)
+- **Tailwind CSS** for styling
 - **TypeScript** for type safety
 - **Internationalization** (Finnish/English) using next-intl
 - **Google OAuth** authentication
@@ -56,7 +56,7 @@ All mutating operations are handled by server actions:
 ### Styling
 
 - **Tailwind CSS** for utility-first styling
-- **Ant Design** components for UI elements
+- **Base UI** components for UI elements
 - **Responsive** design with mobile support
 
 ## Development
@@ -161,31 +161,7 @@ The application uses the following main tables:
 - **mileages** - Mileage claims
 - **attachments** - File attachments for items
 
-All tables include proper PostgreSQL types with `serial` primary keys, `timestamp` columns, and `numeric` types for financial data.
-
-## Migration from Python Backend
-
-This project has been completely transformed:
-
-### Key Changes:
-
-1. **Backend**: FastAPI Python → Next.js 15 Server Actions
-2. **Database**: Python SQLAlchemy → Drizzle ORM with PostgreSQL
-3. **Authentication**: JWT tokens → Session-based with cookies
-4. **API**: REST endpoints → Server Actions
-5. **Routing**: React Router → Next.js App Router
-6. **State Management**: Redux → Server state + React state
-7. **Styling**: CSS → Tailwind CSS (with Ant Design)
-
-### Preserved Features:
-
-- All expense management functionality
-- Admin panel with entry management
-- Google OAuth authentication
-- Ant Design components
-- Internationalization (Finnish/English)
-- TypeScript type safety
-- File upload and attachment handling
+All tables include proper PostgreSQL types with `uuid` primary keys, `timestamp` columns, and `numeric` types for financial data.
 
 ## Deployment
 
@@ -252,12 +228,15 @@ curl -X POST "https://yourdomain.com/api/cleanup-orphaned-files?secret=your_secr
 ```
 
 **Response:**
+
 - On success: `{ success: true, deletedCount: N, deleted: [ ...fileIds ] }`
 - On error: `{ error: "..." }`
 
 **Security:**
+
 - Only requests with the correct secret will be able to trigger the cleanup.
 
 #### Security
+
 - The cleanup API route is protected by the secret and is only accessible from inside the container (localhost) unless you expose it intentionally.
 - Make sure to set a strong value for `FILE_CLEANUP_SECRET` in your production environment.
