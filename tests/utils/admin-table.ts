@@ -3,7 +3,11 @@ import { expect } from '@playwright/test'
 
 export const gotoAdmin = async (page: Page) => {
   await page.goto('/admin')
-  await expect(page.locator('table')).toBeVisible()
+  await expect(
+    page
+      .locator('table')
+      .filter({ has: page.locator('tbody tr[data-row-key]') })
+  ).toBeVisible()
 }
 
 export const rowById = (page: Page, entryId: string) =>
