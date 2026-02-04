@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from 'react'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/Button'
+import { Required } from '@/components/ui/Required'
 import { payEntriesAction } from '@/lib/actions/payEntries'
 import { inputClass } from '@/utils/form-styles'
 
@@ -95,6 +96,7 @@ export function PayModal({
             <Field.Root name="date">
               <Field.Label className="mb-1.5 block text-sm font-medium text-gray-700">
                 {t('date')}
+                <Required />
               </Field.Label>
               <Input type="date" className={inputClass} />
               <Field.Error className="mt-1 text-sm text-red-600" />

@@ -30,6 +30,7 @@ test.describe('admin actions', () => {
     await expect(
       modal.getByRole('heading', { name: 'Approve Entries' })
     ).toBeVisible()
+    await modal.getByLabel('Approval Date').fill('2025-01-15')
     await modal.getByLabel('Approval Note').fill('Playwright approval')
     await modal.getByRole('button', { name: 'Approve' }).click()
 
@@ -55,6 +56,7 @@ test.describe('admin actions', () => {
     await expect(
       modal.getByRole('heading', { name: 'Mark as Paid' })
     ).toBeVisible()
+    await modal.getByLabel('Payment Date').fill('2025-01-15')
     await modal.getByRole('button', { name: 'Mark as Paid' }).click()
 
     await ensureRowExpanded(approvedRow)
@@ -113,6 +115,7 @@ test.describe('admin actions', () => {
     await expect(
       modal.getByRole('heading', { name: 'Approve Entries' })
     ).toBeVisible()
+    await modal.getByLabel('Approval Date').fill('2025-01-15')
     await modal.getByLabel('Approval Note').fill('Bulk approval')
     await modal.getByRole('button', { name: 'Approve' }).click()
 
