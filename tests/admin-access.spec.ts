@@ -18,5 +18,9 @@ test('admin page renders when authenticated', async ({ page }) => {
   await seedTestData()
   await loginAdmin(page)
   await page.goto('/admin')
-  await expect(page.locator('table')).toBeVisible()
+  await expect(
+    page
+      .locator('table')
+      .filter({ has: page.locator('tbody tr[data-row-key]') })
+  ).toBeVisible()
 })
