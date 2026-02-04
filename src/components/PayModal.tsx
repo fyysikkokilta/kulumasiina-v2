@@ -96,11 +96,7 @@ export function PayModal({
               <Field.Label className="mb-1.5 block text-sm font-medium text-gray-700">
                 {t('date')}
               </Field.Label>
-              <Input
-                type="date"
-                defaultValue={new Date().toISOString().slice(0, 10)}
-                className={inputClass}
-              />
+              <Input type="date" className={inputClass} />
               <Field.Error className="mt-1 text-sm text-red-600" />
             </Field.Root>
 

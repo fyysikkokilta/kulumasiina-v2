@@ -1,19 +1,12 @@
-import dayjs from 'dayjs'
-import { locale } from 'next/root-params'
+import { Suspense } from 'react'
 
-import { AdminEntryTable } from '@/components/AdminEntryTable'
-import { getAdminEntries } from '@/data/getAdminEntries'
-import { env } from '@/lib/env'
+import { AdminContent } from '@/components/AdminContent'
+import { AdminEntryTableSkeleton } from '@/components/AdminEntryTableSkeleton'
 
 export default async function AdminPage() {
-  const curLocale = await locale()
-
-  const entries = await getAdminEntries(curLocale)
-  const oldArchivedCutoff = dayjs()
-    .subtract(env.NEXT_PUBLIC_ARCHIVED_ENTRIES_AGE_LIMIT_DAYS, 'days')
-    .toISOString()
-
   return (
-    <AdminEntryTable entries={entries} oldArchivedCutoff={oldArchivedCutoff} />
+    <Suspense fallback={<AdminEntryTableSkeleton />}>
+      <AdminContent />
+    </Suspense>
   )
 }
