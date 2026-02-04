@@ -80,6 +80,8 @@ test.describe('admin actions', () => {
       .first()
       .click()
 
+    await expect(statusTag(paidRow, 'PAID')).not.toBeVisible()
+
     await applyArchivedFilter(page)
     await ensureRowExpanded(paidRow)
     await expect(statusTag(paidRow, 'PAID')).toBeVisible()
@@ -159,9 +161,10 @@ test.describe('admin actions', () => {
   test('filter by status shows only matching rows', async ({ page }) => {
     await applyStatusFilter(page, 'Submitted')
 
+    await expect(rowById(page, testEntryIds.approved)).not.toBeVisible()
+
     await expect(rowById(page, testEntryIds.submitted)).toBeVisible()
     await expect(rowById(page, testEntryIds.submittedSecond)).toBeVisible()
-    await expect(rowById(page, testEntryIds.approved)).not.toBeVisible()
   })
 
   test('approve modal shows validation when approval note is empty', async ({
