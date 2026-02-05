@@ -20,7 +20,7 @@ import { getFile } from '@/lib/storage'
 import { isPdf } from '@/utils/validation'
 
 // Helper function to format dates in Finnish timezone
-function formatDateInFinnishTimezone(date: Date): string {
+function formatDateInFinnishTimezone(date: Date) {
   return date.toLocaleDateString('fi-FI', {
     timeZone: 'Europe/Helsinki',
     year: 'numeric',

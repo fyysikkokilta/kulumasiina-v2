@@ -103,6 +103,6 @@ const PDF_MAGIC_BYTES = Buffer.from([0x25, 0x50, 0x44, 0x46]) // %PDF
 /**
  * Detect if file is PDF based on magic bytes
  */
-export function isPdf(data: Buffer): boolean {
+export function isPdf(data: Buffer) {
   return data.length >= 4 && data.subarray(0, 4).equals(PDF_MAGIC_BYTES)
 }

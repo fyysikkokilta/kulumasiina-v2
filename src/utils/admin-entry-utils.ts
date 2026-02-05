@@ -22,10 +22,7 @@ export const STATUS_COLORS: Record<
  * the given cutoff. Pass cutoffIso from the server to avoid using current time
  * in a Client Component (Next.js prerender).
  */
-export function isOldArchived(
-  entry: AdminEntries[number],
-  cutoffIso: string
-): boolean {
+export function isOldArchived(entry: AdminEntries[number], cutoffIso: string) {
   if (!entry.archived) return false
   const date =
     entry.status === 'paid'
@@ -35,7 +32,7 @@ export function isOldArchived(
   return !!(date && date.isBefore(cutoff))
 }
 
-export function formatEntryForClipboard(entry: EntryRow): string {
+export function formatEntryForClipboard(entry: EntryRow) {
   const accounts = [
     ...entry.items.map((i) => i.account),
     ...entry.mileages.map((m) => m.account)

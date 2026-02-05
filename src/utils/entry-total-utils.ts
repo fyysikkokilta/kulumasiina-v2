@@ -11,7 +11,7 @@ export type ItemLike = {
 export type MileageLike = Pick<NewMileage, 'distance'>
 
 /** Sum of attachment values (excluding isNotReceipt) across items */
-export function itemTotal(items: ItemLike[]): number {
+export function itemTotal(items: ItemLike[]) {
   return items.reduce((acc, item) => {
     return (
       acc +
@@ -24,7 +24,7 @@ export function itemTotal(items: ItemLike[]): number {
 }
 
 /** Sum of distance × rate across mileages */
-export function mileageTotal(mileages: MileageLike[]): number {
+export function mileageTotal(mileages: MileageLike[]) {
   const mileageRate = env.NEXT_PUBLIC_MILEAGE_REIMBURSEMENT_RATE
   return mileages.reduce((acc, m) => acc + m.distance * mileageRate, 0)
 }
@@ -33,7 +33,7 @@ export function mileageTotal(mileages: MileageLike[]): number {
 export function calculateFormEntriesTotal(
   items: ItemLike[],
   mileages: MileageLike[]
-): number {
+) {
   const itemTotalValue = itemTotal(items)
   const mileageTotalValue = mileageTotal(mileages)
   return itemTotalValue + mileageTotalValue
