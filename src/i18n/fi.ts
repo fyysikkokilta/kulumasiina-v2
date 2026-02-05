@@ -93,7 +93,8 @@ const fi = {
       attachments_max: 'Enintään 20 tositetta per kulu',
       at_least_one_value:
         'Vähintään yhdellä tositteella tulee olla rahallinen arvo!',
-      upload_failed: 'Tiedoston lataus epäonnistui. Yritä uudelleen.'
+      upload_failed: 'Tiedoston lataus epäonnistui. Yritä uudelleen.',
+      file_too_large: 'Tiedoston on oltava enintään 8 MB.'
     }
   },
   MileageForm: {
@@ -268,7 +269,8 @@ const fi = {
   },
   PreviewModal: {
     close: 'Sulje',
-    is_not_receipt: 'Lisäliite'
+    is_not_receipt: 'Lisäliite',
+    loading: 'Ladataan…'
   }
 } as const
 

@@ -92,7 +92,8 @@ const en = {
       attachments_min: 'Please add at least one attachment!',
       attachments_max: 'Maximum 20 attachments per item',
       at_least_one_value: 'At least one attachment must have a monetary value!',
-      upload_failed: 'Upload failed. Please try again.'
+      upload_failed: 'Upload failed. Please try again.',
+      file_too_large: 'File must be at most 8 MB.'
     }
   },
   MileageForm: {
@@ -265,7 +266,8 @@ const en = {
   },
   PreviewModal: {
     close: 'Close',
-    is_not_receipt: 'Extra attachment'
+    is_not_receipt: 'Extra attachment',
+    loading: 'Loading…'
   }
 } as const
 

@@ -1,10 +1,10 @@
-export interface PreviewState {
+export type PreviewState = Promise<{
   url: string
   title: string
   isImage: boolean
   isNotReceipt: boolean
   value: number | null
-}
+}>
 
 export interface PrepareAttachmentPreviewParams {
   fileId: string
@@ -24,7 +24,7 @@ export async function prepareAttachmentPreview({
   isNotReceipt,
   value,
   fetchOptions
-}: PrepareAttachmentPreviewParams): Promise<PreviewState> {
+}: PrepareAttachmentPreviewParams) {
   const res = await fetch(`/api/attachment/${fileId}`, fetchOptions)
   const blob = await res.blob()
   const url = URL.createObjectURL(blob)

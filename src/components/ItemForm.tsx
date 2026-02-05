@@ -23,6 +23,8 @@ import {
   type PreviewState
 } from '@/utils/preview-utils'
 
+const MAX_ATTACHMENT_SIZE_BYTES = 8 * 1024 * 1024 // 8 MB
+
 interface ItemFormProps {
   visible: boolean
   onOk: (item: FormItemWithAttachments) => void
@@ -59,10 +61,12 @@ export function ItemForm({
   )
 
   const [previewState, setPreviewState] = useState<PreviewState | null>(null)
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
   useEffect(() => {
     queueMicrotask(() => {
       setErrors(undefined)
+      setUploadError(null)
       setPreviewState(null)
       setAttachments(
         editData?.attachments?.map((a) => ({
@@ -77,6 +81,7 @@ export function ItemForm({
     uploadAttachmentAction,
     {
       onSuccess: (result) => {
+        setUploadError(null)
         if (result?.data) {
           setAttachments((prev) => [
             ...prev,
@@ -84,7 +89,9 @@ export function ItemForm({
           ])
         }
       },
-      onError: () => {}
+      onError: () => {
+        setUploadError(t('errors.upload_failed'))
+      }
     }
   )
 
@@ -102,13 +109,14 @@ export function ItemForm({
         ) as HTMLInputElement
       )?.value ?? null
     )
-    const state = await prepareAttachmentPreview({
-      fileId: slot.fileId,
-      filename: slot.filename,
-      isNotReceipt,
-      value
-    })
-    setPreviewState(state)
+    setPreviewState(
+      prepareAttachmentPreview({
+        fileId: slot.fileId,
+        filename: slot.filename,
+        isNotReceipt,
+        value
+      })
+    )
   }
 
   const itemFormSchema = z.object({
@@ -177,6 +185,7 @@ export function ItemForm({
     }
 
     setErrors(undefined)
+    setUploadError(null)
     onOk(result.data)
     formRef.current?.reset()
     setAttachments([])
@@ -185,6 +194,7 @@ export function ItemForm({
   const resetForm = () => {
     formRef.current?.reset()
     setErrors(undefined)
+    setUploadError(null)
     setAttachments([])
     onCancel()
   }
@@ -341,13 +351,18 @@ export function ItemForm({
                         tabIndex={-1}
                         onChange={(e) => {
                           const file = e.target.files?.[0]
-                          if (file) {
-                            uploadFileAction({
-                              file,
-                              mimeType: file.type
-                            })
+                          if (!file) return
+                          if (file.size > MAX_ATTACHMENT_SIZE_BYTES) {
+                            setUploadError(t('errors.file_too_large'))
                             e.target.value = ''
+                            return
                           }
+                          setUploadError(null)
+                          uploadFileAction({
+                            file,
+                            mimeType: file.type
+                          })
+                          e.target.value = ''
                         }}
                       />
                       <Button
@@ -360,9 +375,9 @@ export function ItemForm({
                         {t('upload')}
                       </Button>
                     </div>
-                    {uploadFileStatus === 'hasErrored' && (
+                    {(uploadFileStatus === 'hasErrored' || uploadError) && (
                       <p className="text-sm text-red-600" role="alert">
-                        {t('errors.upload_failed')}
+                        {uploadError ?? t('errors.upload_failed')}
                       </p>
                     )}
                   </div>

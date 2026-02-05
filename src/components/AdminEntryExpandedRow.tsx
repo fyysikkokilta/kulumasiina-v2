@@ -31,7 +31,7 @@ interface AdminEntryExpandedRowProps {
   archiveStatus?: HookActionStatus
   resetStatus?: HookActionStatus
   setEditState: (state: ItemWithAttachments | Mileage | null) => void
-  setPreviewState: (state: PreviewState) => void
+  setPreviewState: (state: PreviewState | null) => void
 }
 
 export function AdminEntryExpandedRow({
@@ -55,14 +55,15 @@ export function AdminEntryExpandedRow({
     isNotReceipt: boolean,
     value: number | null
   ) => {
-    const state = await prepareAttachmentPreview({
-      fileId,
-      filename,
-      isNotReceipt,
-      value,
-      fetchOptions: { next: { revalidate: 60 * 60 * 24 } }
-    })
-    setPreviewState(state)
+    setPreviewState(
+      prepareAttachmentPreview({
+        fileId,
+        filename,
+        isNotReceipt,
+        value,
+        fetchOptions: { next: { revalidate: 60 * 60 * 24 } }
+      })
+    )
   }
 
   const {
@@ -162,7 +163,7 @@ export function AdminEntryExpandedRow({
                                 attachment.value
                               )
                             }
-                            variant="ghost"
+                            variant="secondary"
                             size="small"
                             disabled={!!record.archived}
                           >
