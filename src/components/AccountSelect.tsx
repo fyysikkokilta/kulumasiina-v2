@@ -96,6 +96,7 @@ export function AccountSelect({
         <Select.Positioner
           sideOffset={4}
           positionMethod="fixed"
+          alignItemWithTrigger={false}
           className="z-110"
         >
           <Select.Popup className="z-110 max-h-[300px] overflow-auto rounded-md border border-gray-200 bg-white shadow-lg">
