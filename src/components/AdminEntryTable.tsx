@@ -64,60 +64,40 @@ export function AdminEntryTable({
 }) {
   const t = useTranslations('AdminEntryTable')
 
-  const [columnFilters, setColumnFilters] = useState<
-    { id: string; value: unknown }[]
-  >(DEFAULT_COLUMN_FILTERS)
-  const [sorting, setSorting] =
-    useState<{ id: string; desc: boolean }[]>(DEFAULT_SORTING)
+  const [columnFilters, setColumnFilters] =
+    useState<{ id: string; value: unknown }[]>(DEFAULT_COLUMN_FILTERS)
+  const [sorting, setSorting] = useState<{ id: string; desc: boolean }[]>(DEFAULT_SORTING)
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 })
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({})
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [approveModalVisible, setApproveModalVisible] = useState(false)
   const [payModalVisible, setPayModalVisible] = useState(false)
-  const [deleteOldArchivedModalVisible, setDeleteOldArchivedModalVisible] =
-    useState(false)
+  const [deleteOldArchivedModalVisible, setDeleteOldArchivedModalVisible] = useState(false)
   const [modalEntryIds, setModalEntryIds] = useState<string[]>([])
-  const [editState, setEditState] = useState<
-    ItemWithAttachments | Mileage | null
-  >(null)
+  const [editState, setEditState] = useState<ItemWithAttachments | Mileage | null>(null)
   const [previewState, setPreviewState] = useState<PreviewState | null>(null)
 
-  const { execute: denyEntries, status: denyStatus } = useAction(
-    denyEntriesAction,
-    {
-      onSuccess: () => setSelectedRowKeys([]),
-      onError: () => {}
-    }
-  )
-  const { execute: archiveEntries, status: archiveStatus } = useAction(
-    archiveEntriesAction,
-    {
-      onSuccess: () => setSelectedRowKeys([]),
-      onError: () => {}
-    }
-  )
-  const { execute: resetEntries, status: resetStatus } = useAction(
-    resetEntriesAction,
-    {
-      onSuccess: () => setSelectedRowKeys([]),
-      onError: () => {}
-    }
-  )
-  const { execute: updateItem, status: updateItemStatus } = useAction(
-    updateItemAction,
-    {
-      onSuccess: () => setEditState(null),
-      onError: () => {}
-    }
-  )
-  const { execute: updateMileage, status: updateMileageStatus } = useAction(
-    updateMileageAction,
-    {
-      onSuccess: () => setEditState(null),
-      onError: () => {}
-    }
-  )
+  const { execute: denyEntries, status: denyStatus } = useAction(denyEntriesAction, {
+    onSuccess: () => setSelectedRowKeys([]),
+    onError: () => {}
+  })
+  const { execute: archiveEntries, status: archiveStatus } = useAction(archiveEntriesAction, {
+    onSuccess: () => setSelectedRowKeys([]),
+    onError: () => {}
+  })
+  const { execute: resetEntries, status: resetStatus } = useAction(resetEntriesAction, {
+    onSuccess: () => setSelectedRowKeys([]),
+    onError: () => {}
+  })
+  const { execute: updateItem, status: updateItemStatus } = useAction(updateItemAction, {
+    onSuccess: () => setEditState(null),
+    onError: () => {}
+  })
+  const { execute: updateMileage, status: updateMileageStatus } = useAction(updateMileageAction, {
+    onSuccess: () => setEditState(null),
+    onError: () => {}
+  })
 
   const tableData = useMemo(
     () =>
@@ -141,8 +121,7 @@ export function AdminEntryTable({
     (status: keyof typeof STATUS_COLORS) => t(`status.${status}`),
     [t]
   )
-  const getTargetIds = (ids?: string[]) =>
-    ids ?? selectedRowKeys.map((k) => String(k))
+  const getTargetIds = (ids?: string[]) => ids ?? selectedRowKeys.map((k) => String(k))
 
   const handleItemUpdate = (itemData: FormItemWithAttachments) => {
     if (!editState || !editState.id) return
@@ -168,10 +147,8 @@ export function AdminEntryTable({
     setModalEntryIds(getTargetIds(ids))
     setPayModalVisible(true)
   }
-  const handleArchive = (ids?: string[]) =>
-    archiveEntries({ ids: getTargetIds(ids) })
-  const handleReset = (ids?: string[]) =>
-    resetEntries({ ids: getTargetIds(ids) })
+  const handleArchive = (ids?: string[]) => archiveEntries({ ids: getTargetIds(ids) })
+  const handleReset = (ids?: string[]) => resetEntries({ ids: getTargetIds(ids) })
   const handleMultiZipDownload = () => {
     const ids = selectedRowKeys.map((k) => String(k))
     window.open(`/api/entry/multi/zip?entry_ids=${ids.join(',')}`)
@@ -197,7 +174,7 @@ export function AdminEntryTable({
   )
 
   const uniqueNames = useMemo(
-    () => [...new Set(tableData.map((e) => e.name))].sort(),
+    () => [...new Set(tableData.map((e) => e.name))].toSorted(),
     [tableData]
   )
 
@@ -212,9 +189,7 @@ export function AdminEntryTable({
     if (f.id === 'archived') return value.length !== 1 || value[0] !== 'active'
   })
 
-  const hasSorting = sorting.some(
-    (s) => s.id !== 'submissionDate' || s.desc !== true
-  )
+  const hasSorting = sorting.some((s) => s.id !== 'submissionDate' || s.desc !== true)
 
   const clearFilters = useCallback(() => {
     setSorting(DEFAULT_SORTING)
@@ -260,8 +235,7 @@ export function AdminEntryTable({
     onSortingChange: (updater) => setSorting(updater),
     onPaginationChange: (updater) => setPagination(updater),
     onRowSelectionChange: (updater) => {
-      const next =
-        typeof updater === 'function' ? updater(rowSelectionState) : updater
+      const next = typeof updater === 'function' ? updater(rowSelectionState) : updater
       setSelectedRowKeys(Object.keys(next).filter((k) => next[k]))
     },
     getCoreRowModel: getCoreRowModel(),
@@ -271,22 +245,15 @@ export function AdminEntryTable({
     enableRowSelection: (row) => {
       if (selectedRowKeys.length === 0) return true
       const statuses = [
-        ...new Set(
-          tableData
-            .filter((e) => selectedRowKeys.includes(e.key))
-            .map((e) => e.status)
-        )
+        ...new Set(tableData.filter((e) => selectedRowKeys.includes(e.key)).map((e) => e.status))
       ]
       return statuses.includes(row.original.status)
     }
   })
 
-  const selectedEntries = tableData.filter((e) =>
-    selectedRowKeys.includes(e.key)
-  )
+  const selectedEntries = tableData.filter((e) => selectedRowKeys.includes(e.key))
   const selectedStatuses = [...new Set(selectedEntries.map((e) => e.status))]
-  const selectedStatus =
-    selectedStatuses.length === 1 ? selectedStatuses[0] : null
+  const selectedStatus = selectedStatuses.length === 1 ? selectedStatuses[0] : null
   const allSelectedPaid = selectedStatus === 'paid'
   const allSelectedSubmitted = selectedStatus === 'submitted'
   const allSelectedApproved = selectedStatus === 'approved'
@@ -415,17 +382,16 @@ export function AdminEntryTable({
                 {t('bulk_actions.mark_as_paid')}
               </Button>
             )}
-            {(allSelectedApproved || allSelectedDenied || allSelectedPaid) &&
-              noneArchived && (
-                <Button
-                  variant="secondary"
-                  onClick={() => handleReset()}
-                  disabled={selectedRowKeys.length === 0}
-                  actionStatus={resetStatus}
-                >
-                  {t('bulk_actions.reset_selected')}
-                </Button>
-              )}
+            {(allSelectedApproved || allSelectedDenied || allSelectedPaid) && noneArchived && (
+              <Button
+                variant="secondary"
+                onClick={() => handleReset()}
+                disabled={selectedRowKeys.length === 0}
+                actionStatus={resetStatus}
+              >
+                {t('bulk_actions.reset_selected')}
+              </Button>
+            )}
             {(allSelectedDenied || allSelectedPaid) && noneArchived && (
               <Button
                 variant="danger"
@@ -448,11 +414,7 @@ export function AdminEntryTable({
               </Button>
             )}
             {selectedRowKeys.length > 0 && (
-              <Button
-                variant="secondary"
-                type="button"
-                onClick={handleCopyClipboardText}
-              >
+              <Button variant="secondary" type="button" onClick={handleCopyClipboardText}>
                 {t('bulk_actions.copy_clipboard_text')}
               </Button>
             )}
@@ -488,10 +450,7 @@ export function AdminEntryTable({
                     >
                       {header.isPlaceholder
                         ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                        : flexRender(header.column.columnDef.header, header.getContext())}
                     </th>
                   ))}
                 </tr>
@@ -500,10 +459,7 @@ export function AdminEntryTable({
             <tbody className="divide-y divide-gray-200 bg-white">
               {pageRows.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={columns.length}
-                    className="px-3 py-8 text-center text-gray-500"
-                  >
+                  <td colSpan={columns.length} className="px-3 py-8 text-center text-gray-500">
                     {t('table_pagination.no_data_available')}
                   </td>
                 </tr>
@@ -512,28 +468,19 @@ export function AdminEntryTable({
                   const isExpanded = !!expandedIds[row.original.id]
                   return (
                     <Fragment key={row.id}>
-                      <tr
-                        className="hover:bg-gray-50"
-                        data-row-key={row.original.id}
-                      >
+                      <tr className="hover:bg-gray-50" data-row-key={row.original.id}>
                         {row.getVisibleCells().map((cell) => (
                           <td
                             key={cell.id}
                             className="border-b border-gray-100 px-3 py-2 text-sm text-gray-900"
                           >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext()
-                            )}
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
                           </td>
                         ))}
                       </tr>
                       {isExpanded && (
                         <tr>
-                          <td
-                            colSpan={columns.length}
-                            className="bg-gray-50/50 p-3"
-                          >
+                          <td colSpan={columns.length} className="bg-gray-50/50 p-3">
                             <AdminEntryExpandedRow
                               record={row.original}
                               onApprove={handleApprove}
@@ -592,16 +539,8 @@ export function AdminEntryTable({
                       <ChevronDown className="h-3.5 w-3" aria-hidden />
                     </Select.Icon>
                   </Select.Trigger>
-                  <Select.Portal
-                    container={
-                      typeof document !== 'undefined' ? document.body : null
-                    }
-                  >
-                    <Select.Positioner
-                      sideOffset={4}
-                      positionMethod="fixed"
-                      className="z-110"
-                    >
+                  <Select.Portal container={typeof document !== 'undefined' ? document.body : null}>
+                    <Select.Positioner sideOffset={4} positionMethod="fixed" className="z-110">
                       <Select.Popup className="z-110 max-h-[300px] overflow-auto rounded-md border border-gray-200 bg-white shadow-lg">
                         <Select.List>
                           {PAGE_SIZES.map((size) => (
@@ -630,8 +569,7 @@ export function AdminEntryTable({
                   {t('table_pagination.previous')}
                 </Button>
                 <span className="text-sm text-gray-700">
-                  {t('table_pagination.page')} {safePage + 1}{' '}
-                  {t('table_pagination.of')} {pageCount}
+                  {t('table_pagination.page')} {safePage + 1} {t('table_pagination.of')} {pageCount}
                 </span>
                 <Button
                   variant="secondary"

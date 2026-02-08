@@ -27,9 +27,7 @@ test.describe('admin actions', () => {
     await page.getByRole('button', { name: 'Approve' }).first().click()
 
     const modal = page.getByRole('dialog')
-    await expect(
-      modal.getByRole('heading', { name: 'Approve Entries' })
-    ).toBeVisible()
+    await expect(modal.getByRole('heading', { name: 'Approve Entries' })).toBeVisible()
     await modal.getByLabel('Approval Date').fill('2025-01-15')
     await modal.getByLabel('Approval Note').fill('Playwright approval')
     await modal.getByRole('button', { name: 'Approve' }).click()
@@ -53,9 +51,7 @@ test.describe('admin actions', () => {
     await page.getByRole('button', { name: 'Pay' }).first().click()
 
     const modal = page.getByRole('dialog')
-    await expect(
-      modal.getByRole('heading', { name: 'Mark as Paid' })
-    ).toBeVisible()
+    await expect(modal.getByRole('heading', { name: 'Mark as Paid' })).toBeVisible()
     await modal.getByLabel('Payment Date').fill('2025-01-15')
     await modal.getByRole('button', { name: 'Mark as Paid' }).click()
 
@@ -75,10 +71,7 @@ test.describe('admin actions', () => {
   test('can archive a paid entry', async ({ page }) => {
     const paidRow = rowById(page, testEntryIds.paid)
     await ensureRowExpanded(paidRow)
-    await page
-      .getByRole('button', { name: 'Archive', exact: true })
-      .first()
-      .click()
+    await page.getByRole('button', { name: 'Archive', exact: true }).first().click()
 
     await expect(statusTag(paidRow, 'PAID')).not.toBeVisible()
 
@@ -99,9 +92,7 @@ test.describe('admin actions', () => {
     await selectRow(submittedRows.nth(1))
 
     await expect(selectionBanner(page)).toContainText('2 entries selected')
-    await expect(
-      page.getByRole('button', { name: /Copy to clipboard/ })
-    ).toBeVisible()
+    await expect(page.getByRole('button', { name: /Copy to clipboard/ })).toBeVisible()
   })
 
   test('bulk approve selected entries', async ({ page }) => {
@@ -114,36 +105,25 @@ test.describe('admin actions', () => {
 
     await page.getByRole('button', { name: /Approve Selected/ }).click()
     const modal = page.getByRole('dialog')
-    await expect(
-      modal.getByRole('heading', { name: 'Approve Entries' })
-    ).toBeVisible()
+    await expect(modal.getByRole('heading', { name: 'Approve Entries' })).toBeVisible()
     await modal.getByLabel('Approval Date').fill('2025-01-15')
     await modal.getByLabel('Approval Note').fill('Bulk approval')
     await modal.getByRole('button', { name: 'Approve' }).click()
 
     await gotoAdmin(page)
-    await expect(
-      statusTag(rowById(page, testEntryIds.submitted), 'APPROVED')
-    ).toBeVisible()
-    await expect(
-      statusTag(rowById(page, testEntryIds.submittedSecond), 'APPROVED')
-    ).toBeVisible()
+    await expect(statusTag(rowById(page, testEntryIds.submitted), 'APPROVED')).toBeVisible()
+    await expect(statusTag(rowById(page, testEntryIds.submittedSecond), 'APPROVED')).toBeVisible()
   })
 
   test('disables mixed-status selections', async ({ page }) => {
     const submittedRow = rowById(page, testEntryIds.submitted)
     await selectRow(submittedRow)
 
-    const approvedRowCheckbox = rowById(page, testEntryIds.approved)
-      .getByRole('checkbox')
-      .first()
+    const approvedRowCheckbox = rowById(page, testEntryIds.approved).getByRole('checkbox').first()
     await expect(approvedRowCheckbox).toBeDisabled()
   })
 
-  test('copy to clipboard copies selected entry text', async ({
-    page,
-    context
-  }) => {
+  test('copy to clipboard copies selected entry text', async ({ page, context }) => {
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
     await gotoAdmin(page)
 
@@ -151,9 +131,7 @@ test.describe('admin actions', () => {
     await selectRow(submittedRow)
     await page.getByRole('button', { name: /Copy to clipboard/ }).click()
 
-    const clipboardText = await page.evaluate(() =>
-      navigator.clipboard.readText()
-    )
+    const clipboardText = await page.evaluate(() => navigator.clipboard.readText())
     expect(clipboardText).toContain('Test Submitted')
     expect(clipboardText).toContain('Submitted entry')
   })
@@ -167,9 +145,7 @@ test.describe('admin actions', () => {
     await expect(rowById(page, testEntryIds.submittedSecond)).toBeVisible()
   })
 
-  test('approve modal shows validation when approval note is empty', async ({
-    page
-  }) => {
+  test('approve modal shows validation when approval note is empty', async ({ page }) => {
     await gotoAdmin(page)
 
     const submittedRow = rowById(page, testEntryIds.submitted)
@@ -177,19 +153,13 @@ test.describe('admin actions', () => {
     await page.getByRole('button', { name: 'Approve' }).first().click()
 
     const modal = page.getByRole('dialog')
-    await expect(
-      modal.getByRole('heading', { name: 'Approve Entries' })
-    ).toBeVisible()
+    await expect(modal.getByRole('heading', { name: 'Approve Entries' })).toBeVisible()
     await modal.getByRole('button', { name: 'Approve' }).click()
 
-    await expect(
-      modal.getByText(/Please enter approval note|approval note/)
-    ).toBeVisible()
+    await expect(modal.getByText(/Please enter approval note|approval note/)).toBeVisible()
   })
 
-  test('clear filters button appears when filters are applied', async ({
-    page
-  }) => {
+  test('clear filters button appears when filters are applied', async ({ page }) => {
     await expect(page.getByRole('button', { name: 'Reset' })).not.toBeVisible()
 
     await applyStatusFilter(page, 'Submitted')

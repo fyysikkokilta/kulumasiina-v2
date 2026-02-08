@@ -37,8 +37,7 @@ const fi = {
     },
     failure: {
       title: 'Virhe!',
-      sub_title:
-        'Kulukorvaushakemuksen lähettäminen epäonnistui. Yritä uudelleen.',
+      sub_title: 'Kulukorvaushakemuksen lähettäminen epäonnistui. Yritä uudelleen.',
       try_again: 'Yritä uudelleen'
     },
     privacy_policy:
@@ -49,8 +48,7 @@ const fi = {
       iban_required: 'Syötä IBAN!',
       iban_invalid: 'Virheellinen IBAN-muoto!',
       claim_title: 'Syötä kulukorvauksen otsikko!',
-      personal_id_code_required:
-        'Henkilötunnus tarvitaan matkakorvauksien maksamista varten!',
+      personal_id_code_required: 'Henkilötunnus tarvitaan matkakorvauksien maksamista varten!',
       personal_id_code_invalid: 'Virheellinen henkilötunnus!',
       no_entries: 'Lisää vähintään yksi kulu tai matka!'
     }
@@ -62,8 +60,7 @@ const fi = {
     select_date: 'Valitse päivämäärä',
     account: 'Kirjanpito-tili',
     select: 'Valitse...',
-    account_placeholder:
-      'Voit jättää tämän tyhjäksi, jos et tiedä oikeaa tiliä.'
+    account_placeholder: 'Voit jättää tämän tyhjäksi, jos et tiedä oikeaa tiliä.'
   },
   ItemForm: {
     add: 'Lisää kulu',
@@ -78,8 +75,7 @@ const fi = {
     value_placeholder: '0.00',
     value_unit: '€',
     is_not_receipt: 'Lisäliite',
-    upload_note:
-      'Yleisimmät kuvatiedostotyypit ja PDF-tiedostot ovat tuettuja.',
+    upload_note: 'Yleisimmät kuvatiedostotyypit ja PDF-tiedostot ovat tuettuja.',
     close: 'Sulje',
     cancel: 'Peruuta',
     ok: 'OK',
@@ -91,8 +87,7 @@ const fi = {
       value_max: 'Summan on oltava pienempi kuin 1,000,000',
       attachments_min: 'Lisää vähintään yksi tosite!',
       attachments_max: 'Enintään 20 tositetta per kulu',
-      at_least_one_value:
-        'Vähintään yhdellä tositteella tulee olla rahallinen arvo!',
+      at_least_one_value: 'Vähintään yhdellä tositteella tulee olla rahallinen arvo!',
       upload_failed: 'Tiedoston lataus epäonnistui. Yritä uudelleen.',
       file_too_large: 'Tiedoston on oltava enintään 8 MB.'
     }
@@ -129,8 +124,7 @@ const fi = {
     },
     failure: {
       title: 'Virhe!',
-      sub_title:
-        'Kulukorvaushakemuksen lähettäminen epäonnistui. Yritä uudelleen.',
+      sub_title: 'Kulukorvaushakemuksen lähettäminen epäonnistui. Yritä uudelleen.',
       try_again: 'Yritä uudelleen'
     }
   },
@@ -218,11 +212,9 @@ const fi = {
       archive: 'Arkistoi'
     },
     selection: {
-      entries_selected:
-        '{entries, plural, =1 {hakemus} other {hakemusta}} valittu',
+      entries_selected: '{entries, plural, =1 {hakemus} other {hakemusta}} valittu',
       status: 'Tila',
-      mixed_statuses:
-        'Sekalaiset tilat - jotkut toiminnot eivät ole käytettävissä'
+      mixed_statuses: 'Sekalaiset tilat - jotkut toiminnot eivät ole käytettävissä'
     },
     bulk_actions: {
       approve_selected: 'Hyväksy valitut',
@@ -259,10 +251,8 @@ const fi = {
   },
   DeleteOldArchivedModal: {
     title: 'Poista vanhat arkistoidut hakemukset',
-    text_1:
-      'Haluatko varmasti poistaa vanhat arkistoidut hakemukset? Tätä toimintoa ei voi perua.',
-    text_2:
-      'Varmista, että jokaisen maksetun hakemuksen PDF on arkistoitu Procountoriin.',
+    text_1: 'Haluatko varmasti poistaa vanhat arkistoidut hakemukset? Tätä toimintoa ei voi perua.',
+    text_2: 'Varmista, että jokaisen maksetun hakemuksen PDF on arkistoitu Procountoriin.',
     remove: 'Poista',
     cancel: 'Peruuta',
     close: 'Sulje'

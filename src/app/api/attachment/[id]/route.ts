@@ -8,10 +8,7 @@ import { getFile } from '@/lib/storage'
 import isAuthorized, { JWT_COOKIE } from '@/utils/isAuthorized'
 import { isPdf } from '@/utils/validation'
 
-export async function GET(
-  request: NextRequest,
-  { params }: RouteContext<'/api/attachment/[id]'>
-) {
+export async function GET(request: NextRequest, { params }: RouteContext<'/api/attachment/[id]'>) {
   const { id } = await params
   const attachment = await db.query.attachments.findFirst({
     where: eq(attachments.fileId, id)

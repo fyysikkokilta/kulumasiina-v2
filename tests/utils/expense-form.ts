@@ -22,12 +22,8 @@ export async function addMinimalMileageAndFillCommon(
   await modal.getByRole('button', { name: 'OK' }).click()
 
   await page.getByLabel('Payee Name').fill(overrides.name ?? 'Test Payee')
-  await page
-    .getByLabel('Contact Information')
-    .fill(overrides.contact ?? 'test@example.com')
+  await page.getByLabel('Contact Information').fill(overrides.contact ?? 'test@example.com')
   await page.getByLabel('IBAN').fill(overrides.iban ?? 'FI2112345600000785')
   await page.getByLabel('Claim Title').fill(overrides.title ?? 'Expenses')
-  await page
-    .getByLabel('Personal ID Code')
-    .fill(overrides.govId ?? '010190-123A')
+  await page.getByLabel('Personal ID Code').fill(overrides.govId ?? '010190-123A')
 }

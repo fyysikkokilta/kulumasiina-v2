@@ -32,8 +32,7 @@ export interface ButtonProps extends Omit<
   className?: string
 }
 
-const isPending = (s: HookActionStatus | undefined) =>
-  s === 'executing' || s === 'transitioning'
+const isPending = (s: HookActionStatus | undefined) => s === 'executing' || s === 'transitioning'
 const hasError = (s: HookActionStatus | undefined) => s === 'hasErrored'
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -69,14 +68,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         aria-invalid={error ? true : undefined}
         {...props}
       >
-        {pending && (
-          <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
-        )}
+        {pending && <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />}
         {error && !pending && (
-          <AlertCircle
-            className="h-4 w-4 shrink-0 text-red-600"
-            aria-label="Error"
-          />
+          <AlertCircle className="h-4 w-4 shrink-0 text-red-600" aria-label="Error" />
         )}
         {children}
       </BaseButton>

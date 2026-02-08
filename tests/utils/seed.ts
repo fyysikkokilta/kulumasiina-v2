@@ -159,7 +159,5 @@ export async function seedTestData() {
   const samplePdf = Buffer.from(samplePdfBase64, 'base64')
   const fileIds = Object.values(testAttachmentIds)
 
-  await Promise.all(
-    fileIds.map((fileId) => fs.writeFile(path.join(dataDir, fileId), samplePdf))
-  )
+  await Promise.all(fileIds.map((fileId) => fs.writeFile(path.join(dataDir, fileId), samplePdf)))
 }

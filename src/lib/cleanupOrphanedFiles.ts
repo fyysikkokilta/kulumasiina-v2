@@ -17,9 +17,7 @@ export async function cleanupOrphanedFiles() {
   const storageFileIds = await listFiles()
 
   // Find files in storage that are not in the database
-  const orphanedFileIds = storageFileIds.filter(
-    (fileId) => !dbFileIdSet.has(fileId)
-  )
+  const orphanedFileIds = storageFileIds.filter((fileId) => !dbFileIdSet.has(fileId))
 
   // Delete orphaned files
   await deleteFiles(orphanedFileIds)

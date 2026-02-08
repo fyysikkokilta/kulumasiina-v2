@@ -57,17 +57,11 @@ export function ExpenseForm() {
       iban: z
         .string()
         .min(1, t('errors.iban_required'))
-        .refine(
-          (val) => isValidIBAN(val.replace(/\s/g, '')),
-          t('errors.iban_invalid')
-        ),
+        .refine((val) => isValidIBAN(val.replace(/\s/g, '')), t('errors.iban_invalid')),
       title: z.string().min(1, t('errors.claim_title')).max(1000),
       govId: z
         .string()
-        .refine(
-          (val) => !val || validateFinnishSSN(val),
-          t('errors.personal_id_code_invalid')
-        )
+        .refine((val) => !val || validateFinnishSSN(val), t('errors.personal_id_code_invalid'))
         .optional(),
       // No need to validate items and mileages, they are validated in their forms
       items: z.array(z.any()),
@@ -86,9 +80,7 @@ export function ExpenseForm() {
     entries.filter(isEntryItem).map((e) => e),
     entries.filter(isEntryMileage).map((e) => e)
   )
-  const editingEntry = editingId
-    ? (entries.find((entry) => entry.id === editingId) ?? null)
-    : null
+  const editingEntry = editingId ? (entries.find((entry) => entry.id === editingId) ?? null) : null
 
   const openModal = (editingId: string | null) => {
     setEditingId(editingId)
@@ -101,17 +93,11 @@ export function ExpenseForm() {
   const handleAddOrUpdateEntry = (data: FormEntry) => {
     setEntries((prev) => {
       const newEntries = [...prev]
-      if (
-        editingId &&
-        editingId !== NEW_ITEM_ID &&
-        editingId !== NEW_MILEAGE_ID
-      ) {
+      if (editingId && editingId !== NEW_ITEM_ID && editingId !== NEW_MILEAGE_ID) {
         const index = newEntries.findIndex((e) => e.id === editingId)
         if (index !== -1) newEntries[index] = { ...newEntries[index], ...data }
       } else {
-        const typeCount = newEntries.filter(
-          isEntryItem(data) ? isEntryItem : isEntryMileage
-        ).length
+        const typeCount = newEntries.filter(isEntryItem(data) ? isEntryItem : isEntryMileage).length
         if (typeCount >= 20) return prev
         newEntries.push({ ...data, id: crypto.randomUUID() })
       }
@@ -120,9 +106,7 @@ export function ExpenseForm() {
     setEditingId(null)
   }
 
-  const [errors, setErrors] = useState<
-    Record<string, string | string[]> | undefined
-  >(undefined)
+  const [errors, setErrors] = useState<Record<string, string | string[]> | undefined>(undefined)
   const formRef = useRef<HTMLFormElement>(null)
 
   const resetForm = () => {
@@ -133,17 +117,13 @@ export function ExpenseForm() {
     setEditingId(null)
   }
 
-  const handleFormSubmit = async (
-    formValues: Record<string, string | number>
-  ) => {
+  const handleFormSubmit = async (formValues: Record<string, string | number>) => {
     if (actionStatus === 'executing') return
 
     const toParse = {
       name: formValues.name,
       contact: formValues.contact,
-      iban: friendlyFormatIBAN(
-        String(formValues.iban ?? '').replace(/\s/g, '')
-      ),
+      iban: friendlyFormatIBAN(String(formValues.iban ?? '').replace(/\s/g, '')),
       title: formValues.title,
       govId: formValues.govId ?? (hasMileages ? '' : undefined),
       items: entries.filter(isEntryItem),
@@ -177,12 +157,7 @@ export function ExpenseForm() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <Form
-        ref={formRef}
-        onFormSubmit={handleFormSubmit}
-        errors={errors}
-        className="space-y-4"
-      >
+      <Form ref={formRef} onFormSubmit={handleFormSubmit} errors={errors} className="space-y-4">
         {/* Basic Information Fields */}
         <Field.Root name="name">
           <Field.Label className="mb-1.5 block text-sm font-medium text-gray-700">
@@ -273,9 +248,7 @@ export function ExpenseForm() {
         )}
         {errors?.mileages && (
           <p className="mb-4 text-sm text-red-600">
-            {Array.isArray(errors.mileages)
-              ? errors.mileages[0]
-              : errors.mileages}
+            {Array.isArray(errors.mileages) ? errors.mileages[0] : errors.mileages}
           </p>
         )}
 
@@ -300,18 +273,14 @@ export function ExpenseForm() {
               isEntryItem(entry) ? (
                 <ItemDisplay
                   onEdit={() => openModal(entry.id ?? null)}
-                  onRemove={() =>
-                    setEntries((prev) => prev.filter((e) => e.id !== entry.id))
-                  }
+                  onRemove={() => setEntries((prev) => prev.filter((e) => e.id !== entry.id))}
                   key={entry.id}
                   item={entry}
                 />
               ) : (
                 <MileageDisplay
                   onEdit={() => openModal(entry.id ?? null)}
-                  onRemove={() =>
-                    setEntries((prev) => prev.filter((e) => e.id !== entry.id))
-                  }
+                  onRemove={() => setEntries((prev) => prev.filter((e) => e.id !== entry.id))}
                   key={entry.id}
                   mileage={entry}
                   mileageRate={env.NEXT_PUBLIC_MILEAGE_REIMBURSEMENT_RATE}
@@ -335,9 +304,7 @@ export function ExpenseForm() {
               type="button"
               variant="secondary"
               onClick={() => openModal(NEW_ITEM_ID)}
-              disabled={
-                entries.filter((entry) => 'attachments' in entry).length >= 20
-              }
+              disabled={entries.filter((entry) => 'attachments' in entry).length >= 20}
               title={
                 entries.filter((entry) => 'attachments' in entry).length >= 20
                   ? t('max_items_reached')
@@ -351,9 +318,7 @@ export function ExpenseForm() {
               type="button"
               variant="secondary"
               onClick={() => openModal(NEW_MILEAGE_ID)}
-              disabled={
-                entries.filter((entry) => 'distance' in entry).length >= 20
-              }
+              disabled={entries.filter((entry) => 'distance' in entry).length >= 20}
               title={
                 entries.filter((entry) => 'distance' in entry).length >= 20
                   ? t('max_mileages_reached')

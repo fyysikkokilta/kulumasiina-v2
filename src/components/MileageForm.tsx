@@ -33,9 +33,7 @@ export function MileageForm({
 }: MileageFormProps) {
   const t = useTranslations('MileageForm')
   const locale = useLocale()
-  const [errors, setErrors] = useState<
-    Record<string, string | string[]> | undefined
-  >(undefined)
+  const [errors, setErrors] = useState<Record<string, string | string[]> | undefined>(undefined)
 
   const formRef = useRef<HTMLFormElement>(null)
 
@@ -47,9 +45,7 @@ export function MileageForm({
     description: z.string().min(1, t('errors.description')).max(500),
     date: z.iso.date(t('errors.date')).transform((val) => new Date(val)),
     route: z.string().min(1, t('errors.route')).max(500),
-    distance: z.coerce
-      .number()
-      .refine((val) => val > 0, t('errors.distance_invalid')),
+    distance: z.coerce.number().refine((val) => val > 0, t('errors.distance_invalid')),
     plateNo: z
       .string()
       .min(1, t('errors.plate_number'))
@@ -63,9 +59,7 @@ export function MileageForm({
       .nullish()
   })
 
-  const handleFormSubmit = async (
-    formValues: Record<string, string | number>
-  ) => {
+  const handleFormSubmit = async (formValues: Record<string, string | number>) => {
     if (submittingStatus === 'executing') return
 
     const result = mileageFormSchema.safeParse(formValues)
@@ -113,9 +107,7 @@ export function MileageForm({
             <EntryCommonFields
               defaultDescription={editData?.description}
               defaultDate={
-                editData?.date
-                  ? new Date(editData.date).toISOString().slice(0, 10)
-                  : undefined
+                editData?.date ? new Date(editData.date).toISOString().slice(0, 10) : undefined
               }
               defaultAccount={editData?.account ?? null}
             />

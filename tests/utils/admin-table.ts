@@ -4,9 +4,7 @@ import { expect } from '@playwright/test'
 export const gotoAdmin = async (page: Page) => {
   await page.goto('/admin')
   await expect(
-    page
-      .locator('table')
-      .filter({ has: page.locator('tbody tr[data-row-key]') })
+    page.locator('table').filter({ has: page.locator('tbody tr[data-row-key]') })
   ).toBeVisible()
 }
 
@@ -28,8 +26,7 @@ export const selectRow = async (row: Locator) => {
   await row.getByRole('checkbox').first().click()
 }
 
-export const selectionBanner = (page: Page) =>
-  page.getByText(/entries selected/i).first()
+export const selectionBanner = (page: Page) => page.getByText(/entries selected/i).first()
 
 export const applyArchivedFilter = async (page: Page) => {
   const archivedHeader = page.locator('th').filter({ hasText: 'Archived' })

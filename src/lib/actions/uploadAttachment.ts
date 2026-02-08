@@ -39,7 +39,7 @@ export const uploadAttachmentAction = actionClient
           .toBuffer()
       } catch (e) {
         console.error('Failed to compress image', e)
-        throw new Error('Failed to compress image')
+        throw new Error('Failed to compress image', { cause: e })
       }
     }
     // If pdf, compress with compress-pdf

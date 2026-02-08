@@ -20,8 +20,7 @@ const en = {
     add_mileage: 'Mileage',
     max_items_reached: 'Maximum 20 items reached',
     max_mileages_reached: 'Maximum 20 mileage entries reached',
-    entries_count:
-      '{items}/{maxItems} items, {mileages}/{maxMileages} mileage entries',
+    entries_count: '{items}/{maxItems} items, {mileages}/{maxMileages} mileage entries',
     total: 'Total',
     edit: 'Edit',
     remove: 'Remove',
@@ -51,8 +50,7 @@ const en = {
       claim_title: 'Please enter claim title!',
       personal_id_code_required:
         'Government issued personal identification code is required for paying mileages!',
-      personal_id_code_invalid:
-        'Invalid Finnish social security number format!',
+      personal_id_code_invalid: 'Invalid Finnish social security number format!',
       no_entries: 'Please add at least one expense or mileage entry!'
     }
   },
@@ -63,8 +61,7 @@ const en = {
     select_date: 'Select date',
     account: 'Bookkeeping Account',
     select: 'Select...',
-    account_placeholder:
-      "Leave this blank if you don't know the correct account."
+    account_placeholder: "Leave this blank if you don't know the correct account."
   },
   ItemForm: {
     add: 'Add an expense',
@@ -216,8 +213,7 @@ const en = {
       archive: 'Archive'
     },
     selection: {
-      entries_selected:
-        '{entries, plural, =1 {entry} other {entries}} selected',
+      entries_selected: '{entries, plural, =1 {entry} other {entries}} selected',
       status: 'Status',
       mixed_statuses: 'Mixed statuses - some actions may be unavailable'
     },
@@ -256,10 +252,8 @@ const en = {
   },
   DeleteOldArchivedModal: {
     title: 'Remove old archived entries',
-    text_1:
-      'Are you sure you want to remove old archived entries? This action cannot be undone.',
-    text_2:
-      'Make sure that for each paid entry the pdf has been archived to Procountor.',
+    text_1: 'Are you sure you want to remove old archived entries? This action cannot be undone.',
+    text_2: 'Make sure that for each paid entry the pdf has been archived to Procountor.',
     remove: 'Remove',
     cancel: 'Cancel',
     close: 'Close'

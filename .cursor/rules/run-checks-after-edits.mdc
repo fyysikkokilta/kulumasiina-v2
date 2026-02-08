@@ -17,6 +17,9 @@ pnpm type:check
 
 # 2. Linting (with autofix)
 pnpm lint --fix
+
+# 3. Format (or format:check when only verifying)
+pnpm format
 ```
 
 ## When to Run
@@ -42,9 +45,11 @@ pnpm lint --fix
 pnpm type:check
 # ✓ No errors
 
-pnpm lint --cache --fix
-# ✓ Fixed 5 issues automatically
-# ⚠ 2 warnings (acceptable)
+pnpm lint --fix
+# ✓ Fixed issues automatically
+
+pnpm format
+# ✓ Formatted files
 ```
 
 ## Don't Skip

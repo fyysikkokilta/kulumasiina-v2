@@ -13,7 +13,5 @@ export async function AdminContent() {
     .subtract(env.NEXT_PUBLIC_ARCHIVED_ENTRIES_AGE_LIMIT_DAYS, 'days')
     .toISOString()
 
-  return (
-    <AdminEntryTable entries={entries} oldArchivedCutoff={oldArchivedCutoff} />
-  )
+  return <AdminEntryTable entries={entries} oldArchivedCutoff={oldArchivedCutoff} />
 }

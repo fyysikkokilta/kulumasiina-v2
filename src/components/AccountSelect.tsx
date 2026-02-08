@@ -47,8 +47,7 @@ export function AccountSelect({
       ? 'w-full cursor-pointer px-3 py-2 text-left text-xs data-highlighted:bg-gray-100 data-selected:bg-blue-50 data-selected:text-blue-600'
       : 'w-full cursor-pointer px-3 py-2 text-left text-sm data-highlighted:bg-gray-100 data-selected:bg-blue-50 data-selected:text-blue-600'
   const iconSize = size === 'sm' ? 'h-3 w-3' : 'h-4 w-4'
-  const valuePlaceholderClass =
-    size === 'sm' ? 'min-w-0 data-placeholder:text-gray-400' : 'min-w-0'
+  const valuePlaceholderClass = size === 'sm' ? 'min-w-0 data-placeholder:text-gray-400' : 'min-w-0'
   const isExecuting = actionStatus === 'executing'
   const hasErrored = actionStatus === 'hasErrored'
   const triggerClass = [
@@ -66,33 +65,19 @@ export function AccountSelect({
       onValueChange={(v) => onChange?.(v ?? '')}
       disabled={disabled ?? isExecuting}
     >
-      <Select.Trigger
-        className={triggerClass}
-        aria-invalid={hasErrored || undefined}
-      >
-        <Select.Value
-          placeholder={placeholder}
-          className={valuePlaceholderClass}
-        />
+      <Select.Trigger className={triggerClass} aria-invalid={hasErrored || undefined}>
+        <Select.Value placeholder={placeholder} className={valuePlaceholderClass} />
         {isExecuting ? (
-          <Loader2
-            className={`shrink-0 animate-spin ${iconSize}`}
-            aria-hidden
-          />
+          <Loader2 className={`shrink-0 animate-spin ${iconSize}`} aria-hidden />
         ) : hasErrored ? (
-          <AlertCircle
-            className={`shrink-0 text-red-600 ${iconSize}`}
-            aria-label="Error"
-          />
+          <AlertCircle className={`shrink-0 text-red-600 ${iconSize}`} aria-label="Error" />
         ) : (
           <Select.Icon className="shrink-0">
             <ChevronDown className={iconSize} />
           </Select.Icon>
         )}
       </Select.Trigger>
-      <Select.Portal
-        container={typeof document !== 'undefined' ? document.body : null}
-      >
+      <Select.Portal container={typeof document !== 'undefined' ? document.body : null}>
         <Select.Positioner
           sideOffset={4}
           positionMethod="fixed"
@@ -102,11 +87,7 @@ export function AccountSelect({
           <Select.Popup className="z-110 max-h-[300px] overflow-auto rounded-md border border-gray-200 bg-white shadow-lg">
             <Select.List>
               {bookkeepingAccounts.map((account) => (
-                <Select.Item
-                  key={account.value}
-                  value={account.value}
-                  className={itemClass}
-                >
+                <Select.Item key={account.value} value={account.value} className={itemClass}>
                   <Select.ItemText>{account.label}</Select.ItemText>
                 </Select.Item>
               ))}

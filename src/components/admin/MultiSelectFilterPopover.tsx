@@ -46,9 +46,7 @@ export function MultiSelectFilterPopover({
     if (!showSearch || !search.trim()) return options
     const q = search.toLowerCase()
     return options.filter(
-      (opt) =>
-        opt.label.toLowerCase().includes(q) ||
-        opt.value.toLowerCase().includes(q)
+      (opt) => opt.label.toLowerCase().includes(q) || opt.value.toLowerCase().includes(q)
     )
   })()
 
@@ -83,10 +81,7 @@ export function MultiSelectFilterPopover({
         className="inline-flex cursor-pointer items-center rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 focus-visible:outline-none"
         aria-label={ariaLabel}
       >
-        <Filter
-          className={`h-4 w-4 ${hasValue ? 'text-blue-600' : ''}`}
-          aria-hidden
-        />
+        <Filter className={`h-4 w-4 ${hasValue ? 'text-blue-600' : ''}`} aria-hidden />
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner side="bottom" align="start" sideOffset={6}>
@@ -129,10 +124,7 @@ export function MultiSelectFilterPopover({
                             keepMounted
                             className="flex size-full items-center justify-center data-checked:opacity-100 data-unchecked:opacity-0"
                           >
-                            <Check
-                              className="h-3 w-3 text-blue-600"
-                              aria-hidden
-                            />
+                            <Check className="h-3 w-3 text-blue-600" aria-hidden />
                           </Checkbox.Indicator>
                         </Checkbox.Root>
                         <span className="truncate text-sm">{opt.label}</span>
@@ -152,12 +144,7 @@ export function MultiSelectFilterPopover({
               >
                 {resetLabel}
               </Button>
-              <Button
-                type="button"
-                variant="primary"
-                size="small"
-                onClick={handleOk}
-              >
+              <Button type="button" variant="primary" size="small" onClick={handleOk}>
                 {okLabel}
               </Button>
             </div>

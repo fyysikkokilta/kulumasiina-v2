@@ -12,12 +12,6 @@ next-env.d.ts
 # Local storage
 /data/
 
-/.vscode
-/.idea
-
 # Test results
 playwright-report/
 test-results/
-
-# Eslint
-.eslintcache

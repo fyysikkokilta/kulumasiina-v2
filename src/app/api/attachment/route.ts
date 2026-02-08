@@ -9,12 +9,7 @@ export async function POST(request: NextRequest) {
   const formData = await request.formData()
   const file = formData.get('file')
   const originalName = formData.get('filename')
-  if (
-    !file ||
-    !originalName ||
-    typeof originalName !== 'string' ||
-    typeof file !== 'object'
-  ) {
+  if (!file || !originalName || typeof originalName !== 'string' || typeof file !== 'object') {
     return new NextResponse('Missing file or filename', { status: 400 })
   }
   const mimeType = file.type
@@ -26,8 +21,7 @@ export async function POST(request: NextRequest) {
     try {
       const image = sharp(fileBuffer)
       const metadata = await image.metadata()
-      const isWiderThanTall =
-        metadata.autoOrient.width > metadata.autoOrient.height
+      const isWiderThanTall = metadata.autoOrient.width > metadata.autoOrient.height
 
       buffer = await image
         .autoOrient()

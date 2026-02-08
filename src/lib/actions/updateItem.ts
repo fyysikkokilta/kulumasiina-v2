@@ -37,13 +37,7 @@ export const updateItemAction = actionClient
   .inputSchema(ItemUpdateSchema)
   .use(isAuthorizedMiddleware)
   .action(async ({ parsedInput }) => {
-    const {
-      id,
-      description,
-      date,
-      account,
-      attachments: attachmentUpdates
-    } = parsedInput
+    const { id, description, date, account, attachments: attachmentUpdates } = parsedInput
     await db.transaction(async (tx) => {
       await tx
         .update(items)

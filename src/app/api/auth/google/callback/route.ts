@@ -10,8 +10,7 @@ import { JWT_COOKIE } from '@/utils/isAuthorized'
 
 export async function GET(request: NextRequest) {
   const cookieStore = await cookies()
-  const locale = (cookieStore.get('NEXT_LOCALE')?.value ||
-    routing.defaultLocale) as Locale
+  const locale = (cookieStore.get('NEXT_LOCALE')?.value || routing.defaultLocale) as Locale
   const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')
   const error = searchParams.get('error')
@@ -53,14 +52,11 @@ export async function GET(request: NextRequest) {
   }
 
   // Get user info
-  const userResponse = await fetch(
-    'https://www.googleapis.com/oauth2/v2/userinfo',
-    {
-      headers: {
-        Authorization: `Bearer ${tokenData.access_token}`
-      }
+  const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+    headers: {
+      Authorization: `Bearer ${tokenData.access_token}`
     }
-  )
+  })
 
   if (!userResponse.ok) {
     redirect({ href: '/login?error=unauthorized', locale })
@@ -79,9 +75,7 @@ export async function GET(request: NextRequest) {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setIssuer('kulumasiina')
-    .setExpirationTime(
-      Math.floor(Date.now() / 1000) + env.JWT_EXPIRY_MINUTES * 60
-    )
+    .setExpirationTime(Math.floor(Date.now() / 1000) + env.JWT_EXPIRY_MINUTES * 60)
     .sign(new TextEncoder().encode(env.JWT_SECRET))
 
   cookieStore.set(JWT_COOKIE, token, {

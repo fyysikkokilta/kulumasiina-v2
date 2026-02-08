@@ -64,10 +64,7 @@ export function EntryCommonFields({
           >
             {t('account')}
           </Field.Label>
-          <AccountSelect
-            placeholder={t('select')}
-            defaultValue={defaultAccount ?? undefined}
-          />
+          <AccountSelect placeholder={t('select')} defaultValue={defaultAccount ?? undefined} />
           <Field.Description className="mt-1 text-sm text-gray-500">
             {t('account_placeholder')}
           </Field.Description>

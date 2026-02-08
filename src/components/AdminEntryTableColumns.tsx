@@ -2,19 +2,9 @@
 
 import { Checkbox } from '@base-ui/react/checkbox'
 import { createColumnHelper } from '@tanstack/react-table'
-import {
-  ArrowUpDown,
-  Check,
-  ChevronDown,
-  ChevronRight,
-  Minus,
-  RotateCcw
-} from 'lucide-react'
+import { ArrowUpDown, Check, ChevronDown, ChevronRight, Minus, RotateCcw } from 'lucide-react'
 
-import {
-  DateFilterPopover,
-  type DateRangeValue
-} from '@/components/admin/DateFilterPopover'
+import { DateFilterPopover, type DateRangeValue } from '@/components/admin/DateFilterPopover'
 import { MultiSelectFilterPopover } from '@/components/admin/MultiSelectFilterPopover'
 import { Button } from '@/components/ui/Button'
 import { Tag } from '@/components/ui/Tag'
@@ -25,9 +15,7 @@ export type EntryRow = AdminEntries[number] & { key: string; total: number }
 
 const columnHelper = createColumnHelper<EntryRow>()
 
-const STATUS_VALUES = Object.keys(
-  STATUS_COLORS
-) as (keyof typeof STATUS_COLORS)[]
+const STATUS_VALUES = Object.keys(STATUS_COLORS) as (keyof typeof STATUS_COLORS)[]
 
 export interface AdminEntryTableColumnsParams {
   t: ReturnType<typeof import('next-intl').useTranslations<'AdminEntryTable'>>
@@ -60,9 +48,7 @@ export function getAdminEntryTableColumns({
           <Checkbox.Root
             checked={table.getIsAllPageRowsSelected()}
             indeterminate={isIndeterminate}
-            onCheckedChange={(checked) =>
-              table.toggleAllPageRowsSelected(!!checked)
-            }
+            onCheckedChange={(checked) => table.toggleAllPageRowsSelected(!!checked)}
             className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:outline-none"
             aria-label={t('filter.filter')}
           >
@@ -136,8 +122,7 @@ export function getAdminEntryTableColumns({
     columnHelper.accessor('submissionDate', {
       id: 'submissionDate',
       header: ({ column }) => {
-        const filterValue =
-          (column.getFilterValue() as DateRangeValue | undefined) ?? {}
+        const filterValue = (column.getFilterValue() as DateRangeValue | undefined) ?? {}
         return (
           <div className="flex items-center gap-1">
             <DateFilterPopover
@@ -218,9 +203,7 @@ export function getAdminEntryTableColumns({
       header: () => t('table.title'),
       cell: (info) => (
         <div className="max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap">
-          {info.getValue().length > 25
-            ? info.getValue().slice(0, 25) + '...'
-            : info.getValue()}
+          {info.getValue().length > 25 ? info.getValue().slice(0, 25) + '...' : info.getValue()}
         </div>
       ),
       size: 220,
@@ -303,9 +286,7 @@ export function getAdminEntryTableColumns({
       },
       cell: (info) => (
         <Tag color={info.getValue() === 'archived' ? 'gray' : 'green'}>
-          {info.getValue() === 'archived'
-            ? t('status.archived')
-            : t('status.active')}
+          {info.getValue() === 'archived' ? t('status.archived') : t('status.active')}
         </Tag>
       ),
       size: 110,
@@ -329,17 +310,14 @@ export function getAdminEntryTableColumns({
           >
             {t('actions.pdf')}
           </Button>
-          {(row.original.status === 'paid' ||
-            row.original.status === 'approved') && (
+          {(row.original.status === 'paid' || row.original.status === 'approved') && (
             <Button
               type="button"
               variant="secondary"
               size="small"
               onClick={() => window.open(`/api/entry/${row.original.id}/csv`)}
             >
-              {row.original.status === 'paid'
-                ? t('actions.zip')
-                : t('actions.csv')}
+              {row.original.status === 'paid' ? t('actions.zip') : t('actions.csv')}
             </Button>
           )}
         </div>

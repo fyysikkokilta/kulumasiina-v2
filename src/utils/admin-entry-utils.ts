@@ -33,15 +33,12 @@ export function isOldArchived(entry: AdminEntries[number], cutoffIso: string) {
 }
 
 export function formatEntryForClipboard(entry: EntryRow) {
-  const accounts = [
-    ...entry.items.map((i) => i.account),
-    ...entry.mileages.map((m) => m.account)
-  ]
+  const accounts = [...entry.items.map((i) => i.account), ...entry.mileages.map((m) => m.account)]
   const labels = [...new Set(accounts)]
     .filter(Boolean)
     .map((v) => bookkeepingAccounts.find((a) => a.value === v)?.label)
     .filter(Boolean)
-    .sort()
+    .toSorted()
     .join(', ')
   const km = entry.mileages.reduce((s, m) => s + m.distance, 0)
   const kmStr = km > 0 ? ` (${km} km)` : ''

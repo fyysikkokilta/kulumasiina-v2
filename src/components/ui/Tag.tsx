@@ -14,12 +14,7 @@ const colorVariants = {
   gray: 'bg-gray-100 text-gray-600 border-gray-300'
 }
 
-export function Tag({
-  className,
-  color = 'default',
-  children,
-  ...props
-}: TagProps) {
+export function Tag({ className, color = 'default', children, ...props }: TagProps) {
   return (
     <span
       className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium ${colorVariants[color]} ${className || ''}`}

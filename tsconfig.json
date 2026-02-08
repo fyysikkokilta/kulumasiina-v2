@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "lib": ["DOM", "DOM.Iterable", "ES2024"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -20,7 +20,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "target": "ES2017"
+    "target": "ES2024"
   },
   "include": [
     "next-env.d.ts",
@@ -29,7 +29,6 @@
     ".next/types/**/*.ts",
     ".lintstagedrc.ts",
     "postcss.config.js",
-    "eslint.config.ts",
     ".next/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]

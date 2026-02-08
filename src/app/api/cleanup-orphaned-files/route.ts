@@ -5,9 +5,7 @@ import { env } from '@/lib/env'
 
 export async function POST(req: NextRequest) {
   const secret = env.FILE_CLEANUP_SECRET
-  const provided =
-    req.headers.get('x-cleanup-secret') ||
-    req.nextUrl.searchParams.get('secret')
+  const provided = req.headers.get('x-cleanup-secret') || req.nextUrl.searchParams.get('secret')
 
   if (!secret || !provided || provided !== secret) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -21,9 +19,6 @@ export async function POST(req: NextRequest) {
       deleted
     })
   } catch (err) {
-    return NextResponse.json(
-      { error: (err as Error).message || 'Cleanup failed' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: (err as Error).message || 'Cleanup failed' }, { status: 500 })
   }
 }

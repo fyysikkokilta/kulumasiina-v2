@@ -9,9 +9,7 @@ test.beforeEach(async ({ page }) => {
 
 test('admin page redirects when unauthenticated', async ({ page }) => {
   await page.waitForURL('**/login')
-  await expect(
-    page.getByRole('heading', { name: 'Login Required' })
-  ).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Login Required' })).toBeVisible()
 })
 
 test('admin page renders when authenticated', async ({ page }) => {
@@ -19,8 +17,6 @@ test('admin page renders when authenticated', async ({ page }) => {
   await loginAdmin(page)
   await page.goto('/admin')
   await expect(
-    page
-      .locator('table')
-      .filter({ has: page.locator('tbody tr[data-row-key]') })
+    page.locator('table').filter({ has: page.locator('tbody tr[data-row-key]') })
   ).toBeVisible()
 })

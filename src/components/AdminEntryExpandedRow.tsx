@@ -2,23 +2,13 @@ import dayjs from 'dayjs'
 import { useTranslations } from 'next-intl'
 import { type HookActionStatus, useAction } from 'next-safe-action/hooks'
 
-import {
-  AccountSelect,
-  accountSelectTriggerClass
-} from '@/components/AccountSelect'
+import { AccountSelect, accountSelectTriggerClass } from '@/components/AccountSelect'
 import { Button } from '@/components/ui/Button'
 import { Tag } from '@/components/ui/Tag'
 import { updateBookkeepingAccountAction } from '@/lib/actions/updateBookkeepingAccount'
-import type {
-  EntryWithItemsAndMileages,
-  ItemWithAttachments,
-  Mileage
-} from '@/lib/db/schema'
+import type { EntryWithItemsAndMileages, ItemWithAttachments, Mileage } from '@/lib/db/schema'
 import { env } from '@/lib/env'
-import {
-  prepareAttachmentPreview,
-  type PreviewState
-} from '@/utils/preview-utils'
+import { prepareAttachmentPreview, type PreviewState } from '@/utils/preview-utils'
 
 interface AdminEntryExpandedRowProps {
   record: EntryWithItemsAndMileages
@@ -66,13 +56,13 @@ export function AdminEntryExpandedRow({
     )
   }
 
-  const {
-    execute: updateBookkeepingAccount,
-    status: updateBookkeepingAccountStatus
-  } = useAction(updateBookkeepingAccountAction, {
-    onSuccess: () => {},
-    onError: () => {}
-  })
+  const { execute: updateBookkeepingAccount, status: updateBookkeepingAccountStatus } = useAction(
+    updateBookkeepingAccountAction,
+    {
+      onSuccess: () => {},
+      onError: () => {}
+    }
+  )
 
   return (
     <div className="rounded border border-gray-200 bg-white p-4 shadow">
@@ -94,10 +84,7 @@ export function AdminEntryExpandedRow({
         <div className="mb-4">
           <strong className="text-nowrap">{`${t('table.items')}: `}</strong>
           {record.items.map((item) => (
-            <div
-              key={item.id}
-              className="mt-2 ml-4 rounded border border-gray-100 bg-gray-50 p-2"
-            >
+            <div key={item.id} className="mt-2 ml-4 rounded border border-gray-100 bg-gray-50 p-2">
               <div className="flex flex-col gap-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="text-gray-600">
@@ -114,9 +101,7 @@ export function AdminEntryExpandedRow({
                   </span>
                   <div className="flex flex-wrap items-center gap-2">
                     <AccountSelect
-                      placeholder={
-                        t('table.select_account') || t('table.select')
-                      }
+                      placeholder={t('table.select_account') || t('table.select')}
                       value={item.account || ''}
                       onChange={(value) =>
                         updateBookkeepingAccount({
@@ -201,9 +186,7 @@ export function AdminEntryExpandedRow({
                   </span>
                   <div className="flex flex-wrap items-center gap-2">
                     <AccountSelect
-                      placeholder={
-                        t('table.select_account') || t('table.select')
-                      }
+                      placeholder={t('table.select_account') || t('table.select')}
                       value={mileage.account || ''}
                       onChange={(value) =>
                         updateBookkeepingAccount({
@@ -251,10 +234,7 @@ export function AdminEntryExpandedRow({
         <div className="flex gap-2">
           {record.status === 'submitted' && (
             <>
-              <Button
-                variant="secondary"
-                onClick={() => onApprove([record.id])}
-              >
+              <Button variant="secondary" onClick={() => onApprove([record.id])}>
                 {t('actions.approve')}
               </Button>
               <Button
@@ -280,16 +260,15 @@ export function AdminEntryExpandedRow({
               {t('actions.reset')}
             </Button>
           )}
-          {(record.status === 'paid' || record.status === 'denied') &&
-            !record.archived && (
-              <Button
-                variant="danger"
-                onClick={() => onArchive([record.id])}
-                actionStatus={archiveStatus}
-              >
-                {t('actions.archive')}
-              </Button>
-            )}
+          {(record.status === 'paid' || record.status === 'denied') && !record.archived && (
+            <Button
+              variant="danger"
+              onClick={() => onArchive([record.id])}
+              actionStatus={archiveStatus}
+            >
+              {t('actions.archive')}
+            </Button>
+          )}
         </div>
       </div>
     </div>

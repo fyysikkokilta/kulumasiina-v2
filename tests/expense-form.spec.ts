@@ -48,15 +48,10 @@ test('can add an expense item with an attachment', async ({ page }) => {
   await modal.getByLabel('Amount').fill('12.50')
   await modal.getByRole('button', { name: 'OK' }).click()
 
-  const expenseCard = page
-    .locator('div')
-    .filter({ hasText: 'Expense item' })
-    .first()
+  const expenseCard = page.locator('div').filter({ hasText: 'Expense item' }).first()
   await expect(expenseCard).toBeVisible()
   await expect(expenseCard.getByText('1 attachment')).toBeVisible()
-  await expect(
-    expenseCard.getByRole('strong').filter({ hasText: '12.50 €' })
-  ).toBeVisible()
+  await expect(expenseCard.getByRole('strong').filter({ hasText: '12.50 €' })).toBeVisible()
 })
 
 test('shows validation errors for invalid IBAN', async ({ page }) => {
@@ -91,9 +86,7 @@ test('requires personal id code when mileage exists', async ({ page }) => {
   await modal.getByRole('button', { name: 'OK' }).click()
 
   await page.getByRole('button', { name: 'Submit' }).click()
-  await expect(
-    page.getByText(/personal identification code is required/)
-  ).toBeVisible()
+  await expect(page.getByText(/personal identification code is required/)).toBeVisible()
 })
 
 test('blocks submitting item without attachment value', async ({ page }) => {
@@ -112,9 +105,7 @@ test('blocks submitting item without attachment value', async ({ page }) => {
   await expect(modal.getByLabel('Amount')).toBeVisible({ timeout: 15000 })
 
   await modal.getByRole('button', { name: 'OK' }).click()
-  await expect(
-    modal.getByText(/At least one attachment must have a monetary value/)
-  ).toBeVisible()
+  await expect(modal.getByText(/At least one attachment must have a monetary value/)).toBeVisible()
 })
 
 test('shows success screen after valid submission', async ({ page }) => {
@@ -136,12 +127,10 @@ test('shows success screen after valid submission', async ({ page }) => {
   await page.getByRole('button', { name: 'Submit' }).click()
 
   // Submission completes and shows result (success or failure depending on env/DB)
-  await expect(
-    page.getByRole('heading', { name: /Success!|Error!/ })
-  ).toBeVisible({ timeout: 15000 })
-  await expect(
-    page.getByRole('button', { name: /Submit Another|Try Again/ })
-  ).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Success!|Error!/ })).toBeVisible({
+    timeout: 15000
+  })
+  await expect(page.getByRole('button', { name: /Submit Another|Try Again/ })).toBeVisible()
 })
 
 test('can edit an existing mileage entry', async ({ page }) => {
@@ -206,9 +195,7 @@ test('shows validation error when payee name is empty', async ({ page }) => {
 
 // --- Main form validation (requires one entry so Submit is enabled) ---
 
-test('shows validation error when contact information is empty', async ({
-  page
-}) => {
+test('shows validation error when contact information is empty', async ({ page }) => {
   await addMinimalMileageAndFillCommon(page, { contact: '' })
 
   await page.getByRole('button', { name: 'Submit' }).click()
@@ -229,15 +216,11 @@ test('shows validation error when IBAN is empty', async ({ page }) => {
   await expect(page.getByText(/Please enter IBAN/)).toBeVisible()
 })
 
-test('shows validation error for invalid personal id code format', async ({
-  page
-}) => {
+test('shows validation error for invalid personal id code format', async ({ page }) => {
   await addMinimalMileageAndFillCommon(page, { govId: 'invalid-id' })
 
   await page.getByRole('button', { name: 'Submit' }).click()
-  await expect(
-    page.getByText(/Invalid Finnish social security number/)
-  ).toBeVisible()
+  await expect(page.getByText(/Invalid Finnish social security number/)).toBeVisible()
 })
 
 test('shows validation error when no entries added', async ({ page }) => {
@@ -288,14 +271,10 @@ test('mileage form shows error when distance is zero', async ({ page }) => {
   await modal.getByLabel('Plate Number').fill('abc-123')
   await modal.getByRole('button', { name: 'OK' }).click()
 
-  await expect(
-    modal.getByText(/Please provide a valid positive number/)
-  ).toBeVisible()
+  await expect(modal.getByText(/Please provide a valid positive number/)).toBeVisible()
 })
 
-test('mileage form shows error when plate number is empty', async ({
-  page
-}) => {
+test('mileage form shows error when plate number is empty', async ({ page }) => {
   await page.getByRole('button', { name: 'Mileage' }).click()
   const modal = page.getByRole('dialog')
 
@@ -305,14 +284,10 @@ test('mileage form shows error when plate number is empty', async ({
   await modal.getByLabel('Distance').fill('5')
   await modal.getByRole('button', { name: 'OK' }).click()
 
-  await expect(
-    modal.getByText(/Please provide the plate number of the vehicle/)
-  ).toBeVisible()
+  await expect(modal.getByText(/Please provide the plate number of the vehicle/)).toBeVisible()
 })
 
-test('mileage form shows error for invalid plate number format', async ({
-  page
-}) => {
+test('mileage form shows error for invalid plate number format', async ({ page }) => {
   await page.getByRole('button', { name: 'Mileage' }).click()
   const modal = page.getByRole('dialog')
 
@@ -328,9 +303,7 @@ test('mileage form shows error for invalid plate number format', async ({
 
 // --- Expense item form validation (modal) ---
 
-test('expense item form shows error when description is empty', async ({
-  page
-}) => {
+test('expense item form shows error when description is empty', async ({ page }) => {
   await page.getByRole('button', { name: 'Expense' }).click()
   const modal = page.getByRole('dialog')
 
@@ -347,9 +320,7 @@ test('expense item form shows error when description is empty', async ({
   await expect(modal.getByText(/Please provide a description/)).toBeVisible()
 })
 
-test('expense item form shows error when no attachment added', async ({
-  page
-}) => {
+test('expense item form shows error when no attachment added', async ({ page }) => {
   await page.getByRole('button', { name: 'Expense' }).click()
   const modal = page.getByRole('dialog')
 
@@ -357,7 +328,5 @@ test('expense item form shows error when no attachment added', async ({
   await modal.getByLabel('Date').fill('2025-01-02')
   await modal.getByRole('button', { name: 'OK' }).click()
 
-  await expect(
-    modal.getByText(/Please add at least one attachment/)
-  ).toBeVisible()
+  await expect(modal.getByText(/Please add at least one attachment/)).toBeVisible()
 })

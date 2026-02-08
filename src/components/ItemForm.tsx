@@ -18,10 +18,7 @@ import { Required } from '@/components/ui/Required'
 import { uploadAttachmentAction } from '@/lib/actions/uploadAttachment'
 import type { FormItemWithAttachments } from '@/lib/db/schema'
 import { inputClass } from '@/utils/form-styles'
-import {
-  prepareAttachmentPreview,
-  type PreviewState
-} from '@/utils/preview-utils'
+import { prepareAttachmentPreview, type PreviewState } from '@/utils/preview-utils'
 
 const MAX_ATTACHMENT_SIZE_BYTES = 8 * 1024 * 1024 // 8 MB
 
@@ -33,18 +30,10 @@ interface ItemFormProps {
   submittingStatus?: HookActionStatus
 }
 
-export function ItemForm({
-  visible,
-  onOk,
-  onCancel,
-  editData,
-  submittingStatus
-}: ItemFormProps) {
+export function ItemForm({ visible, onOk, onCancel, editData, submittingStatus }: ItemFormProps) {
   const t = useTranslations('ItemForm')
   const locale = useLocale()
-  const [errors, setErrors] = useState<
-    Record<string, string | string[]> | undefined
-  >(undefined)
+  const [errors, setErrors] = useState<Record<string, string | string[]> | undefined>(undefined)
 
   const formRef = useRef<HTMLFormElement>(null)
   const addFileInputRef = useRef<HTMLInputElement>(null)
@@ -103,11 +92,8 @@ export function ItemForm({
         ) as HTMLInputElement
       )?.checked ?? false
     const value = Number(
-      (
-        formRef.current?.elements.namedItem(
-          `attachments[${slot.fileId}].value`
-        ) as HTMLInputElement
-      )?.value ?? null
+      (formRef.current?.elements.namedItem(`attachments[${slot.fileId}].value`) as HTMLInputElement)
+        ?.value ?? null
     )
     setPreviewState(
       prepareAttachmentPreview({
@@ -148,21 +134,16 @@ export function ItemForm({
       )
   })
 
-  const handleFormSubmit = async (
-    formValues: Record<string, string | number | boolean>
-  ) => {
+  const handleFormSubmit = async (formValues: Record<string, string | number | boolean>) => {
     if (submittingStatus === 'executing' || uploadFileStatus === 'executing') {
       return
     }
 
     const parsedAttachments = attachments.map((slot) => {
       const value = formValues[`attachments[${slot.fileId}].value`]
-        ? Number.parseFloat(
-            String(formValues[`attachments[${slot.fileId}].value`])
-          )
+        ? Number.parseFloat(String(formValues[`attachments[${slot.fileId}].value`]))
         : undefined
-      const isNotReceipt =
-        formValues[`attachments[${slot.fileId}].isNotReceipt`] ?? false
+      const isNotReceipt = formValues[`attachments[${slot.fileId}].isNotReceipt`] ?? false
       return {
         fileId: slot.fileId,
         filename: slot.filename,
@@ -201,10 +182,7 @@ export function ItemForm({
 
   return (
     <>
-      <PreviewModal
-        previewState={previewState}
-        closePreview={() => setPreviewState(null)}
-      />
+      <PreviewModal previewState={previewState} closePreview={() => setPreviewState(null)} />
       <Dialog.Root open={visible} onOpenChange={(open) => !open && resetForm()}>
         <Dialog.Portal>
           <Dialog.Backdrop className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50" />
@@ -231,9 +209,7 @@ export function ItemForm({
               <EntryCommonFields
                 defaultDescription={editData?.description}
                 defaultDate={
-                  editData?.date
-                    ? new Date(editData.date).toISOString().slice(0, 10)
-                    : undefined
+                  editData?.date ? new Date(editData.date).toISOString().slice(0, 10) : undefined
                 }
                 defaultAccount={editData?.account ?? null}
               />
@@ -243,9 +219,7 @@ export function ItemForm({
                   {t('attachments')}
                   <Required />
                 </label>
-                <p className="mb-3 text-xs text-gray-500">
-                  {t('attachments_help')}
-                </p>
+                <p className="mb-3 text-xs text-gray-500">{t('attachments_help')}</p>
 
                 {errors?.attachments && (
                   <p className="mt-2 text-sm text-red-600" role="alert">
@@ -286,9 +260,7 @@ export function ItemForm({
                             max={1000000}
                             locale={locale}
                             className="w-full"
-                            defaultValue={
-                              editData?.attachments?.[i]?.value ?? undefined
-                            }
+                            defaultValue={editData?.attachments?.[i]?.value ?? undefined}
                           >
                             <NumberField.Input
                               placeholder={t('value_placeholder')}
@@ -301,17 +273,13 @@ export function ItemForm({
                         </div>
                         <Field.Error className="mt-1 text-sm text-red-600" />
                       </Field.Root>
-                      <Field.Root
-                        name={`attachments[${slot.fileId}].isNotReceipt`}
-                      >
+                      <Field.Root name={`attachments[${slot.fileId}].isNotReceipt`}>
                         <Field.Label className="mb-1 block text-xs font-medium text-gray-600">
                           {t('is_not_receipt')}
                         </Field.Label>
                         <Checkbox.Root
                           className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                          defaultChecked={
-                            editData?.attachments?.[i]?.isNotReceipt ?? false
-                          }
+                          defaultChecked={editData?.attachments?.[i]?.isNotReceipt ?? false}
                         >
                           <Checkbox.Indicator
                             keepMounted
@@ -325,9 +293,7 @@ export function ItemForm({
                       <Button
                         type="button"
                         onClick={() =>
-                          setAttachments((prev) =>
-                            prev.filter((s) => s.fileId !== slot.fileId)
-                          )
+                          setAttachments((prev) => prev.filter((s) => s.fileId !== slot.fileId))
                         }
                         variant="danger"
                         size="small"

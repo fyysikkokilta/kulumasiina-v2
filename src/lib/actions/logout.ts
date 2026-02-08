@@ -11,8 +11,7 @@ import { actionClient } from './safeActionClient'
 
 export const logoutAction = actionClient.action(async () => {
   const cookieStore = await cookies()
-  const locale = (cookieStore.get('NEXT_LOCALE')?.value ||
-    routing.defaultLocale) as Locale
+  const locale = (cookieStore.get('NEXT_LOCALE')?.value || routing.defaultLocale) as Locale
   cookieStore.delete(JWT_COOKIE)
   redirect({ href: '/', locale })
 })

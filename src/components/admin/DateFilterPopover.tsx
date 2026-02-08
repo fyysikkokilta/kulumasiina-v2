@@ -58,10 +58,7 @@ export function DateFilterPopover({
         className="inline-flex cursor-pointer items-center rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 focus-visible:outline-none"
         aria-label={ariaLabel}
       >
-        <Filter
-          className={`h-4 w-4 ${hasValue ? 'text-blue-600' : ''}`}
-          aria-hidden
-        />
+        <Filter className={`h-4 w-4 ${hasValue ? 'text-blue-600' : ''}`} aria-hidden />
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner side="bottom" align="start" sideOffset={6}>
@@ -71,23 +68,16 @@ export function DateFilterPopover({
                 <Input
                   type="date"
                   value={draft.start ?? ''}
-                  onValueChange={(v) =>
-                    setDraft((prev) => ({ ...prev, start: v || undefined }))
-                  }
+                  onValueChange={(v) => setDraft((prev) => ({ ...prev, start: v || undefined }))}
                   placeholder={startDateLabel}
                   className="rounded border border-gray-300 px-2 py-1.5 text-sm"
                   aria-label={startDateLabel}
                 />
-                <ArrowRight
-                  className="h-4 w-4 shrink-0 text-gray-400"
-                  aria-hidden
-                />
+                <ArrowRight className="h-4 w-4 shrink-0 text-gray-400" aria-hidden />
                 <Input
                   type="date"
                   value={draft.end ?? ''}
-                  onValueChange={(v) =>
-                    setDraft((prev) => ({ ...prev, end: v || undefined }))
-                  }
+                  onValueChange={(v) => setDraft((prev) => ({ ...prev, end: v || undefined }))}
                   placeholder={endDateLabel}
                   className="rounded border border-gray-300 px-2 py-1.5 text-sm"
                   aria-label={endDateLabel}
@@ -103,12 +93,7 @@ export function DateFilterPopover({
                 >
                   {resetLabel}
                 </Button>
-                <Button
-                  type="button"
-                  variant="primary"
-                  size="small"
-                  onClick={handleFilter}
-                >
+                <Button type="button" variant="primary" size="small" onClick={handleFilter}>
                   {okLabel}
                 </Button>
               </div>

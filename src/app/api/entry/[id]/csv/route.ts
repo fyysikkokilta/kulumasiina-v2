@@ -9,10 +9,7 @@ import { generateCsv, generateCsvInfoFromEntry } from '@/utils/csv-utils'
 import isAuthorized, { JWT_COOKIE } from '@/utils/isAuthorized'
 import { generateCombinedPDF, generatePartsFromEntry } from '@/utils/pdf-utils'
 
-export async function GET(
-  request: NextRequest,
-  { params }: RouteContext<'/api/entry/[id]/csv'>
-) {
+export async function GET(request: NextRequest, { params }: RouteContext<'/api/entry/[id]/csv'>) {
   const cookieStore = await cookies()
   const token = cookieStore.get(JWT_COOKIE)?.value
   const authorized = await isAuthorized(token)

@@ -23,10 +23,7 @@ export const deleteOldArchivedEntriesAction = actionClient
           eq(entries.archived, true),
           or(
             and(eq(entries.status, 'paid'), lt(entries.paidDate, limitDate)),
-            and(
-              eq(entries.status, 'denied'),
-              lt(entries.rejectionDate, limitDate)
-            )
+            and(eq(entries.status, 'denied'), lt(entries.rejectionDate, limitDate))
           )
         )
       )

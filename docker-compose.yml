@@ -3,7 +3,7 @@ services:
     image: ghcr.io/fyysikkokilta/kulumasiina-v2:latest
     restart: always
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - 'host.docker.internal:host-gateway'
     env_file:
       - .env
     ports:

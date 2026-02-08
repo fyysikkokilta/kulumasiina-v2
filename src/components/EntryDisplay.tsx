@@ -42,8 +42,7 @@ export function ItemDisplay({ item, onEdit, onRemove }: ItemDisplayProps) {
         <div className="flex items-start justify-between gap-4">
           <strong>{dayjs(item.date).format('DD.MM.YYYY')}</strong>
           <Tag color="green">
-            {item.attachments.length}{' '}
-            {t('attachments', { attachments: item.attachments.length })}
+            {item.attachments.length} {t('attachments', { attachments: item.attachments.length })}
           </Tag>
         </div>
         <div className="flex items-start justify-between gap-4">
@@ -67,12 +66,7 @@ interface MileageDisplayProps {
   onRemove: () => void
 }
 
-export function MileageDisplay({
-  mileage,
-  mileageRate,
-  onEdit,
-  onRemove
-}: MileageDisplayProps) {
+export function MileageDisplay({ mileage, mileageRate, onEdit, onRemove }: MileageDisplayProps) {
   const t = useTranslations('ExpenseForm')
   const total = mileage.distance * mileageRate
 
@@ -114,8 +108,7 @@ export function MileageDisplay({
             <strong>{`${t('route')}:`}</strong> {mileage.route}
           </div>
           <div>
-            <strong>{`${t('plate_number')}:`}</strong>{' '}
-            {mileage.plateNo.toUpperCase()}
+            <strong>{`${t('plate_number')}:`}</strong> {mileage.plateNo.toUpperCase()}
           </div>
         </div>
       </div>

@@ -24,7 +24,9 @@ Kulumasiina v2 is an expense management application built for Fyysikkokilta (Gui
 pnpm dev              # Start dev server
 pnpm build            # Production build
 pnpm type:check       # TypeScript type checking (tsc --noEmit)
-pnpm lint --fix       # ESLint with autofix
+pnpm lint             # Oxlint (run lint --fix for autofix)
+pnpm format           # Oxfmt format
+pnpm format:check     # Oxfmt check only
 pnpm db:generate      # Generate Drizzle migrations from schema
 pnpm db:push          # Push schema changes to database
 pnpm db:migrate       # Run migrations programmatically
@@ -33,7 +35,7 @@ npx playwright test                    # Run all E2E tests
 npx playwright test tests/admin-actions.spec.ts  # Run a single test file
 ```
 
-**After editing any code, always run `pnpm type:check` then `pnpm lint --fix`.**
+**After editing any code, always run `pnpm type:check`, then `pnpm lint --fix`, then `pnpm format`.**
 
 ## Architecture
 
@@ -59,11 +61,11 @@ npx playwright test tests/admin-actions.spec.ts  # Run a single test file
 
 Four tables with cascade deletes: `entries` → `items` → `attachments`, and `entries` → `mileages`. Entry status enum: `submitted | approved | paid | denied`.
 
-### ESLint Rules to Know
+### Lint and format (oxlint, oxfmt)
 
-- **No JSX string literals** (`react/jsx-no-literals`) — all user-facing text must use i18n
-- **Import `Link`, `redirect`, `useRouter`, `usePathname` from `@/i18n/routing`** — not from `next/link` or `next/navigation`
-- **Import sorting** enforced via `simple-import-sort`
+- **Import `Link`, `redirect`, `useRouter`, `usePathname` from `@/i18n/routing`** — not from `next/link` or `next/navigation` (enforced by oxlint `no-restricted-imports`)
+- **No JSX string literals** — all user-facing text must use i18n; avoid hardcoded strings in JSX
+- **Pre-commit:** lint-staged runs `tsc --noEmit`, `oxlint --fix`, and `oxfmt` on staged files. Styling: Tailwind CSS 4 with oxfmt (experimentalTailwindcss) for class sorting; single quotes, no trailing commas
 
 ## Commit Messages
 

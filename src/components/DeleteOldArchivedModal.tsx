@@ -22,17 +22,14 @@ export function DeleteOldArchivedModal({
 }: DeleteOldArchivedModalProps) {
   const t = useTranslations('DeleteOldArchivedModal')
 
-  const { execute: deleteOldArchivedEntries, status } = useAction(
-    deleteOldArchivedEntriesAction,
-    {
-      onSuccess: () => {
-        onSuccess()
-      },
-      onError: (error) => {
-        console.error(error)
-      }
+  const { execute: deleteOldArchivedEntries, status } = useAction(deleteOldArchivedEntriesAction, {
+    onSuccess: () => {
+      onSuccess()
+    },
+    onError: (error) => {
+      console.error(error)
     }
-  )
+  })
 
   return (
     <Dialog.Root open={visible} onOpenChange={(open) => !open && onCancel()}>
@@ -51,13 +48,8 @@ export function DeleteOldArchivedModal({
               <span className="sr-only">{t('close')}</span>
             </Dialog.Close>
           </div>
-          <Dialog.Description className="sr-only">
-            {t('title')}
-          </Dialog.Description>
-          <Form
-            onFormSubmit={() => deleteOldArchivedEntries()}
-            className="space-y-4"
-          >
+          <Dialog.Description className="sr-only">{t('title')}</Dialog.Description>
+          <Form onFormSubmit={() => deleteOldArchivedEntries()} className="space-y-4">
             <p className="text-red-600">{t('text_1')}</p>
             <p>{t('text_2')}</p>
             <div className="flex gap-2">

@@ -32,8 +32,7 @@ export const updateMileageAction = actionClient
   .inputSchema(MileageUpdateSchema)
   .use(isAuthorizedMiddleware)
   .action(async ({ parsedInput }) => {
-    const { id, description, date, route, distance, plateNo, account } =
-      parsedInput
+    const { id, description, date, route, distance, plateNo, account } = parsedInput
     await db
       .update(mileages)
       .set({

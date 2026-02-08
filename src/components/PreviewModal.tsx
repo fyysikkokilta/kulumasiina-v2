@@ -50,6 +50,7 @@ function PreviewContent({
             src={data.url}
             className="h-full w-full border-0"
             title={data.title}
+            sandbox="allow-same-origin"
             style={{ height: 'calc(80vh - 65px)' }}
           />
         )}
@@ -82,26 +83,15 @@ function PreviewFallback({ closePreview }: { closePreview: () => void }) {
   )
 }
 
-export function PreviewModal({
-  previewState,
-  closePreview
-}: PreviewModalProps) {
+export function PreviewModal({ previewState, closePreview }: PreviewModalProps) {
   return (
-    <Dialog.Root
-      open={!!previewState}
-      onOpenChange={(open) => !open && closePreview()}
-    >
+    <Dialog.Root open={!!previewState} onOpenChange={(open) => !open && closePreview()}>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/50" />
         <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 w-[90%] max-w-[1400px] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-white shadow-lg">
           {previewState ? (
-            <Suspense
-              fallback={<PreviewFallback closePreview={closePreview} />}
-            >
-              <PreviewContent
-                promise={previewState}
-                closePreview={closePreview}
-              />
+            <Suspense fallback={<PreviewFallback closePreview={closePreview} />}>
+              <PreviewContent promise={previewState} closePreview={closePreview} />
             </Suspense>
           ) : null}
         </Dialog.Popup>

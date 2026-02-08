@@ -22,16 +22,9 @@ interface PayModalProps {
   onSuccess?: () => void
 }
 
-export function PayModal({
-  visible,
-  onCancel,
-  entryIds,
-  onSuccess
-}: PayModalProps) {
+export function PayModal({ visible, onCancel, entryIds, onSuccess }: PayModalProps) {
   const formRef = useRef<HTMLFormElement>(null)
-  const [errors, setErrors] = useState<
-    Record<string, string | string[]> | undefined
-  >(undefined)
+  const [errors, setErrors] = useState<Record<string, string | string[]> | undefined>(undefined)
   const t = useTranslations('PayModal')
 
   useEffect(() => {
@@ -69,10 +62,7 @@ export function PayModal({
   }
 
   return (
-    <Dialog.Root
-      open={visible}
-      onOpenChange={(open) => !open && handleCancel()}
-    >
+    <Dialog.Root open={visible} onOpenChange={(open) => !open && handleCancel()}>
       <Dialog.Portal>
         <Dialog.Backdrop className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50" />
         <Dialog.Popup
@@ -83,9 +73,7 @@ export function PayModal({
             overflow: 'auto'
           }}
         >
-          <Dialog.Title className="mb-4 text-lg font-semibold">
-            {t('title')}
-          </Dialog.Title>
+          <Dialog.Title className="mb-4 text-lg font-semibold">{t('title')}</Dialog.Title>
           <Form
             ref={formRef}
             key={visible ? entryIds.join(',') : 'closed'}
