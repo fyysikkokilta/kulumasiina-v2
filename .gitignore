@@ -15,3 +15,6 @@ next-env.d.ts
 # Test results
 playwright-report/
 test-results/
+
+# CI apt cache (workflow restores here)
+.apt-cache/
