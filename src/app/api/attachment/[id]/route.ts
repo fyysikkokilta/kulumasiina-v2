@@ -24,9 +24,14 @@ export async function GET(request: NextRequest, { params }: RouteContext<'/api/a
     })
   }
 
-  let fileBuffer: Buffer
+  let fileBuffer: Buffer | null = null
   try {
     fileBuffer = await getFile(id)
+    if (!fileBuffer) {
+      return new NextResponse('File not found', {
+        status: 404
+      })
+    }
   } catch (e) {
     console.error(e)
     return new NextResponse('File not found', {

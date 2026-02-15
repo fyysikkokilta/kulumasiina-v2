@@ -142,10 +142,9 @@ NEXT_PUBLIC_ARCHIVED_ENTRIES_AGE_LIMIT_DAYS=30
 STORAGE_DRIVER=local # or s3
 
 # S3/Cloudflare R2 Configuration (if using S3 storage)
-S3_ENDPOINT=https://<your-s3-endpoint>
-S3_ACCESS_KEY=<your-access-key>
-S3_SECRET_KEY=<your-secret-key>
-S3_BUCKET=<your-bucket-name>
+S3_ENDPOINT=https://<your-s3-endpoint>/<your-bucket-name>
+S3_ACCESS_KEY_ID=<your-access-key-id>
+S3_SECRET_ACCESS_KEY=<your-secret-access-key>
 S3_REGION=<your-region>
 
 # File Cleanup Secret (for orphaned file cleanup API)

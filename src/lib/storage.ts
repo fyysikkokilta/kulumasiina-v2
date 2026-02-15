@@ -1,26 +1,24 @@
 import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
-import { BucketItem, Client as MinioClient } from 'minio'
+import { S3mini } from 's3mini'
 import path from 'path'
 
 import { env } from './env'
 
-const isS3 = env.STORAGE_DRIVER === 's3'
+const isS3 =
+  env.STORAGE_DRIVER === 's3' && env.S3_ENDPOINT && env.S3_ACCESS_KEY_ID && env.S3_SECRET_ACCESS_KEY
 
 // S3 client setup
-let minio: InstanceType<typeof MinioClient> | null = null
+let s3mini: InstanceType<typeof S3mini> | null = null
 if (isS3) {
-  minio = new MinioClient({
-    endPoint: env.S3_ENDPOINT?.replace(/^https?:\/\//, '') || '',
-    port: env.S3_ENDPOINT?.startsWith('https://') ? 443 : 80,
-    useSSL: env.S3_ENDPOINT?.startsWith('https://') ?? true,
-    accessKey: env.S3_ACCESS_KEY || '',
-    secretKey: env.S3_SECRET_KEY || '',
+  s3mini = new S3mini({
+    endpoint: env.S3_ENDPOINT!,
+    accessKeyId: env.S3_ACCESS_KEY_ID!,
+    secretAccessKey: env.S3_SECRET_ACCESS_KEY!,
     region: env.S3_REGION
   })
 }
 
-const bucket = env.S3_BUCKET || ''
 const localPath = path.join(process.cwd(), 'data')
 
 async function saveFileLocally(buffer: Buffer) {
@@ -32,54 +30,45 @@ async function saveFileLocally(buffer: Buffer) {
 }
 
 async function saveFileToS3(buffer: Buffer) {
-  if (!isS3 || !minio) throw new Error('S3 storage not enabled')
+  if (!isS3 || !s3mini) throw new Error('S3 storage not configured')
   const fileId = randomUUID()
-  await minio.putObject(bucket, fileId, buffer, buffer.length)
+  await s3mini.putObject(fileId, buffer, undefined, undefined, undefined, buffer.length)
   return fileId
 }
 
 export async function saveFile(buffer: Buffer) {
   if (isS3) {
-    return await saveFileToS3(buffer)
+    return saveFileToS3(buffer)
   } else {
-    return await saveFileLocally(buffer)
+    return saveFileLocally(buffer)
   }
 }
 
 async function getFileLocally(fileId: string) {
   const filePath = path.join(localPath, fileId)
-  return await fs.readFile(filePath)
+  const content = await fs.readFile(filePath)
+  return content ? Buffer.from(content) : null
 }
 
 async function getFileFromS3(fileId: string) {
-  if (!isS3 || !minio) throw new Error('S3 storage not enabled')
-  const stream = await minio.getObject(bucket, fileId)
-  const chunks: Buffer[] = []
-  for await (const chunk of stream) {
-    chunks.push(chunk as Buffer)
-  }
-  return Buffer.concat(chunks)
+  if (!isS3 || !s3mini) throw new Error('S3 storage not configured')
+  const content = await s3mini.getObjectArrayBuffer(fileId)
+  return content ? Buffer.from(content) : null
 }
 
 export async function getFile(fileId: string) {
   if (isS3) {
-    return await getFileFromS3(fileId)
+    return getFileFromS3(fileId)
   } else {
-    return await getFileLocally(fileId)
+    return getFileLocally(fileId)
   }
 }
 
 export async function listFiles() {
   if (isS3) {
-    const objects: BucketItem[] = []
-    if (!minio) throw new Error('S3 storage not enabled')
-    const objectsStream = minio.listObjectsV2(bucket, '', true)
-    await new Promise((resolve, reject) => {
-      objectsStream.on('data', (obj) => objects.push(obj))
-      objectsStream.on('end', resolve)
-      objectsStream.on('error', reject)
-    })
-    return objects.map((obj) => obj.name).filter((name): name is string => name !== undefined)
+    if (!s3mini) throw new Error('S3 storage not configured')
+    const objects = await s3mini.listObjects()
+    return objects?.map((obj) => obj.Key) ?? []
   } else {
     try {
       await fs.mkdir(localPath, { recursive: true })
@@ -94,8 +83,8 @@ export async function listFiles() {
 
 export async function deleteFiles(fileIds: string[]) {
   if (isS3) {
-    if (!minio) throw new Error('S3 storage not enabled')
-    await minio.removeObjects(bucket, fileIds)
+    if (!s3mini) throw new Error('S3 storage not configured')
+    await s3mini.deleteObjects(fileIds)
     console.log('Deleted files from S3', fileIds)
   } else {
     for (const fileId of fileIds) {

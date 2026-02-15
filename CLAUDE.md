@@ -15,7 +15,7 @@ Kulumasiina v2 is an expense management application built for Fyysikkokilta (Gui
 - **Auth:** Google OAuth 2.0 with JWT sessions (jose)
 - **i18n:** next-intl (locales: en, fi) — routes are prefixed `/en/` or `/fi/`
 - **Validation:** Zod 4 + next-safe-action for type-safe server actions
-- **File Storage:** Pluggable local filesystem or S3/R2 (via MinIO client)
+- **File Storage:** Pluggable local filesystem or S3/R2 (via S3mini client)
 - **Package Manager:** pnpm (enforced, no npm/yarn)
 
 ## Common Commands
