@@ -46,11 +46,11 @@ function PreviewContent({
             className="max-h-[calc(80vh-65px)] max-w-full object-contain"
           />
         ) : (
+          // oxlint-disable-next-line react/iframe-missing-sandbox
           <iframe
             src={data.url}
             className="h-full w-full border-0"
             title={data.title}
-            sandbox="allow-same-origin"
             style={{ height: 'calc(80vh - 65px)' }}
           />
         )}
