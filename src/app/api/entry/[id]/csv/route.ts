@@ -73,7 +73,7 @@ export async function GET(request: NextRequest, { params }: RouteContext<'/api/e
 
     const mediaType = filename.endsWith('.zip') ? 'application/zip' : 'text/csv'
 
-    return new NextResponse(Buffer.from(data), {
+    return new NextResponse(data, {
       status: 200,
       headers: {
         'Content-Type': mediaType,

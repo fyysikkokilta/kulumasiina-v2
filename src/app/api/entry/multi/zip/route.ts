@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
 
     const mediaType = filename.endsWith('.zip') ? 'application/zip' : 'text/csv'
 
-    return new NextResponse(Buffer.from(data), {
+    return new NextResponse(data, {
       status: 200,
       headers: {
         'Content-Type': mediaType,

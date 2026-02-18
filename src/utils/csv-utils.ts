@@ -1,5 +1,5 @@
 import { PDFDocument } from '@cantoo/pdf-lib'
-import archiver from 'archiver'
+import { ZipWriter, BlobWriter, BlobReader } from '@zip.js/zip.js'
 
 import type { EntryWithItemsAndMileages } from '@/lib/db/schema'
 import { env } from '@/lib/env'
@@ -270,11 +270,11 @@ export async function generateCsv(csvInfos: CsvInfo[]) {
 
   // Create ZIP file with CSV and PDFs
   const archiveName = csvInfos.length === 1 ? documentName : multiName
-  const zipData = (await createZipArchive(
+  const zipData = await createZipArchive(
     csvContent,
     multiName,
     mergedCsvInfos.filter((info) => info.pdf)
-  )) as Buffer
+  )
 
   return {
     filename: `${archiveName}.zip`,
@@ -282,27 +282,33 @@ export async function generateCsv(csvInfos: CsvInfo[]) {
   }
 }
 
-function createZipArchive(csvContent: string, csvFilename: string, pdfInfos: CsvInfo[]) {
-  return new Promise((resolve, reject) => {
-    const archive = archiver('zip', { zlib: { level: 9 } })
-    const chunks: Buffer[] = []
+async function createZipArchive(csvContent: string, csvFilename: string, pdfInfos: CsvInfo[]) {
+  // Create a BlobWriter to collect ZIP data
+  const blobWriter = new BlobWriter()
+  const zipWriter = new ZipWriter(blobWriter)
 
-    archive.on('data', (chunk: Buffer) => chunks.push(chunk))
-    archive.on('end', () => resolve(Buffer.concat(chunks)))
-    archive.on('error', reject)
+  // Add CSV file
+  await zipWriter.add(
+    `${csvFilename}.csv`,
+    new BlobReader(new Blob([Buffer.from(csvContent, 'utf8')]))
+  )
 
-    // Add CSV file
-    archive.append(csvContent, { name: `${csvFilename}.csv` })
-
-    // Add PDF files
-    for (const pdfInfo of pdfInfos) {
-      if (pdfInfo.pdf) {
-        archive.append(pdfInfo.pdf.data, { name: pdfInfo.pdf.filename })
-      }
+  // Add PDF files
+  for (const pdfInfo of pdfInfos) {
+    if (pdfInfo.pdf) {
+      await zipWriter.add(
+        pdfInfo.pdf.filename,
+        new BlobReader(new Blob([Buffer.from(pdfInfo.pdf.data)]))
+      )
     }
+  }
 
-    void archive.finalize()
-  })
+  // Finalize zip
+  const zipBlob = await zipWriter.close()
+
+  // Convert Blob -> Buffer
+  const arrayBuffer = await zipBlob.arrayBuffer()
+  return Buffer.from(arrayBuffer)
 }
 
 export function generateCsvInfoFromEntry(
