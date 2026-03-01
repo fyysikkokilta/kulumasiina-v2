@@ -75,8 +75,7 @@
       "compress-pdf",
       "esbuild",
       "sharp",
-      "simple-git-hooks",
-      "unrs-resolver"
+      "simple-git-hooks"
     ],
     "patchedDependencies": {
       "@tanstack/table-core": "patches/@tanstack__table-core.patch"
