@@ -44,8 +44,7 @@ export const updateItemAction = actionClient
         .set({
           description,
           date,
-          account,
-          updatedAt: new Date()
+          account
         })
         .where(eq(item.id, id))
       await tx.delete(attachment).where(eq(attachment.itemId, id))

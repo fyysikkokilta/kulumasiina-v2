@@ -24,8 +24,7 @@ export const approveEntriesAction = actionClient
       .set({
         status: 'approved',
         approvalDate: parsedInput.date,
-        approvalNote: parsedInput.approvalNote,
-        updatedAt: new Date()
+        approvalNote: parsedInput.approvalNote
       })
       .where(inArray(entry.id, parsedInput.ids))
 

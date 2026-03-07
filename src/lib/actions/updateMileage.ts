@@ -41,8 +41,7 @@ export const updateMileageAction = actionClient
         route,
         distance,
         plateNo,
-        account,
-        updatedAt: new Date()
+        account
       })
       .where(eq(mileage.id, id))
 

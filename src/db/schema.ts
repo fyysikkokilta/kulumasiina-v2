@@ -6,8 +6,6 @@ export const attachment = pgTable('attachment', {
   filename: text('filename').notNull(),
   value: real('value'),
   isNotReceipt: boolean('is_not_receipt').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
   fileId: uuid('file_id').notNull(),
   id: uuid('id').defaultRandom().primaryKey(),
   itemId: uuid('item_id')
@@ -28,8 +26,6 @@ export const entry = pgTable('entry', {
   paidDate: timestamp('paid_date'),
   rejectionDate: timestamp('rejection_date'),
   archived: boolean('archived').default(false),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
   id: uuid('id').defaultRandom().primaryKey()
 })
 
@@ -37,8 +33,6 @@ export const item = pgTable('item', {
   description: text('description').notNull(),
   date: timestamp('date').notNull(),
   account: text('account'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
   id: uuid('id').defaultRandom().primaryKey(),
   entryId: uuid('entry_id')
     .notNull()
@@ -52,8 +46,6 @@ export const mileage = pgTable('mileage', {
   distance: real().notNull(),
   plateNo: text('plate_no').notNull(),
   account: text('account'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
   id: uuid('id').defaultRandom().primaryKey(),
   entryId: uuid('entry_id')
     .notNull()

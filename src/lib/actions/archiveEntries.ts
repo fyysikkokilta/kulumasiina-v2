@@ -17,13 +17,10 @@ export const archiveEntriesAction = actionClient
   .inputSchema(ArchiveEntriesSchema)
   .use(isAuthorizedMiddleware)
   .action(async ({ parsedInput }) => {
-    const now = new Date()
-
     await db
       .update(entry)
       .set({
-        archived: true,
-        updatedAt: now
+        archived: true
       })
       .where(inArray(entry.id, parsedInput.ids))
 

@@ -17,8 +17,6 @@ export const resetEntriesAction = actionClient
   .inputSchema(ChangeStatusSchema)
   .use(isAuthorizedMiddleware)
   .action(async ({ parsedInput }) => {
-    const now = new Date()
-
     await db
       .update(entry)
       .set({
@@ -26,8 +24,7 @@ export const resetEntriesAction = actionClient
         approvalDate: null,
         approvalNote: null,
         paidDate: null,
-        rejectionDate: null,
-        updatedAt: now
+        rejectionDate: null
       })
       .where(inArray(entry.id, parsedInput.ids))
 

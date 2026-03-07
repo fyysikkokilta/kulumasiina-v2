@@ -22,21 +22,18 @@ export const updateBookkeepingAccountAction = actionClient
   .inputSchema(BookkeepingAccountSchema)
   .use(isAuthorizedMiddleware)
   .action(async ({ parsedInput }) => {
-    const now = new Date()
     if (parsedInput.isMileage) {
       await db
         .update(mileage)
         .set({
-          account: parsedInput.account,
-          updatedAt: now
+          account: parsedInput.account
         })
         .where(eq(mileage.id, parsedInput.id))
     } else {
       await db
         .update(item)
         .set({
-          account: parsedInput.account,
-          updatedAt: now
+          account: parsedInput.account
         })
         .where(eq(item.id, parsedInput.id))
     }

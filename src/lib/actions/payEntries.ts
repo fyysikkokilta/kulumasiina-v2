@@ -19,14 +19,12 @@ export const payEntriesAction = actionClient
   .use(isAuthorizedMiddleware)
   .action(async ({ parsedInput }) => {
     const paidDate = new Date(parsedInput.date)
-    const now = new Date()
 
     await db
       .update(entry)
       .set({
         status: 'paid',
-        paidDate,
-        updatedAt: now
+        paidDate
       })
       .where(inArray(entry.id, parsedInput.ids))
 

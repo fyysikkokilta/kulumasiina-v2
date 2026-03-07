@@ -23,8 +23,7 @@ export const denyEntriesAction = actionClient
       .update(entry)
       .set({
         status: 'denied',
-        rejectionDate: now,
-        updatedAt: now
+        rejectionDate: now
       })
       .where(inArray(entry.id, parsedInput.ids))
 

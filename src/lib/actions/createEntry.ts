@@ -88,9 +88,7 @@ export const createEntryAction = actionClient
             govId: null, // Regular expenses don't need govId
             title: parsedInput.title,
             status: 'submitted',
-            submissionDate: now,
-            createdAt: now,
-            updatedAt: now
+            submissionDate: now
           })
           .returning()
 
@@ -102,9 +100,7 @@ export const createEntryAction = actionClient
               entryId: expenseEntry.id,
               description: itemData.description,
               date: itemData.date,
-              account: itemData.account,
-              createdAt: now,
-              updatedAt: now
+              account: itemData.account
             })
             .returning()
 
@@ -116,9 +112,7 @@ export const createEntryAction = actionClient
                 fileId: attachmentData.fileId,
                 filename: attachmentData.filename,
                 value: attachmentData.value,
-                isNotReceipt: attachmentData.isNotReceipt,
-                createdAt: now,
-                updatedAt: now
+                isNotReceipt: attachmentData.isNotReceipt
               })
             }
           }
@@ -134,9 +128,7 @@ export const createEntryAction = actionClient
             govId: parsedInput.govId, // Travel expenses need govId
             title: parsedInput.title,
             status: 'submitted',
-            submissionDate: now,
-            createdAt: now,
-            updatedAt: now
+            submissionDate: now
           })
           .returning()
 
@@ -149,9 +141,7 @@ export const createEntryAction = actionClient
             route: mileageData.route,
             distance: mileageData.distance,
             plateNo: mileageData.plateNo,
-            account: mileageData.account,
-            createdAt: now,
-            updatedAt: now
+            account: mileageData.account
           }))
         )
 
@@ -176,9 +166,7 @@ export const createEntryAction = actionClient
           govId: hasMileages ? parsedInput.govId : null, // Only set govId for mileage entries
           title: parsedInput.title,
           status: 'submitted',
-          submissionDate: now,
-          createdAt: now,
-          updatedAt: now
+          submissionDate: now
         })
         .returning()
 
@@ -191,9 +179,7 @@ export const createEntryAction = actionClient
               entryId: innerEntryResult.id,
               description: itemData.description,
               date: itemData.date,
-              account: itemData.account,
-              createdAt: now,
-              updatedAt: now
+              account: itemData.account
             })
             .returning()
 
@@ -205,9 +191,7 @@ export const createEntryAction = actionClient
                 fileId: attachmentData.fileId,
                 filename: attachmentData.filename,
                 value: attachmentData.value,
-                isNotReceipt: attachmentData.isNotReceipt,
-                createdAt: now,
-                updatedAt: now
+                isNotReceipt: attachmentData.isNotReceipt
               })
             }
           }
@@ -224,9 +208,7 @@ export const createEntryAction = actionClient
             route: mileageData.route,
             distance: mileageData.distance,
             plateNo: mileageData.plateNo,
-            account: mileageData.account,
-            createdAt: now,
-            updatedAt: now
+            account: mileageData.account
           }))
         )
       }
