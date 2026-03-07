@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Tag } from '@/components/ui/Tag'
-import type { FormItemWithAttachments, FormMileage } from '@/lib/db/schema'
+import type { FormItemWithAttachments, FormMileage } from '@/db/types'
 
 interface ItemDisplayProps {
   item: FormItemWithAttachments

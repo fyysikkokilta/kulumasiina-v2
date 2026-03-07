@@ -4,8 +4,8 @@ import { inArray } from 'drizzle-orm'
 import { updateTag } from 'next/cache'
 import { z } from 'zod'
 
-import { db } from '../db'
-import { entries } from '../db/schema'
+import { db } from '@/db'
+import { entry } from '@/db/schema'
 import { isAuthorizedMiddleware } from './isAuthorized'
 import { actionClient } from './safeActionClient'
 
@@ -22,13 +22,13 @@ export const payEntriesAction = actionClient
     const now = new Date()
 
     await db
-      .update(entries)
+      .update(entry)
       .set({
         status: 'paid',
         paidDate,
         updatedAt: now
       })
-      .where(inArray(entries.id, parsedInput.ids))
+      .where(inArray(entry.id, parsedInput.ids))
 
     updateTag('admin-entries')
 

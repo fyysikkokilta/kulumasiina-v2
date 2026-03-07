@@ -30,12 +30,7 @@ import { denyEntriesAction } from '@/lib/actions/denyEntries'
 import { resetEntriesAction } from '@/lib/actions/resetEntries'
 import { updateItemAction } from '@/lib/actions/updateItem'
 import { updateMileageAction } from '@/lib/actions/updateMileage'
-import type {
-  FormItemWithAttachments,
-  FormMileage,
-  ItemWithAttachments,
-  Mileage
-} from '@/lib/db/schema'
+import type { FormItemWithAttachments, FormMileage, ItemWithAttachments, Mileage } from '@/db/types'
 import {
   formatEntryForClipboard,
   isOldArchived,

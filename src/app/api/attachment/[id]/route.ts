@@ -1,17 +1,17 @@
-import { eq } from 'drizzle-orm'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
-import { db } from '@/lib/db'
-import { attachments } from '@/lib/db/schema'
+import { db } from '@/db'
 import { getFile } from '@/lib/storage'
 import isAuthorized, { JWT_COOKIE } from '@/utils/isAuthorized'
 import { isPdf } from '@/utils/validation'
 
 export async function GET(request: NextRequest, { params }: RouteContext<'/api/attachment/[id]'>) {
   const { id } = await params
-  const attachment = await db.query.attachments.findFirst({
-    where: eq(attachments.fileId, id)
+  const attachment = await db.query.attachment.findFirst({
+    where: {
+      fileId: id
+    }
   })
 
   // Prevent public access to sent submissions

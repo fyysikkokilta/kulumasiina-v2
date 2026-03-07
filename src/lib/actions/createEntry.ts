@@ -6,8 +6,8 @@ import { z } from 'zod'
 
 import { validateFinnishSSN } from '@/utils/validation'
 
-import { db } from '../db'
-import { attachments, entries, items, mileages } from '../db/schema'
+import { db } from '@/db'
+import { attachment, entry, item, mileage } from '@/db/schema'
 import { actionClient } from './safeActionClient'
 
 const EntryCreateSchema = z.object({
@@ -80,7 +80,7 @@ export const createEntryAction = actionClient
       // Create entry for items (expenses)
       const createdEntries = await db.transaction(async (tx) => {
         const [expenseEntry] = await tx
-          .insert(entries)
+          .insert(entry)
           .values({
             name: parsedInput.name,
             contact: parsedInput.contact,
@@ -96,8 +96,8 @@ export const createEntryAction = actionClient
 
         // Create items for expense entry
         for (const itemData of parsedInput.items) {
-          const [item] = await tx
-            .insert(items)
+          const [itemResult] = await tx
+            .insert(item)
             .values({
               entryId: expenseEntry.id,
               description: itemData.description,
@@ -110,13 +110,13 @@ export const createEntryAction = actionClient
 
           // Link attachments to this item
           if (itemData.attachments.length > 0) {
-            for (const attachment of itemData.attachments) {
-              await tx.insert(attachments).values({
-                itemId: item.id,
-                fileId: attachment.fileId,
-                filename: attachment.filename,
-                value: attachment.value,
-                isNotReceipt: attachment.isNotReceipt,
+            for (const attachmentData of itemData.attachments) {
+              await tx.insert(attachment).values({
+                itemId: itemResult.id,
+                fileId: attachmentData.fileId,
+                filename: attachmentData.filename,
+                value: attachmentData.value,
+                isNotReceipt: attachmentData.isNotReceipt,
                 createdAt: now,
                 updatedAt: now
               })
@@ -126,7 +126,7 @@ export const createEntryAction = actionClient
 
         // Create entry for mileages (travel expenses)
         const [mileageEntry] = await tx
-          .insert(entries)
+          .insert(entry)
           .values({
             name: parsedInput.name,
             contact: parsedInput.contact,
@@ -141,7 +141,7 @@ export const createEntryAction = actionClient
           .returning()
 
         // Create mileages for travel entry
-        await tx.insert(mileages).values(
+        await tx.insert(mileage).values(
           parsedInput.mileages.map((mileageData) => ({
             entryId: mileageEntry.id,
             description: mileageData.description,
@@ -166,9 +166,9 @@ export const createEntryAction = actionClient
     }
 
     // Single entry logic (when only items OR only mileages exist)
-    const entry = await db.transaction(async (tx) => {
-      const [entry] = await tx
-        .insert(entries)
+    const entryResult = await db.transaction(async (tx) => {
+      const [innerEntryResult] = await tx
+        .insert(entry)
         .values({
           name: parsedInput.name,
           contact: parsedInput.contact,
@@ -185,10 +185,10 @@ export const createEntryAction = actionClient
       // Create items if any
       if (hasItems) {
         for (const itemData of parsedInput.items) {
-          const [item] = await tx
-            .insert(items)
+          const [innerItemResult] = await tx
+            .insert(item)
             .values({
-              entryId: entry.id,
+              entryId: innerEntryResult.id,
               description: itemData.description,
               date: itemData.date,
               account: itemData.account,
@@ -199,13 +199,13 @@ export const createEntryAction = actionClient
 
           // Link attachments to this item
           if (itemData.attachments.length > 0) {
-            for (const attachment of itemData.attachments) {
-              await tx.insert(attachments).values({
-                itemId: item.id,
-                fileId: attachment.fileId,
-                filename: attachment.filename,
-                value: attachment.value,
-                isNotReceipt: attachment.isNotReceipt,
+            for (const attachmentData of itemData.attachments) {
+              await tx.insert(attachment).values({
+                itemId: innerItemResult.id,
+                fileId: attachmentData.fileId,
+                filename: attachmentData.filename,
+                value: attachmentData.value,
+                isNotReceipt: attachmentData.isNotReceipt,
                 createdAt: now,
                 updatedAt: now
               })
@@ -216,9 +216,9 @@ export const createEntryAction = actionClient
 
       // Create mileages if any
       if (hasMileages) {
-        await tx.insert(mileages).values(
+        await tx.insert(mileage).values(
           parsedInput.mileages.map((mileageData) => ({
-            entryId: entry.id,
+            entryId: innerEntryResult.id,
             description: mileageData.description,
             date: mileageData.date,
             route: mileageData.route,
@@ -233,12 +233,12 @@ export const createEntryAction = actionClient
 
       updateTag('admin-entries')
 
-      return entry
+      return innerEntryResult
     })
 
     return {
       success: true,
-      entryId: entry.id,
-      entryIds: [entry.id]
+      entryId: entryResult.id,
+      entryIds: [entryResult.id]
     }
   })

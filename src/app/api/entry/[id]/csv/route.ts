@@ -1,10 +1,8 @@
-import { eq } from 'drizzle-orm'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
-import { db } from '@/lib/db'
-import { entries } from '@/lib/db/schema'
+import { db } from '@/db'
 import { generateCsv, generateCsvInfoFromEntry } from '@/utils/csv-utils'
 import isAuthorized, { JWT_COOKIE } from '@/utils/isAuthorized'
 import { generateCombinedPDF, generatePartsFromEntry } from '@/utils/pdf-utils'
@@ -22,8 +20,10 @@ export async function GET(request: NextRequest, { params }: RouteContext<'/api/e
     const entryId = z.uuid().parse(id)
 
     // Get entry with all related data
-    const entry = await db.query.entries.findFirst({
-      where: eq(entries.id, entryId),
+    const entry = await db.query.entry.findFirst({
+      where: {
+        id: entryId
+      },
       with: {
         items: {
           with: {

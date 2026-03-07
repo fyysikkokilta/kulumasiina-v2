@@ -13,7 +13,7 @@ import { z } from 'zod'
 import { EntryCommonFields } from '@/components/EntryCommonFields'
 import { Button } from '@/components/ui/Button'
 import { Required } from '@/components/ui/Required'
-import type { FormMileage } from '@/lib/db/schema'
+import type { FormMileage } from '@/db/types'
 import { inputClass, textareaClass } from '@/utils/form-styles'
 
 interface MileageFormProps {

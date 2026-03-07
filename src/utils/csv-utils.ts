@@ -1,7 +1,7 @@
 import { PDFDocument } from '@cantoo/pdf-lib'
 import { ZipWriter, BlobWriter, BlobReader } from '@zip.js/zip.js'
 
-import type { EntryWithItemsAndMileages } from '@/lib/db/schema'
+import type { EntryWithItemsAndMileages } from '@/db/types'
 import { env } from '@/lib/env'
 
 interface CsvRow {

@@ -4,8 +4,8 @@ import { eq } from 'drizzle-orm'
 import { updateTag } from 'next/cache'
 import { z } from 'zod'
 
-import { db } from '../db'
-import { items, mileages } from '../db/schema'
+import { db } from '@/db'
+import { item, mileage } from '@/db/schema'
 import { isAuthorizedMiddleware } from './isAuthorized'
 import { actionClient } from './safeActionClient'
 
@@ -25,20 +25,20 @@ export const updateBookkeepingAccountAction = actionClient
     const now = new Date()
     if (parsedInput.isMileage) {
       await db
-        .update(mileages)
+        .update(mileage)
         .set({
           account: parsedInput.account,
           updatedAt: now
         })
-        .where(eq(mileages.id, parsedInput.id))
+        .where(eq(mileage.id, parsedInput.id))
     } else {
       await db
-        .update(items)
+        .update(item)
         .set({
           account: parsedInput.account,
           updatedAt: now
         })
-        .where(eq(items.id, parsedInput.id))
+        .where(eq(item.id, parsedInput.id))
     }
 
     updateTag('admin-entries')

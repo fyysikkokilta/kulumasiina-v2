@@ -3,8 +3,8 @@
 import { and, eq, lt, or } from 'drizzle-orm'
 import { updateTag } from 'next/cache'
 
-import { db } from '../db'
-import { entries } from '../db/schema'
+import { db } from '@/db'
+import { entry } from '@/db/schema'
 import { env } from '../env'
 import { isAuthorizedMiddleware } from './isAuthorized'
 import { actionClient } from './safeActionClient'
@@ -17,13 +17,13 @@ export const deleteOldArchivedEntriesAction = actionClient
     limitDate.setDate(limitDate.getDate() - ageLimitDays)
 
     await db
-      .delete(entries)
+      .delete(entry)
       .where(
         and(
-          eq(entries.archived, true),
+          eq(entry.archived, true),
           or(
-            and(eq(entries.status, 'paid'), lt(entries.paidDate, limitDate)),
-            and(eq(entries.status, 'denied'), lt(entries.rejectionDate, limitDate))
+            and(eq(entry.status, 'paid'), lt(entry.paidDate, limitDate)),
+            and(eq(entry.status, 'denied'), lt(entry.rejectionDate, limitDate))
           )
         )
       )

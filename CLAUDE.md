@@ -48,11 +48,11 @@ npx playwright test tests/admin-actions.spec.ts  # Run a single test file
 
 ### Key Directories
 
-- `src/lib/db/schema.ts` — Drizzle database schema (entries, items, mileages, attachments)
 - `src/lib/actions/` — Server actions using next-safe-action with Zod validation
 - `src/lib/env.ts` — Type-safe environment config via @t3-oss/env-nextjs
 - `src/lib/storage.ts` — File storage abstraction (local or S3)
 - `src/data/` — Data fetching utilities (server-side)
+- `src/db/schema.ts` — Drizzle database schema (entries, items, mileages, attachments)
 - `src/i18n/` — Internationalization config and message files (en.json, fi.json)
 - `src/components/` — React components
 - `tests/` — Playwright E2E tests with shared utilities in `tests/utils/`

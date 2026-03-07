@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import { Locale } from 'next-intl'
 
 import { redirect } from '@/i18n/navigation'
-import { db } from '@/lib/db'
+import { db } from '@/db'
 import isAuthorized, { JWT_COOKIE } from '@/utils/isAuthorized'
 
 export const getAdminEntries = async (locale: Locale) => {
@@ -17,7 +17,7 @@ export const getAdminEntries = async (locale: Locale) => {
     redirect({ href: `/${locale}/login`, locale })
   }
 
-  const entries = await db.query.entries.findMany({
+  const entries = await db.query.entry.findMany({
     with: {
       items: {
         with: {

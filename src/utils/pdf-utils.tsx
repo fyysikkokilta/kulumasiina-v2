@@ -6,7 +6,7 @@ import path from 'path'
 import React from 'react'
 import sharp from 'sharp'
 
-import type { EntryWithItemsAndMileages } from '@/lib/db/schema'
+import type { EntryWithItemsAndMileages } from '@/db/types'
 import { env } from '@/lib/env'
 import { getFile } from '@/lib/storage'
 import { isPdf } from '@/utils/validation'

@@ -16,7 +16,7 @@ import { PreviewModal } from '@/components/PreviewModal'
 import { Button } from '@/components/ui/Button'
 import { Required } from '@/components/ui/Required'
 import { uploadAttachmentAction } from '@/lib/actions/uploadAttachment'
-import type { FormItemWithAttachments } from '@/lib/db/schema'
+import type { FormItemWithAttachments } from '@/db/types'
 import { inputClass } from '@/utils/form-styles'
 import { prepareAttachmentPreview, type PreviewState } from '@/utils/preview-utils'
 

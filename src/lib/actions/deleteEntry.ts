@@ -4,8 +4,8 @@ import { eq } from 'drizzle-orm'
 import { updateTag } from 'next/cache'
 import { z } from 'zod'
 
-import { db } from '../db'
-import { entries } from '../db/schema'
+import { db } from '@/db'
+import { entry } from '@/db/schema'
 import { isAuthorizedMiddleware } from './isAuthorized'
 import { actionClient } from './safeActionClient'
 
@@ -15,7 +15,7 @@ export const deleteEntryAction = actionClient
   .inputSchema(DeleteEntrySchema)
   .use(isAuthorizedMiddleware)
   .action(async ({ parsedInput }) => {
-    await db.delete(entries).where(eq(entries.id, parsedInput.id))
+    await db.delete(entry).where(eq(entry.id, parsedInput.id))
 
     updateTag('admin-entries')
 

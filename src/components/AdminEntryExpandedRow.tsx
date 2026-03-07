@@ -6,7 +6,7 @@ import { AccountSelect, accountSelectTriggerClass } from '@/components/AccountSe
 import { Button } from '@/components/ui/Button'
 import { Tag } from '@/components/ui/Tag'
 import { updateBookkeepingAccountAction } from '@/lib/actions/updateBookkeepingAccount'
-import type { EntryWithItemsAndMileages, ItemWithAttachments, Mileage } from '@/lib/db/schema'
+import type { EntryWithItemsAndMileages, ItemWithAttachments, Mileage } from '@/db/types'
 import { env } from '@/lib/env'
 import { prepareAttachmentPreview, type PreviewState } from '@/utils/preview-utils'
 

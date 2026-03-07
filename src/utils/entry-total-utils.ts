@@ -1,4 +1,4 @@
-import type { NewAttachment, NewMileage } from '@/lib/db/schema'
+import type { NewAttachment, NewMileage } from '@/db/types'
 import { env } from '@/lib/env'
 
 /**

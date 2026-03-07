@@ -35,8 +35,8 @@ export function DateFilterPopover({
   const [draft, setDraft] = useState<DateRangeValue>(value)
   const hasValue = Boolean(value.start || value.end)
 
-  const handleOpenChange = (open: boolean) => {
-    setOpen(open)
+  const handleOpenChange = (incomingOpen: boolean) => {
+    setOpen(incomingOpen)
     setDraft(value)
   }
 

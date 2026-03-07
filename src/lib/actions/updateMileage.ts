@@ -4,8 +4,8 @@ import { eq } from 'drizzle-orm'
 import { updateTag } from 'next/cache'
 import { z } from 'zod'
 
-import { db } from '../db'
-import { mileages } from '../db/schema'
+import { db } from '@/db'
+import { mileage } from '@/db/schema'
 import { isAuthorizedMiddleware } from './isAuthorized'
 import { actionClient } from './safeActionClient'
 
@@ -34,7 +34,7 @@ export const updateMileageAction = actionClient
   .action(async ({ parsedInput }) => {
     const { id, description, date, route, distance, plateNo, account } = parsedInput
     await db
-      .update(mileages)
+      .update(mileage)
       .set({
         description,
         date,
@@ -44,7 +44,7 @@ export const updateMileageAction = actionClient
         account,
         updatedAt: new Date()
       })
-      .where(eq(mileages.id, id))
+      .where(eq(mileage.id, id))
 
     updateTag('admin-entries')
 

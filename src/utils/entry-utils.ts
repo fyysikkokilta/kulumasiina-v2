@@ -1,5 +1,4 @@
-import type { FormEntry } from '@/lib/db/schema'
-import type { FormItemWithAttachments, FormMileage } from '@/lib/db/schema'
+import type { FormItemWithAttachments, FormMileage, FormEntry } from '@/db/types'
 
 export const isEntryItem = (entry: FormEntry | null): entry is FormItemWithAttachments => {
   return !!entry && 'attachments' in entry

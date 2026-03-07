@@ -1,10 +1,8 @@
-import { inArray } from 'drizzle-orm'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
-import { db } from '@/lib/db'
-import { entries } from '@/lib/db/schema'
+import { db } from '@/db'
 import { generateCsv, generateCsvInfoFromEntry } from '@/utils/csv-utils'
 import isAuthorized, { JWT_COOKIE } from '@/utils/isAuthorized'
 import { generateCombinedPDF, generatePartsFromEntry } from '@/utils/pdf-utils'
@@ -32,8 +30,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Get entries with all related data
-    const entriesData = await db.query.entries.findMany({
-      where: inArray(entries.id, entryIds),
+    const entriesData = await db.query.entry.findMany({
+      where: {
+        id: { in: entryIds }
+      },
       with: {
         items: {
           with: {

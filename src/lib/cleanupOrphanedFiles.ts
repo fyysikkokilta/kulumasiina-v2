@@ -1,5 +1,5 @@
-import { db } from './db'
-import { attachments } from './db/schema'
+import { db } from '@/db'
+import { attachment } from '@/db/schema'
 import { deleteFiles, listFiles } from './storage'
 
 /**
@@ -8,9 +8,9 @@ import { deleteFiles, listFiles } from './storage'
  */
 export async function cleanupOrphanedFiles() {
   // Get all fileIds referenced in the database
-  const dbFileIds: string[] = (
-    await db.select({ fileId: attachments.fileId }).from(attachments)
-  ).map((a) => a.fileId)
+  const dbFileIds: string[] = (await db.select({ fileId: attachment.fileId }).from(attachment)).map(
+    (a) => a.fileId
+  )
   const dbFileIdSet = new Set(dbFileIds)
 
   // Get all files in storage

@@ -16,7 +16,7 @@ import { Card } from '@/components/ui/Card'
 import { Required } from '@/components/ui/Required'
 import { Link } from '@/i18n/navigation'
 import { createEntryAction } from '@/lib/actions/createEntry'
-import type { FormEntry } from '@/lib/db/schema'
+import type { FormEntry } from '@/db/types'
 import { env } from '@/lib/env'
 import { calculateFormEntriesTotal } from '@/utils/entry-total-utils'
 import { isEntryItem, isEntryMileage } from '@/utils/entry-utils'
@@ -82,8 +82,8 @@ export function ExpenseForm() {
   )
   const editingEntry = editingId ? (entries.find((entry) => entry.id === editingId) ?? null) : null
 
-  const openModal = (editingId: string | null) => {
-    setEditingId(editingId)
+  const openModal = (incomingEditingId: string | null) => {
+    setEditingId(incomingEditingId)
   }
 
   const closeModal = () => {

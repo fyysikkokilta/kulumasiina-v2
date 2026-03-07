@@ -50,8 +50,8 @@ export function MultiSelectFilterPopover({
     )
   })()
 
-  const handleOpenChange = (open: boolean) => {
-    setOpen(open)
+  const handleOpenChange = (incomingOpen: boolean) => {
+    setOpen(incomingOpen)
     setDraft(new Set(value))
   }
 

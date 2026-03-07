@@ -1,17 +1,17 @@
 import fs from 'fs/promises'
 import path from 'path'
 
-import { db } from '@/lib/db'
-import { attachments, entries, items } from '@/lib/db/schema'
+import { db } from '@/db'
+import { attachment, entry, item } from '@/db/schema'
 
 import { testAttachmentIds, testEntryIds, testItemIds } from './test-data'
 
 export async function seedTestData() {
-  await db.delete(attachments)
-  await db.delete(items)
-  await db.delete(entries)
+  await db.delete(attachment)
+  await db.delete(item)
+  await db.delete(entry)
 
-  await db.insert(entries).values([
+  await db.insert(entry).values([
     {
       id: testEntryIds.submitted,
       name: 'Test Submitted',
@@ -70,7 +70,7 @@ export async function seedTestData() {
     }
   ])
 
-  await db.insert(items).values([
+  await db.insert(item).values([
     {
       id: testItemIds.submitted,
       entryId: testEntryIds.submitted,
@@ -108,7 +108,7 @@ export async function seedTestData() {
     }
   ])
 
-  await db.insert(attachments).values([
+  await db.insert(attachment).values([
     {
       id: testAttachmentIds.submitted,
       itemId: testItemIds.submitted,

@@ -4,8 +4,8 @@ import { eq } from 'drizzle-orm'
 import { updateTag } from 'next/cache'
 import { z } from 'zod'
 
-import { db } from '../db'
-import { attachments, items } from '../db/schema'
+import { db } from '@/db'
+import { attachment, item } from '@/db/schema'
 import { isAuthorizedMiddleware } from './isAuthorized'
 import { actionClient } from './safeActionClient'
 
@@ -40,16 +40,16 @@ export const updateItemAction = actionClient
     const { id, description, date, account, attachments: attachmentUpdates } = parsedInput
     await db.transaction(async (tx) => {
       await tx
-        .update(items)
+        .update(item)
         .set({
           description,
           date,
           account,
           updatedAt: new Date()
         })
-        .where(eq(items.id, id))
-      await tx.delete(attachments).where(eq(attachments.itemId, id))
-      await tx.insert(attachments).values(
+        .where(eq(item.id, id))
+      await tx.delete(attachment).where(eq(attachment.itemId, id))
+      await tx.insert(attachment).values(
         attachmentUpdates.map(({ fileId, filename, value, isNotReceipt }) => ({
           itemId: id,
           fileId,

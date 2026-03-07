@@ -9,7 +9,7 @@ import { Header } from '@/components/Header'
 import { routing } from '@/i18n/routing'
 
 export const generateStaticParams = async () => {
-  return routing.locales.map((locale) => ({ locale }))
+  return routing.locales.map((localeParam) => ({ locale: localeParam }))
 }
 
 export async function generateMetadata() {
