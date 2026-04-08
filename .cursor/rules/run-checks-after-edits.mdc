@@ -13,7 +13,7 @@ Run these commands in sequence after editing code:
 
 ```bash
 # 1. Type checking
-pnpm type:check
+pnpm typecheck
 
 # 2. Linting (with autofix)
 pnpm lint --fix
@@ -42,7 +42,7 @@ pnpm format
 # Make code changes...
 # Then verify:
 
-pnpm type:check
+pnpm typecheck
 # ✓ No errors
 
 pnpm lint --fix

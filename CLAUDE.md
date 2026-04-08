@@ -23,7 +23,7 @@ Kulumasiina v2 is an expense management application built for Fyysikkokilta (Gui
 ```bash
 pnpm dev              # Start dev server
 pnpm build            # Production build
-pnpm type:check       # TypeScript type checking (tsc --noEmit)
+pnpm typecheck       # TypeScript type checking (tsc --noEmit)
 pnpm lint             # Oxlint (run lint --fix for autofix)
 pnpm format           # Oxfmt format
 pnpm format:check     # Oxfmt check only
@@ -35,7 +35,7 @@ npx playwright test                    # Run all E2E tests
 npx playwright test tests/admin-actions.spec.ts  # Run a single test file
 ```
 
-**After editing any code, always run `pnpm type:check`, then `pnpm lint --fix`, then `pnpm format`.**
+**After editing any code, always run `pnpm typecheck`, then `pnpm lint --fix`, then `pnpm format`.**
 
 ## Architecture
 

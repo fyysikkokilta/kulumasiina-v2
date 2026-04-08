@@ -41,7 +41,7 @@ The app runs at `http://localhost:3000`. Navigate to `/en/` or `/fi/` for the ap
 | `pnpm lint --fix`             | Lint and auto-fix                                   |
 | `pnpm format`                 | Format code with oxfmt                              |
 | `pnpm format:check`           | Check formatting without fixing                     |
-| `pnpm type:check`             | TypeScript type check (`tsc --noEmit`)              |
+| `pnpm typecheck`              | TypeScript type check (`tsc --noEmit`)              |
 | `pnpm db:migrate`             | Run pending database migrations                     |
 | `pnpm db:generate`            | Generate migration from schema changes              |
 | `pnpm db:push`                | Push schema to DB (dev only; skips migration files) |
@@ -107,7 +107,7 @@ Lint-staged runs on every commit:
 2. `oxlint --fix` — Linting with auto-fix
 3. `oxfmt` — Code formatting
 
-After editing code, run `pnpm type:check`, then `pnpm lint --fix`, then `pnpm format` before committing.
+After editing code, run `pnpm typecheck`, then `pnpm lint --fix`, then `pnpm format` before committing.
 
 ## Project Structure
 
