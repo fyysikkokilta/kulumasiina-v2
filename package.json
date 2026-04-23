@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "typegen": "next typegen",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsgo --noEmit",
     "lint": "oxlint .",
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",
@@ -21,13 +21,13 @@
     "prepare": "simple-git-hooks"
   },
   "dependencies": {
-    "@base-ui/react": "^1.4.0",
+    "@base-ui/react": "^1.4.1",
     "@cantoo/pdf-lib": "^2.6.5",
-    "@react-pdf/renderer": "^4.4.0",
+    "@react-pdf/renderer": "^4.5.1",
     "@t3-oss/env-nextjs": "^0.13.11",
     "@tanstack/react-table": "^8.21.3",
     "@zip.js/zip.js": "^2.8.26",
-    "compress-pdf": "^0.5.6",
+    "compress-pdf": "^0.6.1",
     "dayjs": "^1.11.20",
     "dotenv": "^17.4.2",
     "drizzle-orm": "1.0.0-beta.22",
@@ -47,22 +47,22 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.59.1",
-    "@tailwindcss/postcss": "^4.2.2",
+    "@tailwindcss/postcss": "^4.2.4",
     "@tailwindcss/typography": "^0.5.19",
     "@types/archiver": "^7.0.0",
     "@types/node": "^25.6.0",
     "@types/pg": "^8.20.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@typescript/native-preview": "7.0.0-dev.20260421.2",
     "babel-plugin-react-compiler": "^1.0.0",
     "drizzle-kit": "1.0.0-beta.22",
     "lint-staged": "^16.4.0",
-    "oxfmt": "^0.44.0",
-    "oxlint": "^1.60.0",
+    "oxfmt": "^0.46.0",
+    "oxlint": "^1.61.0",
     "postcss": "^8.5.10",
     "simple-git-hooks": "^2.13.1",
-    "tailwindcss": "^4.2.2",
-    "typescript": "^5.9.3"
+    "tailwindcss": "^4.2.4"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm exec lint-staged"

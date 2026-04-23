@@ -41,7 +41,7 @@ The app runs at `http://localhost:3000`. Navigate to `/en/` or `/fi/` for the ap
 | `pnpm lint --fix`             | Lint and auto-fix                                   |
 | `pnpm format`                 | Format code with oxfmt                              |
 | `pnpm format:check`           | Check formatting without fixing                     |
-| `pnpm typecheck`              | TypeScript type check (`tsc --noEmit`)              |
+| `pnpm typecheck`              | TypeScript type check (`tsgo --noEmit`)             |
 | `pnpm db:migrate`             | Run pending database migrations                     |
 | `pnpm db:generate`            | Generate migration from schema changes              |
 | `pnpm db:push`                | Push schema to DB (dev only; skips migration files) |
@@ -103,7 +103,7 @@ Entry status: `submitted` → `approved` or `denied`; approved entries can move 
 
 Lint-staged runs on every commit:
 
-1. `tsc --noEmit` — TypeScript type check
+1. `tsgo --noEmit` — TypeScript type check
 2. `oxlint --fix` — Linting with auto-fix
 3. `oxfmt` — Code formatting
 
