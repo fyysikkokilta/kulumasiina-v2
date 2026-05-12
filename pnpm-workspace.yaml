@@ -1,7 +1,10 @@
-# https://pnpm.io/supply-chain-security
+allowBuilds:
+  '@parcel/watcher': true
+  '@swc/core': true
+  compress-pdf: true
+  esbuild: true
+  sharp: true
+  simple-git-hooks: true
 minimumReleaseAge: 1440
-minimumReleaseAgeExclude:
-  - next
-  - '@next/*'
-  - 'drizzle-orm'
-  - 'drizzle-kit'
+patchedDependencies:
+  '@tanstack/table-core': 'patches/@tanstack__table-core.patch'

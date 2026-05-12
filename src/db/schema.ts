@@ -1,53 +1,53 @@
-import { pgEnum, pgTable, text, timestamp, real, boolean, uuid } from 'drizzle-orm/pg-core'
+import { pgEnum, text, timestamp, real, boolean, uuid, snakeCase } from 'drizzle-orm/pg-core'
 
 export const status = pgEnum('status', ['submitted', 'approved', 'paid', 'denied'])
 
-export const attachment = pgTable('attachment', {
-  filename: text('filename').notNull(),
-  value: real('value'),
-  isNotReceipt: boolean('is_not_receipt').notNull(),
-  fileId: uuid('file_id').notNull(),
-  id: uuid('id').defaultRandom().primaryKey(),
-  itemId: uuid('item_id')
+export const attachment = snakeCase.table('attachment', {
+  filename: text().notNull(),
+  value: real(),
+  isNotReceipt: boolean().notNull(),
+  fileId: uuid().notNull(),
+  id: uuid().defaultRandom().primaryKey(),
+  itemId: uuid()
     .notNull()
     .references(() => item.id, { onDelete: 'cascade' })
 })
 
-export const entry = pgTable('entry', {
-  name: text('name').notNull(),
-  contact: text('contact').notNull(),
-  iban: text('iban').notNull(),
-  govId: text('gov_id'),
-  title: text('title').notNull(),
+export const entry = snakeCase.table('entry', {
+  name: text().notNull(),
+  contact: text().notNull(),
+  iban: text().notNull(),
+  govId: text(),
+  title: text().notNull(),
   status: status().default('submitted').notNull(),
-  submissionDate: timestamp('submission_date').notNull(),
-  approvalDate: timestamp('approval_date'),
-  approvalNote: text('approval_note'),
-  paidDate: timestamp('paid_date'),
-  rejectionDate: timestamp('rejection_date'),
-  archived: boolean('archived').default(false),
-  id: uuid('id').defaultRandom().primaryKey()
+  submissionDate: timestamp().notNull(),
+  approvalDate: timestamp(),
+  approvalNote: text(),
+  paidDate: timestamp(),
+  rejectionDate: timestamp(),
+  archived: boolean().default(false),
+  id: uuid().defaultRandom().primaryKey()
 })
 
-export const item = pgTable('item', {
-  description: text('description').notNull(),
-  date: timestamp('date').notNull(),
-  account: text('account'),
-  id: uuid('id').defaultRandom().primaryKey(),
-  entryId: uuid('entry_id')
+export const item = snakeCase.table('item', {
+  description: text().notNull(),
+  date: timestamp().notNull(),
+  account: text(),
+  id: uuid().defaultRandom().primaryKey(),
+  entryId: uuid()
     .notNull()
     .references(() => entry.id, { onDelete: 'cascade' })
 })
 
-export const mileage = pgTable('mileage', {
-  description: text('description').notNull(),
-  date: timestamp('date').notNull(),
-  route: text('route').notNull(),
+export const mileage = snakeCase.table('mileage', {
+  description: text().notNull(),
+  date: timestamp().notNull(),
+  route: text().notNull(),
   distance: real().notNull(),
-  plateNo: text('plate_no').notNull(),
-  account: text('account'),
-  id: uuid('id').defaultRandom().primaryKey(),
-  entryId: uuid('entry_id')
+  plateNo: text().notNull(),
+  account: text(),
+  id: uuid().defaultRandom().primaryKey(),
+  entryId: uuid()
     .notNull()
     .references(() => entry.id, { onDelete: 'cascade' })
 })

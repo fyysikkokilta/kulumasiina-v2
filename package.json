@@ -27,58 +27,45 @@
     "@t3-oss/env-nextjs": "^0.13.11",
     "@tanstack/react-table": "^8.21.3",
     "@zip.js/zip.js": "^2.8.26",
-    "compress-pdf": "^0.6.1",
+    "compress-pdf": "^0.6.2",
     "dayjs": "^1.11.20",
     "dotenv": "^17.4.2",
-    "drizzle-orm": "1.0.0-beta.22",
+    "drizzle-orm": "1.0.0-rc.2",
     "ibantools": "^4.5.4",
-    "jose": "^6.2.2",
-    "lucide-react": "^1.8.0",
-    "next": "^16.2.4",
-    "next-intl": "^4.9.1",
+    "jose": "^6.2.3",
+    "lucide-react": "^1.14.0",
+    "next": "^16.2.6",
+    "next-intl": "^4.11.2",
     "next-safe-action": "^8.5.2",
     "pg": "^8.20.0",
-    "react": "^19.2.5",
-    "react-dom": "^19.2.5",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
     "s3mini": "^0.9.4",
     "sharp": "^0.34.5",
     "tsx": "^4.21.0",
-    "zod": "^4.3.6"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@playwright/test": "^1.59.1",
-    "@tailwindcss/postcss": "^4.2.4",
+    "@tailwindcss/postcss": "^4.3.0",
     "@tailwindcss/typography": "^0.5.19",
     "@types/archiver": "^7.0.0",
-    "@types/node": "^25.6.0",
+    "@types/node": "^25.6.2",
     "@types/pg": "^8.20.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@typescript/native-preview": "7.0.0-dev.20260421.2",
+    "@typescript/native-preview": "7.0.0-dev.20260511.1",
     "babel-plugin-react-compiler": "^1.0.0",
-    "drizzle-kit": "1.0.0-beta.22",
-    "lint-staged": "^16.4.0",
-    "oxfmt": "^0.46.0",
-    "oxlint": "^1.61.0",
-    "postcss": "^8.5.10",
+    "drizzle-kit": "1.0.0-rc.2",
+    "lint-staged": "^17.0.4",
+    "oxfmt": "^0.48.0",
+    "oxlint": "^1.63.0",
+    "postcss": "^8.5.14",
     "simple-git-hooks": "^2.13.1",
-    "tailwindcss": "^4.2.4"
+    "tailwindcss": "^4.3.0"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm exec lint-staged"
   },
-  "packageManager": "pnpm@10.33.0",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@parcel/watcher",
-      "@swc/core",
-      "compress-pdf",
-      "esbuild",
-      "sharp",
-      "simple-git-hooks"
-    ],
-    "patchedDependencies": {
-      "@tanstack/table-core": "patches/@tanstack__table-core.patch"
-    }
-  }
+  "packageManager": "pnpm@11.1.1"
 }
