@@ -261,6 +261,26 @@ const fi = {
     close: 'Sulje',
     is_not_receipt: 'Lisäliite',
     loading: 'Ladataan…'
+  },
+  ExportPage: {
+    title: 'Vienti',
+    preparing: 'Valmistellaan vientiä…',
+    preparing_subtitle: 'Lataus käynnistyy automaattisesti.',
+    success_message: 'Lataus käynnistyi.',
+    error_title: 'Vienti epäonnistui',
+    error_subtitle: 'Vientiä ei voitu suorittaa loppuun.',
+    error_code: 'Virhekoodi',
+    entry_label: 'Hakemus',
+    attachment_label: 'Liite',
+    file_id_label: 'Tiedoston tunniste',
+    file_label: 'Tiedosto',
+    missing_entries_label: 'Puuttuvat hakemukset',
+    loading_fallback: 'Ladataan…',
+    invalid_request: 'Virheellinen vientipyyntö.',
+    network_error: 'Verkkovirhe. Yritä uudelleen.',
+    retry: 'Yritä uudelleen',
+    back_to_admin: 'Takaisin hallintaan',
+    copy_details: 'Kopioi tiedot'
   }
 } as const
 

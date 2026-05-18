@@ -3,15 +3,28 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
 import { db } from '@/db'
+import {
+  attachmentStorageErrorPayload,
+  entryNotFoundErrorPayload,
+  invalidEntryStatusErrorPayload
+} from '@/lib/export-error'
 import isAuthorized, { JWT_COOKIE } from '@/utils/isAuthorized'
-import { generateCombinedPDF, generatePartsFromEntry } from '@/utils/pdf-utils'
+import {
+  AttachmentStorageError,
+  generateCombinedPDF,
+  generatePartsFromEntry
+} from '@/utils/pdf-utils'
 
-export async function GET(request: NextRequest, { params }: RouteContext<'/api/entry/[id]/pdf'>) {
+type RouteContext = {
+  params: Promise<{ id: string }>
+}
+
+export async function GET(_request: NextRequest, { params }: RouteContext) {
   const cookieStore = await cookies()
   const token = cookieStore.get(JWT_COOKIE)?.value
   const authorized = await isAuthorized(token)
   if (!authorized) {
-    return new NextResponse('Unauthorized', { status: 404 })
+    return NextResponse.json({ code: 'UNAUTHORIZED', message: 'Unauthorized.' }, { status: 404 })
   }
 
   try {
@@ -34,11 +47,11 @@ export async function GET(request: NextRequest, { params }: RouteContext<'/api/e
     })
 
     if (!entry) {
-      return new NextResponse('Entry not found', { status: 404 })
+      return NextResponse.json(entryNotFoundErrorPayload(entryId), { status: 404 })
     }
 
     if (!['approved', 'paid', 'submitted', 'denied'].includes(entry.status)) {
-      return new NextResponse('Invalid entry status for PDF generation', {
+      return NextResponse.json(invalidEntryStatusErrorPayload(entryId, entry.status), {
         status: 400
       })
     }
@@ -71,7 +84,22 @@ export async function GET(request: NextRequest, { params }: RouteContext<'/api/e
       }
     })
   } catch (error) {
+    if (error instanceof AttachmentStorageError) {
+      console.error('AttachmentStorageError during PDF export:', error.message, error.cause)
+      return NextResponse.json(
+        attachmentStorageErrorPayload(
+          error.entryId,
+          error.attachmentId,
+          error.fileId,
+          error.filename
+        ),
+        { status: 500 }
+      )
+    }
     console.error('Error generating PDF:', error)
-    return new NextResponse('Internal server error', { status: 500 })
+    return NextResponse.json(
+      { code: 'INTERNAL_ERROR', message: 'Internal server error.' },
+      { status: 500 }
+    )
   }
 }

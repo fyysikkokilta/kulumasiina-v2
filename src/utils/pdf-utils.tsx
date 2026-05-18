@@ -11,6 +11,35 @@ import { env } from '@/lib/env'
 import { getFile } from '@/lib/storage'
 import { isPdf } from '@/utils/validation'
 
+/**
+ * Thrown when an attachment file is missing, unreadable, or empty in storage.
+ * Carries enough context for a human-readable 500 response.
+ */
+export class AttachmentStorageError extends Error {
+  readonly entryId: string
+  readonly attachmentId: string
+  readonly fileId: string | null
+  readonly filename: string | null
+
+  constructor(opts: {
+    entryId: string
+    attachmentId: string
+    fileId: string | null
+    filename: string | null
+    cause?: unknown
+  }) {
+    const message =
+      `Attachment file missing/unreadable for entry=${opts.entryId} ` +
+      `attachment=${opts.attachmentId} fileId=${opts.fileId ?? 'null'} filename=${opts.filename ?? 'null'}`
+    super(message, { cause: opts.cause })
+    this.name = 'AttachmentStorageError'
+    this.entryId = opts.entryId
+    this.attachmentId = opts.attachmentId
+    this.fileId = opts.fileId
+    this.filename = opts.filename
+  }
+}
+
 // Helper function to format dates in Finnish timezone
 function formatDateInFinnishTimezone(date: Date) {
   return date.toLocaleDateString('fi-FI', {
@@ -517,10 +546,36 @@ export async function generatePartsFromEntry(entry: EntryWithItemsAndMileages) {
       let data: Buffer = Buffer.alloc(0)
       if (att.fileId) {
         try {
-          data = (await getFile(att.fileId)) || Buffer.alloc(0)
+          const fileData = await getFile(att.fileId)
+          if (!fileData || fileData.length === 0) {
+            throw new AttachmentStorageError({
+              entryId: entry.id,
+              attachmentId: att.id,
+              fileId: att.fileId,
+              filename: att.filename ?? null,
+              cause: new Error('getFile returned null or empty buffer')
+            })
+          }
+          data = fileData
         } catch (e) {
-          console.error('Error getting file:', e)
+          // Re-throw our custom errors unchanged so route handlers can identify them
+          if (e instanceof AttachmentStorageError) throw e
+          throw new AttachmentStorageError({
+            entryId: entry.id,
+            attachmentId: att.id,
+            fileId: att.fileId,
+            filename: att.filename ?? null,
+            cause: e
+          })
         }
+      } else {
+        throw new AttachmentStorageError({
+          entryId: entry.id,
+          attachmentId: att.id,
+          fileId: null,
+          filename: att.filename ?? null,
+          cause: new Error('Attachment record has no fileId')
+        })
       }
       const isPdfFile = isPdf(data)
       data = isPdfFile ? data : await convertToPng(data)

@@ -10,7 +10,7 @@ import {
   useReactTable
 } from '@tanstack/react-table'
 import { ChevronDown } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useAction } from 'next-safe-action/hooks'
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -58,6 +58,7 @@ export function AdminEntryTable({
   oldArchivedCutoff: string
 }) {
   const t = useTranslations('AdminEntryTable')
+  const locale = useLocale()
 
   const [columnFilters, setColumnFilters] =
     useState<{ id: string; value: unknown }[]>(DEFAULT_COLUMN_FILTERS)
@@ -146,7 +147,9 @@ export function AdminEntryTable({
   const handleReset = (ids?: string[]) => resetEntries({ ids: getTargetIds(ids) })
   const handleMultiZipDownload = () => {
     const ids = selectedRowKeys.map((k) => String(k))
-    window.open(`/api/entry/multi/zip?entry_ids=${ids.join(',')}`)
+    window.location.assign(
+      `/${locale}/admin/export?apiUrl=${encodeURIComponent(`/api/entry/multi/zip?entry_ids=${ids.join(',')}`)}`
+    )
   }
   const handleCopyClipboardText = () => {
     const lines = tableData
@@ -195,6 +198,7 @@ export function AdminEntryTable({
     () =>
       getAdminEntryTableColumns({
         t,
+        locale,
         toggleExpand,
         expandedIds,
         getStatusColor,
@@ -205,6 +209,7 @@ export function AdminEntryTable({
       }),
     [
       t,
+      locale,
       toggleExpand,
       expandedIds,
       getStatusColor,
