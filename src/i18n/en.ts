@@ -276,12 +276,14 @@ const en = {
     file_id_label: 'File ID',
     file_label: 'File',
     missing_entries_label: 'Missing entries',
-    loading_fallback: 'Loading…',
     invalid_request: 'Invalid export request.',
     network_error: 'Network error. Please try again.',
+    download_again: 'Download Again',
     retry: 'Retry',
     back_to_admin: 'Back to Admin',
-    copy_details: 'Copy Details'
+    copy_details: 'Copy Details',
+    copy_success: 'Details copied to clipboard.',
+    copy_error: 'Copy failed. Please copy the details manually.'
   }
 } as const
 

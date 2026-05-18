@@ -275,12 +275,14 @@ const fi = {
     file_id_label: 'Tiedoston tunniste',
     file_label: 'Tiedosto',
     missing_entries_label: 'Puuttuvat hakemukset',
-    loading_fallback: 'Ladataan…',
     invalid_request: 'Virheellinen vientipyyntö.',
     network_error: 'Verkkovirhe. Yritä uudelleen.',
+    download_again: 'Lataa uudelleen',
     retry: 'Yritä uudelleen',
     back_to_admin: 'Takaisin hallintaan',
-    copy_details: 'Kopioi tiedot'
+    copy_details: 'Kopioi tiedot',
+    copy_success: 'Tiedot kopioitu leikepöydälle.',
+    copy_error: 'Kopiointi epäonnistui. Kopioi tiedot käsin.'
   }
 } as const
 

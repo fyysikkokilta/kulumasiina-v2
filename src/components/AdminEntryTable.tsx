@@ -50,6 +50,17 @@ const DEFAULT_COLUMN_FILTERS = [
 
 const DEFAULT_SORTING = [{ id: 'submissionDate', desc: true }]
 
+const openExportPage = (locale: string, apiUrl: string) => {
+  const href = `/${locale}/admin/export?apiUrl=${encodeURIComponent(apiUrl)}`
+  const exportWindow = window.open(href, '_blank')
+
+  if (exportWindow) {
+    exportWindow.opener = null
+  } else {
+    window.location.assign(href)
+  }
+}
+
 export function AdminEntryTable({
   entries,
   oldArchivedCutoff
@@ -147,9 +158,7 @@ export function AdminEntryTable({
   const handleReset = (ids?: string[]) => resetEntries({ ids: getTargetIds(ids) })
   const handleMultiZipDownload = () => {
     const ids = selectedRowKeys.map((k) => String(k))
-    window.location.assign(
-      `/${locale}/admin/export?apiUrl=${encodeURIComponent(`/api/entry/multi/zip?entry_ids=${ids.join(',')}`)}`
-    )
+    openExportPage(locale, `/api/entry/multi/zip?entry_ids=${ids.join(',')}`)
   }
   const handleCopyClipboardText = () => {
     const lines = tableData

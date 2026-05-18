@@ -543,7 +543,7 @@ export async function generatePartsFromEntry(entry: EntryWithItemsAndMileages) {
   for (const item of entry.items) {
     const attachments: AttachmentData[] = []
     for (const att of item.attachments) {
-      let data: Buffer = Buffer.alloc(0)
+      let data: Buffer
       if (att.fileId) {
         try {
           const fileData = await getFile(att.fileId)

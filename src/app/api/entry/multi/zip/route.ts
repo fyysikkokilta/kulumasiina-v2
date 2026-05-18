@@ -16,16 +16,16 @@ import {
   generatePartsFromEntry
 } from '@/utils/pdf-utils'
 
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   const cookieStore = await cookies()
   const token = cookieStore.get(JWT_COOKIE)?.value
   const authorized = await isAuthorized(token)
   if (!authorized) {
-    return NextResponse.json({ code: 'UNAUTHORIZED', message: 'Unauthorized.' }, { status: 404 })
+    return NextResponse.json({ code: 'UNAUTHORIZED', message: 'Unauthorized.' }, { status: 401 })
   }
 
   try {
-    const { searchParams } = new URL(_request.url)
+    const { searchParams } = new URL(request.url)
     const entryIdsParam = searchParams.get('entry_ids')
 
     if (!entryIdsParam) {
@@ -35,14 +35,28 @@ export async function GET(_request: NextRequest) {
       )
     }
 
-    const entryIds = entryIdsParam.split(',').map((id) => z.uuid().parse(id.trim()))
+    const rawEntryIds = entryIdsParam
+      .split(',')
+      .map((id) => id.trim())
+      .filter(Boolean)
 
-    if (entryIds.length === 0) {
+    if (rawEntryIds.length === 0) {
       return NextResponse.json(
         { code: 'MISSING_ENTRY_IDS', message: 'No valid entry IDs provided.' },
         { status: 400 }
       )
     }
+
+    const parsedEntryIds = z.array(z.uuid()).safeParse(rawEntryIds)
+
+    if (!parsedEntryIds.success) {
+      return NextResponse.json(
+        { code: 'INVALID_ENTRY_IDS', message: 'One or more entry IDs are invalid.' },
+        { status: 400 }
+      )
+    }
+
+    const entryIds = parsedEntryIds.data
 
     // Get entries with all related data
     const entriesData = await db.query.entry.findMany({

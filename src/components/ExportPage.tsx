@@ -3,7 +3,7 @@
 import { AlertTriangle, Download, Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -14,18 +14,74 @@ interface ExportPageProps {
 }
 
 type ExportState = 'loading' | 'success' | 'error'
+type CopyState = 'idle' | 'success' | 'error'
+
+const UUID_PATTERN = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}'
+
+const EXPORT_API_PATTERNS = [
+  new RegExp(`^/api/entry/${UUID_PATTERN}/pdf$`, 'u'),
+  new RegExp(`^/api/entry/${UUID_PATTERN}/csv$`, 'u'),
+  new RegExp(`^/api/entry/multi/zip\\?entry_ids=${UUID_PATTERN}(?:,${UUID_PATTERN})*$`, 'u')
+]
+
+const isAllowedExportApiUrl = (value: string) =>
+  EXPORT_API_PATTERNS.some((pattern) => pattern.test(value))
+
+const getDownloadFilename = (contentDisposition: string | null) => {
+  if (!contentDisposition) {
+    return 'export'
+  }
+
+  const encodedMatch = contentDisposition.match(/filename\*=UTF-8''([^;]+)/iu)
+  if (encodedMatch?.[1]) {
+    try {
+      return decodeURIComponent(encodedMatch[1])
+    } catch {
+      return encodedMatch[1]
+    }
+  }
+
+  const filenameMatch = contentDisposition.match(/filename=(?:"([^"]+)"|([^;]+))/iu)
+  const filename = filenameMatch?.[1] ?? filenameMatch?.[2]?.trim()
+
+  return filename || 'export'
+}
+
+const triggerDownload = (url: string, filename: string) => {
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+}
 
 export function ExportPage({ apiUrl }: ExportPageProps) {
   const t = useTranslations('ExportPage')
   const router = useRouter()
   const [state, setState] = useState<ExportState>('loading')
   const [errorPayload, setErrorPayload] = useState<ExportErrorPayload | null>(null)
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
+  const [downloadFilename, setDownloadFilename] = useState('export')
+  const [copyState, setCopyState] = useState<CopyState>('idle')
+  const downloadUrlRef = useRef<string | null>(null)
+
+  const clearDownloadUrl = useCallback(() => {
+    if (downloadUrlRef.current) {
+      URL.revokeObjectURL(downloadUrlRef.current)
+      downloadUrlRef.current = null
+    }
+
+    setDownloadUrl(null)
+  }, [])
 
   const doExport = useCallback(async () => {
     setState('loading')
     setErrorPayload(null)
+    setCopyState('idle')
+    clearDownloadUrl()
 
-    if (!apiUrl.startsWith('/api/')) {
+    if (!isAllowedExportApiUrl(apiUrl)) {
       setErrorPayload({
         code: 'INVALID_API_URL',
         message: t('invalid_request')
@@ -55,18 +111,13 @@ export function ExportPage({ apiUrl }: ExportPageProps) {
       }
 
       const blob = await response.blob()
-      const contentDisposition = response.headers.get('content-disposition')
-      const filenameMatch = contentDisposition?.match(/filename="(.+)"/)
-      const filename = filenameMatch ? filenameMatch[1] : 'export'
+      const filename = getDownloadFilename(response.headers.get('content-disposition'))
 
       const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = filename
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
+      downloadUrlRef.current = url
+      setDownloadUrl(url)
+      setDownloadFilename(filename)
+      triggerDownload(url, filename)
 
       setState('success')
     } catch {
@@ -76,24 +127,47 @@ export function ExportPage({ apiUrl }: ExportPageProps) {
       })
       setState('error')
     }
-  }, [apiUrl, t])
+  }, [apiUrl, clearDownloadUrl, t])
 
   useEffect(() => {
     void doExport()
   }, [doExport])
 
+  useEffect(() => {
+    return () => {
+      if (downloadUrlRef.current) {
+        URL.revokeObjectURL(downloadUrlRef.current)
+      }
+    }
+  }, [])
+
   const handleRetry = () => {
     void doExport()
+  }
+
+  const handleDownloadAgain = () => {
+    if (!downloadUrl) return
+    triggerDownload(downloadUrl, downloadFilename)
   }
 
   const handleBack = () => {
     router.push('/admin')
   }
 
-  const handleCopyDetails = () => {
+  const handleCopyDetails = async () => {
     if (!errorPayload) return
     const text = JSON.stringify(errorPayload, null, 2)
-    void navigator.clipboard.writeText(text)
+
+    try {
+      if (!navigator.clipboard?.writeText) {
+        throw new Error('Clipboard API unavailable')
+      }
+
+      await navigator.clipboard.writeText(text)
+      setCopyState('success')
+    } catch {
+      setCopyState('error')
+    }
   }
 
   if (state === 'loading') {
@@ -124,6 +198,9 @@ export function ExportPage({ apiUrl }: ExportPageProps) {
           <div>
             <p className="font-semibold text-gray-900">{t('success_message')}</p>
           </div>
+          <Button variant="primary" onClick={handleDownloadAgain} disabled={!downloadUrl}>
+            {t('download_again')}
+          </Button>
           <Button variant="secondary" onClick={handleBack}>
             {t('back_to_admin')}
           </Button>
@@ -190,6 +267,11 @@ export function ExportPage({ apiUrl }: ExportPageProps) {
             <Button variant="ghost" size="small" onClick={handleCopyDetails}>
               {t('copy_details')}
             </Button>
+          )}
+          {copyState !== 'idle' && (
+            <p className="text-center text-xs text-gray-500">
+              {copyState === 'success' ? t('copy_success') : t('copy_error')}
+            </p>
           )}
         </div>
       </Card>

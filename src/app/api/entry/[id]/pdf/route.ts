@@ -24,7 +24,7 @@ export async function GET(_request: NextRequest, { params }: RouteContext) {
   const token = cookieStore.get(JWT_COOKIE)?.value
   const authorized = await isAuthorized(token)
   if (!authorized) {
-    return NextResponse.json({ code: 'UNAUTHORIZED', message: 'Unauthorized.' }, { status: 404 })
+    return NextResponse.json({ code: 'UNAUTHORIZED', message: 'Unauthorized.' }, { status: 401 })
   }
 
   try {
