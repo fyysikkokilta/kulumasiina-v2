@@ -12,7 +12,7 @@ test.beforeAll(async () => {
 
 test('entry pdf api requires auth', async ({ request }) => {
   const res = await request.get(`${apiBaseUrl}/api/entry/${testEntryIds.submitted}/pdf`)
-  expect(res.status()).toBe(404)
+  expect(res.status()).toBe(401)
 })
 
 test('entry pdf api works with auth', async ({ request }) => {
@@ -27,7 +27,7 @@ test('entry pdf api works with auth', async ({ request }) => {
 
 test('entry csv api requires auth', async ({ request }) => {
   const res = await request.get(`${apiBaseUrl}/api/entry/${testEntryIds.approved}/csv`)
-  expect(res.status()).toBe(404)
+  expect(res.status()).toBe(401)
 })
 
 test('entry csv api works with auth', async ({ request }) => {
@@ -41,7 +41,7 @@ test('entry csv api works with auth', async ({ request }) => {
 
 test('multi zip api requires auth', async ({ request }) => {
   const res = await request.get(`${apiBaseUrl}/api/entry/multi/zip?entry_ids=${testEntryIds.paid}`)
-  expect(res.status()).toBe(404)
+  expect(res.status()).toBe(401)
 })
 
 test('multi zip api works with auth', async ({ request }) => {

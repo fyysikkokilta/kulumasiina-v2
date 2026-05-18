@@ -11,14 +11,9 @@ import { Tag } from '@/components/ui/Tag'
 import type { AdminEntries } from '@/data/getAdminEntries'
 import { STATUS_COLORS } from '@/utils/admin-entry-utils'
 
-export type EntryRow = AdminEntries[number] & { key: string; total: number }
-
-const columnHelper = createColumnHelper<EntryRow>()
-
-const STATUS_VALUES = Object.keys(STATUS_COLORS) as (keyof typeof STATUS_COLORS)[]
-
 export interface AdminEntryTableColumnsParams {
   t: ReturnType<typeof import('next-intl').useTranslations<'AdminEntryTable'>>
+  locale: string
   toggleExpand: (id: string) => void
   expandedIds: Record<string, boolean>
   getStatusColor: (status: keyof typeof STATUS_COLORS) => string
@@ -28,8 +23,26 @@ export interface AdminEntryTableColumnsParams {
   onClearFilters: () => void
 }
 
+export type EntryRow = AdminEntries[number] & { key: string; total: number }
+
+const columnHelper = createColumnHelper<EntryRow>()
+
+const STATUS_VALUES = Object.keys(STATUS_COLORS) as (keyof typeof STATUS_COLORS)[]
+
+const openExportPage = (locale: string, apiUrl: string) => {
+  const href = `/${locale}/admin/export?apiUrl=${encodeURIComponent(apiUrl)}`
+  const exportWindow = window.open(href, '_blank')
+
+  if (exportWindow) {
+    exportWindow.opener = null
+  } else {
+    window.location.assign(href)
+  }
+}
+
 export function getAdminEntryTableColumns({
   t,
+  locale,
   toggleExpand,
   expandedIds,
   getStatusColor,
@@ -306,7 +319,7 @@ export function getAdminEntryTableColumns({
             type="button"
             variant="secondary"
             size="small"
-            onClick={() => window.open(`/api/entry/${row.original.id}/pdf`)}
+            onClick={() => openExportPage(locale, `/api/entry/${row.original.id}/pdf`)}
           >
             {t('actions.pdf')}
           </Button>
@@ -315,7 +328,7 @@ export function getAdminEntryTableColumns({
               type="button"
               variant="secondary"
               size="small"
-              onClick={() => window.open(`/api/entry/${row.original.id}/csv`)}
+              onClick={() => openExportPage(locale, `/api/entry/${row.original.id}/csv`)}
             >
               {row.original.status === 'paid' ? t('actions.zip') : t('actions.csv')}
             </Button>

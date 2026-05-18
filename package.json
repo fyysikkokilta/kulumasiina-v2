@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "typegen": "next typegen",
-    "typecheck": "tsgo --noEmit",
+    "typecheck": "next typegen && tsgo --noEmit",
     "lint": "oxlint .",
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",

@@ -262,6 +262,28 @@ const en = {
     close: 'Close',
     is_not_receipt: 'Extra attachment',
     loading: 'Loading…'
+  },
+  ExportPage: {
+    title: 'Export',
+    preparing: 'Preparing export…',
+    preparing_subtitle: 'Your download will start automatically.',
+    success_message: 'Download started.',
+    error_title: 'Export Failed',
+    error_subtitle: 'The export could not be completed.',
+    error_code: 'Error code',
+    entry_label: 'Entry',
+    attachment_label: 'Attachment',
+    file_id_label: 'File ID',
+    file_label: 'File',
+    missing_entries_label: 'Missing entries',
+    invalid_request: 'Invalid export request.',
+    network_error: 'Network error. Please try again.',
+    download_again: 'Download Again',
+    retry: 'Retry',
+    back_to_admin: 'Back to Admin',
+    copy_details: 'Copy Details',
+    copy_success: 'Details copied to clipboard.',
+    copy_error: 'Copy failed. Please copy the details manually.'
   }
 } as const
 

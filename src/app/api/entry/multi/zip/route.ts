@@ -3,16 +3,25 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
 import { db } from '@/db'
+import {
+  attachmentStorageErrorPayload,
+  invalidEntryStatusErrorPayload,
+  someEntriesNotFoundErrorPayload
+} from '@/lib/export-error'
 import { generateCsv, generateCsvInfoFromEntry } from '@/utils/csv-utils'
 import isAuthorized, { JWT_COOKIE } from '@/utils/isAuthorized'
-import { generateCombinedPDF, generatePartsFromEntry } from '@/utils/pdf-utils'
+import {
+  AttachmentStorageError,
+  generateCombinedPDF,
+  generatePartsFromEntry
+} from '@/utils/pdf-utils'
 
 export async function GET(request: NextRequest) {
   const cookieStore = await cookies()
   const token = cookieStore.get(JWT_COOKIE)?.value
   const authorized = await isAuthorized(token)
   if (!authorized) {
-    return new NextResponse('Unauthorized', { status: 404 })
+    return NextResponse.json({ code: 'UNAUTHORIZED', message: 'Unauthorized.' }, { status: 401 })
   }
 
   try {
@@ -20,14 +29,34 @@ export async function GET(request: NextRequest) {
     const entryIdsParam = searchParams.get('entry_ids')
 
     if (!entryIdsParam) {
-      return new NextResponse('Missing entry_ids parameter', { status: 400 })
+      return NextResponse.json(
+        { code: 'MISSING_ENTRY_IDS', message: 'Missing entry_ids parameter.' },
+        { status: 400 }
+      )
     }
 
-    const entryIds = entryIdsParam.split(',').map((id) => z.uuid().parse(id.trim()))
+    const rawEntryIds = entryIdsParam
+      .split(',')
+      .map((id) => id.trim())
+      .filter(Boolean)
 
-    if (entryIds.length === 0) {
-      return new NextResponse('No valid entry IDs provided', { status: 400 })
+    if (rawEntryIds.length === 0) {
+      return NextResponse.json(
+        { code: 'MISSING_ENTRY_IDS', message: 'No valid entry IDs provided.' },
+        { status: 400 }
+      )
     }
+
+    const parsedEntryIds = z.array(z.uuid()).safeParse(rawEntryIds)
+
+    if (!parsedEntryIds.success) {
+      return NextResponse.json(
+        { code: 'INVALID_ENTRY_IDS', message: 'One or more entry IDs are invalid.' },
+        { status: 400 }
+      )
+    }
+
+    const entryIds = parsedEntryIds.data
 
     // Get entries with all related data
     const entriesData = await db.query.entry.findMany({
@@ -45,15 +74,19 @@ export async function GET(request: NextRequest) {
     })
 
     if (entriesData.length !== entryIds.length) {
-      return new NextResponse('Some entries not found', { status: 404 })
+      const foundIds = new Set(entriesData.map((e) => e.id))
+      const missing = entryIds.filter((id) => !foundIds.has(id))
+      return NextResponse.json(someEntriesNotFoundErrorPayload(missing), { status: 404 })
     }
 
     // Check that all entries are paid
     const invalidEntries = entriesData.filter((entry) => entry.status !== 'paid')
     if (invalidEntries.length > 0) {
-      return new NextResponse('All entries must be paid for CSV generation', {
-        status: 400
-      })
+      const firstInvalid = invalidEntries[0]
+      return NextResponse.json(
+        invalidEntryStatusErrorPayload(firstInvalid.id, firstInvalid.status),
+        { status: 400 }
+      )
     }
 
     // Generate CSV infos with PDFs
@@ -93,7 +126,26 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error('Error generating multi-entry CSV:', error)
-    return new NextResponse('Internal server error', { status: 500 })
+    if (error instanceof AttachmentStorageError) {
+      console.error(
+        'AttachmentStorageError during multi-entry ZIP export:',
+        error.message,
+        error.cause
+      )
+      return NextResponse.json(
+        attachmentStorageErrorPayload(
+          error.entryId,
+          error.attachmentId,
+          error.fileId,
+          error.filename
+        ),
+        { status: 500 }
+      )
+    }
+    console.error('Error generating multi-entry ZIP:', error)
+    return NextResponse.json(
+      { code: 'INTERNAL_ERROR', message: 'Internal server error.' },
+      { status: 500 }
+    )
   }
 }
