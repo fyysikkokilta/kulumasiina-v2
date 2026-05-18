@@ -4,7 +4,6 @@ import { Separator } from '@base-ui/react/separator'
 import { locale } from 'next/root-params'
 import { NextIntlClientProvider } from 'next-intl'
 import { getTranslations } from 'next-intl/server'
-import type { ReactNode } from 'react'
 
 import { Header } from '@/components/Header'
 import { routing } from '@/i18n/routing'
@@ -21,7 +20,7 @@ export async function generateMetadata() {
   }
 }
 
-export default async function LocaleLayout({ children }: { children: ReactNode }) {
+export default async function LocaleLayout({ children }: LayoutProps<'/[locale]'>) {
   const curLocale = await locale()
 
   return (

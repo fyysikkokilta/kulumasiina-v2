@@ -16,11 +16,7 @@ import {
   generatePartsFromEntry
 } from '@/utils/pdf-utils'
 
-type RouteContext = {
-  params: Promise<{ id: string }>
-}
-
-export async function GET(_request: NextRequest, { params }: RouteContext) {
+export async function GET(_request: NextRequest, { params }: RouteContext<'/api/entry/[id]/csv'>) {
   const cookieStore = await cookies()
   const token = cookieStore.get(JWT_COOKIE)?.value
   const authorized = await isAuthorized(token)
