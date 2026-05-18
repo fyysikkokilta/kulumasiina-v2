@@ -261,7 +261,7 @@ const en = {
   PreviewModal: {
     close: 'Close',
     is_not_receipt: 'Extra attachment',
-loading: 'Loading…'
+    loading: 'Loading…'
   },
   ExportPage: {
     title: 'Export',
