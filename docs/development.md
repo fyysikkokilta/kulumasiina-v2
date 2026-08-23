@@ -2,8 +2,8 @@
 
 ## Prerequisites
 
-- **Node.js** 24 or later
-- **pnpm** 10 or later (`npm install -g pnpm` or via [corepack](https://nodejs.org/api/corepack.html))
+- **Node.js** 26 or later
+- **pnpm** 11 or later (`npm install -g pnpm`)
 - **PostgreSQL** 14 or later (local install, Docker, or a managed service)
 - **Ghostscript** (required for PDF compression; see [compress-pdf](https://github.com/victorsoares96/compress-pdf) for installation)
 

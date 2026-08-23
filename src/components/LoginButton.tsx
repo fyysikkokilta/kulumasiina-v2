@@ -10,12 +10,12 @@ interface LoginButtonProps {
   authorized: boolean
 }
 
+const handleLogout = async () => {
+  await logoutAction()
+}
+
 export function LoginButton({ authorized }: LoginButtonProps) {
   const t = useTranslations('Login')
-
-  const handleLogout = async () => {
-    await logoutAction()
-  }
 
   return authorized ? (
     <Button

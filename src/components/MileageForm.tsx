@@ -38,8 +38,9 @@ export function MileageForm({
   const formRef = useRef<HTMLFormElement>(null)
 
   useEffect(() => {
+    if (!visible) return
     queueMicrotask(() => setErrors(undefined))
-  }, [editData, visible])
+  }, [visible])
 
   const mileageFormSchema = z.object({
     description: z.string().min(1, t('errors.description')).max(500),

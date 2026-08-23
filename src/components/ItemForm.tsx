@@ -53,6 +53,7 @@ export function ItemForm({ visible, onOk, onCancel, editData, submittingStatus }
   const [uploadError, setUploadError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (!visible) return
     queueMicrotask(() => {
       setErrors(undefined)
       setUploadError(null)

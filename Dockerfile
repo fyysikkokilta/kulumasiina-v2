@@ -1,7 +1,10 @@
 # To use this Dockerfile, you have to set `output: 'standalone'` in your next.config.mjs file.
 # From https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile
 
-FROM node:24-alpine AS base
+FROM node:26-alpine AS base
+
+# Corepack is no longer bundled with Node.js 25+
+RUN npm install -g corepack && corepack enable pnpm
 
 ARG SKIP_ENV_VALIDATION=true
 ARG NEXT_PUBLIC_ARCHIVED_ENTRIES_AGE_LIMIT_DAYS=30
@@ -17,8 +20,7 @@ WORKDIR /app
 
 # Install dependencies
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY patches ./patches
-RUN corepack enable pnpm && pnpm i --frozen-lockfile --ignore-scripts
+RUN pnpm i --frozen-lockfile --ignore-scripts
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -38,7 +40,7 @@ ENV NEXT_PUBLIC_MILEAGE_REIMBURSEMENT_RATE=${NEXT_PUBLIC_MILEAGE_REIMBURSEMENT_R
 ENV NEXT_PUBLIC_PRIVACY_POLICY_URL=${NEXT_PUBLIC_PRIVACY_POLICY_URL}
 ENV NODE_ENV=${NODE_ENV}
 
-RUN corepack enable pnpm && pnpm run build
+RUN pnpm run build
 
 # Production image, copy all the files and run next
 FROM base AS runner

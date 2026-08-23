@@ -28,8 +28,9 @@ export function PayModal({ visible, onCancel, entryIds, onSuccess }: PayModalPro
   const t = useTranslations('PayModal')
 
   useEffect(() => {
+    if (!visible) return
     queueMicrotask(() => setErrors(undefined))
-  }, [entryIds, visible])
+  }, [visible])
 
   const payFormSchema = z.object({
     date: z.iso.date(t('date_error')).transform((val) => new Date(val))

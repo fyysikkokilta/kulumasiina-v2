@@ -75,7 +75,7 @@ function PreviewFallback({ closePreview }: { closePreview: () => void }) {
           <span className="sr-only">{t('close')}</span>
         </Dialog.Close>
       </div>
-      <div className="relative flex h-full min-h-[300px] w-full items-center justify-center overflow-hidden rounded-b-lg bg-gray-50">
+      <div className="relative flex h-full min-h-75 w-full items-center justify-center overflow-hidden rounded-b-lg bg-gray-50">
         <Loader2 className="h-10 w-10 animate-spin text-gray-400" aria-hidden />
         <span className="sr-only">{t('loading')}</span>
       </div>
@@ -88,7 +88,7 @@ export function PreviewModal({ previewState, closePreview }: PreviewModalProps) 
     <Dialog.Root open={!!previewState} onOpenChange={(open) => !open && closePreview()}>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/50" />
-        <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 w-[90%] max-w-[1400px] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-white shadow-lg">
+        <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 w-[90%] max-w-350 -translate-x-1/2 -translate-y-1/2 rounded-lg bg-white shadow-lg">
           {previewState ? (
             <Suspense fallback={<PreviewFallback closePreview={closePreview} />}>
               <PreviewContent promise={previewState} closePreview={closePreview} />

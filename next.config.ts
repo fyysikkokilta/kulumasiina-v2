@@ -11,7 +11,6 @@ const nextConfig: NextConfig = {
     globalNotFound: true,
     optimizePackageImports: ['@base-ui/react'],
     inlineCss: true,
-    rootParams: true,
     serverActions: {
       bodySizeLimit: '8mb'
     }

@@ -28,8 +28,9 @@ export function ApproveModal({ visible, onCancel, entryIds, onSuccess }: Approve
   const t = useTranslations('ApproveModal')
 
   useEffect(() => {
+    if (!visible) return
     queueMicrotask(() => setErrors(undefined))
-  }, [entryIds, visible])
+  }, [visible])
 
   const approveFormSchema = z.object({
     date: z.iso.date(t('date_error')).transform((val) => new Date(val)),

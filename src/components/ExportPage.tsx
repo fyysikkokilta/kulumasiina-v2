@@ -59,12 +59,16 @@ const triggerDownload = (url: string, filename: string) => {
 export function ExportPage({ apiUrl }: ExportPageProps) {
   const t = useTranslations('ExportPage')
   const router = useRouter()
-  const [state, setState] = useState<ExportState>('loading')
-  const [errorPayload, setErrorPayload] = useState<ExportErrorPayload | null>(null)
+  const isApiUrlAllowed = isAllowedExportApiUrl(apiUrl)
+  const [state, setState] = useState<ExportState>(isApiUrlAllowed ? 'loading' : 'error')
+  const [errorPayload, setErrorPayload] = useState<ExportErrorPayload | null>(
+    isApiUrlAllowed ? null : { code: 'INVALID_API_URL', message: t('invalid_request') }
+  )
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
   const [downloadFilename, setDownloadFilename] = useState('export')
   const [copyState, setCopyState] = useState<CopyState>('idle')
   const downloadUrlRef = useRef<string | null>(null)
+  const abortRef = useRef<AbortController | null>(null)
 
   const clearDownloadUrl = useCallback(() => {
     if (downloadUrlRef.current) {
@@ -75,25 +79,21 @@ export function ExportPage({ apiUrl }: ExportPageProps) {
     setDownloadUrl(null)
   }, [])
 
-  const doExport = useCallback(async () => {
-    setState('loading')
-    setErrorPayload(null)
-    setCopyState('idle')
-    clearDownloadUrl()
-
-    if (!isAllowedExportApiUrl(apiUrl)) {
-      setErrorPayload({
-        code: 'INVALID_API_URL',
-        message: t('invalid_request')
-      })
-      setState('error')
-      return
-    }
+  // The export is an external side effect (fetch + browser download), so it runs
+  // from an effect on mount and is called directly again by the retry handler.
+  // The in-flight request is aborted on unmount and before any re-run.
+  const runExport = useCallback(async () => {
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
 
     try {
       const response = await fetch(apiUrl, {
-        credentials: 'include'
+        credentials: 'include',
+        signal: controller.signal
       })
+
+      if (controller.signal.aborted) return
 
       if (!response.ok) {
         const contentType = response.headers.get('content-type') ?? ''
@@ -111,8 +111,9 @@ export function ExportPage({ apiUrl }: ExportPageProps) {
       }
 
       const blob = await response.blob()
-      const filename = getDownloadFilename(response.headers.get('content-disposition'))
+      if (controller.signal.aborted) return
 
+      const filename = getDownloadFilename(response.headers.get('content-disposition'))
       const url = URL.createObjectURL(blob)
       downloadUrlRef.current = url
       setDownloadUrl(url)
@@ -121,17 +122,28 @@ export function ExportPage({ apiUrl }: ExportPageProps) {
 
       setState('success')
     } catch {
+      if (controller.signal.aborted) return
       setErrorPayload({
         code: 'INTERNAL_ERROR',
         message: t('network_error')
       })
       setState('error')
     }
-  }, [apiUrl, clearDownloadUrl, t])
+  }, [apiUrl, t])
 
   useEffect(() => {
-    void doExport()
-  }, [doExport])
+    if (!isApiUrlAllowed) return
+
+    const start = async () => {
+      await runExport()
+    }
+
+    void start()
+
+    return () => {
+      abortRef.current?.abort()
+    }
+  }, [isApiUrlAllowed, runExport])
 
   useEffect(() => {
     return () => {
@@ -142,7 +154,12 @@ export function ExportPage({ apiUrl }: ExportPageProps) {
   }, [])
 
   const handleRetry = () => {
-    void doExport()
+    if (!isApiUrlAllowed) return
+    clearDownloadUrl()
+    setErrorPayload(null)
+    setCopyState('idle')
+    setState('loading')
+    void runExport()
   }
 
   const handleDownloadAgain = () => {

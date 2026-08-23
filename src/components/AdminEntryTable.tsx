@@ -1,20 +1,14 @@
 'use client'
 
 import { Select } from '@base-ui/react/select'
-import {
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable
-} from '@tanstack/react-table'
+import { flexRender, useTable } from '@tanstack/react-table'
 import { ChevronDown } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useAction } from 'next-safe-action/hooks'
-import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
+import { Fragment, useCallback, useMemo, useState } from 'react'
 
 import { AdminEntryExpandedRow } from '@/components/AdminEntryExpandedRow'
+import { adminEntryTableFeatures } from '@/components/adminEntryTableFeatures'
 import { getAdminEntryTableColumns } from '@/components/AdminEntryTableColumns'
 import { ApproveModal } from '@/components/ApproveModal'
 import { DeleteOldArchivedModal } from '@/components/DeleteOldArchivedModal'
@@ -167,10 +161,6 @@ export function AdminEntryTable({
     void navigator.clipboard.writeText(lines.join('\n'))
   }
 
-  useEffect(() => {
-    setPagination((prev) => ({ ...prev, pageIndex: 0 }))
-  }, [columnFilters])
-
   const toggleExpand = useCallback((id: string) => {
     setExpandedIds((prev) => ({ ...prev, [id]: !prev[id] }))
   }, [])
@@ -230,7 +220,8 @@ export function AdminEntryTable({
     ]
   )
 
-  const table = useReactTable({
+  const table = useTable({
+    features: adminEntryTableFeatures,
     data: tableData,
     columns,
     getRowId: (row) => row.id,
@@ -240,17 +231,16 @@ export function AdminEntryTable({
       pagination,
       rowSelection: rowSelectionState
     },
-    onColumnFiltersChange: (updater) => setColumnFilters(updater),
+    onColumnFiltersChange: (updater) => {
+      setColumnFilters(updater)
+      setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+    },
     onSortingChange: (updater) => setSorting(updater),
     onPaginationChange: (updater) => setPagination(updater),
     onRowSelectionChange: (updater) => {
       const next = typeof updater === 'function' ? updater(rowSelectionState) : updater
       setSelectedRowKeys(Object.keys(next).filter((k) => next[k]))
     },
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     enableRowSelection: (row) => {
       if (selectedRowKeys.length === 0) return true
       const statuses = [
@@ -478,7 +468,7 @@ export function AdminEntryTable({
                   return (
                     <Fragment key={row.id}>
                       <tr className="hover:bg-gray-50" data-row-key={row.original.id}>
-                        {row.getVisibleCells().map((cell) => (
+                        {row.getAllCells().map((cell) => (
                           <td
                             key={cell.id}
                             className="border-b border-gray-100 px-3 py-2 text-sm text-gray-900"
@@ -524,7 +514,7 @@ export function AdminEntryTable({
               </div>
               <div className="flex items-center gap-2">
                 <Select.Root
-                  value={String(table.getState().pagination.pageSize)}
+                  value={String(pagination.pageSize)}
                   onValueChange={(v) => {
                     if (v != null) {
                       table.setPageSize(Number(v))
@@ -550,7 +540,7 @@ export function AdminEntryTable({
                   </Select.Trigger>
                   <Select.Portal container={typeof document !== 'undefined' ? document.body : null}>
                     <Select.Positioner sideOffset={4} positionMethod="fixed" className="z-110">
-                      <Select.Popup className="z-110 max-h-[300px] overflow-auto rounded-md border border-gray-200 bg-white shadow-lg">
+                      <Select.Popup className="z-110 max-h-75 overflow-auto rounded-md border border-gray-200 bg-white shadow-lg">
                         <Select.List>
                           {PAGE_SIZES.map((size) => (
                             <Select.Item

@@ -4,6 +4,7 @@ import { Checkbox } from '@base-ui/react/checkbox'
 import { createColumnHelper } from '@tanstack/react-table'
 import { ArrowUpDown, Check, ChevronDown, ChevronRight, Minus, RotateCcw } from 'lucide-react'
 
+import type { AdminEntryTableFeatures } from '@/components/adminEntryTableFeatures'
 import { DateFilterPopover, type DateRangeValue } from '@/components/admin/DateFilterPopover'
 import { MultiSelectFilterPopover } from '@/components/admin/MultiSelectFilterPopover'
 import { Button } from '@/components/ui/Button'
@@ -25,7 +26,7 @@ export interface AdminEntryTableColumnsParams {
 
 export type EntryRow = AdminEntries[number] & { key: string; total: number }
 
-const columnHelper = createColumnHelper<EntryRow>()
+const columnHelper = createColumnHelper<AdminEntryTableFeatures, EntryRow>()
 
 const STATUS_VALUES = Object.keys(STATUS_COLORS) as (keyof typeof STATUS_COLORS)[]
 
@@ -51,7 +52,7 @@ export function getAdminEntryTableColumns({
   hasFiltersOrSorting,
   onClearFilters
 }: AdminEntryTableColumnsParams) {
-  return [
+  return columnHelper.columns([
     columnHelper.display({
       id: 'select',
       header: ({ table }) => {
@@ -200,7 +201,7 @@ export function getAdminEntryTableColumns({
         )
       },
       cell: (info) => (
-        <div className="max-w-[180px] overflow-hidden text-ellipsis whitespace-nowrap">
+        <div className="max-w-45 overflow-hidden text-ellipsis whitespace-nowrap">
           {info.getValue()}
         </div>
       ),
@@ -215,7 +216,7 @@ export function getAdminEntryTableColumns({
     columnHelper.accessor('title', {
       header: () => t('table.title'),
       cell: (info) => (
-        <div className="max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap">
+        <div className="max-w-55 overflow-hidden text-ellipsis whitespace-nowrap">
           {info.getValue().length > 25 ? info.getValue().slice(0, 25) + '...' : info.getValue()}
         </div>
       ),
@@ -337,5 +338,5 @@ export function getAdminEntryTableColumns({
       ),
       size: 140
     })
-  ]
+  ])
 }

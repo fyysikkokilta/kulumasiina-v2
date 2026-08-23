@@ -23,7 +23,7 @@ Kulumasiina v2 is an expense management application built for Fyysikkokilta (Gui
 ```bash
 pnpm dev              # Start dev server
 pnpm build            # Production build
-pnpm typecheck       # TypeScript type checking (tsgo --noEmit)
+pnpm typecheck        # TypeScript type checking (tsc --noEmit)
 pnpm lint             # Oxlint (run lint --fix for autofix)
 pnpm format           # Oxfmt format
 pnpm format:check     # Oxfmt check only
@@ -65,7 +65,7 @@ Four tables with cascade deletes: `entries` → `items` → `attachments`, and `
 
 - **Import `Link`, `redirect`, `useRouter`, `usePathname` from `@/i18n/routing`** — not from `next/link` or `next/navigation` (enforced by oxlint `no-restricted-imports`)
 - **No JSX string literals** — all user-facing text must use i18n; avoid hardcoded strings in JSX
-- **Pre-commit:** lint-staged runs `tsgo --noEmit`, `oxlint --fix`, and `oxfmt` on staged files. Styling: Tailwind CSS 4 with oxfmt (experimentalTailwindcss) for class sorting; single quotes, no trailing commas
+- **Pre-commit:** lint-staged runs `tsc --noEmit`, `oxlint --fix`, and `oxfmt` on staged files. Styling: Tailwind CSS 4 with oxfmt (experimentalTailwindcss) for class sorting; single quotes, no trailing commas
 
 ## Commit Messages
 
@@ -76,3 +76,13 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/): `type: lowe
 - PostgreSQL database
 - Ghostscript (required for PDF compression, installed in Docker/CI)
 - Environment variables — see `.env.example` for the full list
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

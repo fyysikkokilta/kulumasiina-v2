@@ -28,6 +28,12 @@ import { FormResult } from './FormResult'
 import { ItemForm } from './ItemForm'
 import { MileageForm } from './MileageForm'
 
+const privacyPolicyLink = (chunks: ReactNode) => (
+  <Link href={env.NEXT_PUBLIC_PRIVACY_POLICY_URL} className="text-blue-500 hover:text-blue-700">
+    {chunks}
+  </Link>
+)
+
 const NEW_ITEM_ID = 'new-item'
 const NEW_MILEAGE_ID = 'new-mileage'
 
@@ -345,18 +351,7 @@ export function ExpenseForm() {
 
         {/* Privacy Policy */}
         <div className="text-center text-gray-500">
-          <span>
-            {t.rich('privacy_policy', {
-              privacy_policy: (chunks: ReactNode) => (
-                <Link
-                  href={env.NEXT_PUBLIC_PRIVACY_POLICY_URL}
-                  className="text-blue-500 hover:text-blue-700"
-                >
-                  {chunks}
-                </Link>
-              )
-            })}
-          </span>
+          <span>{t.rich('privacy_policy', { privacy_policy: privacyPolicyLink })}</span>
         </div>
       </Form>
 
