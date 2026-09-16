@@ -74,6 +74,9 @@ EXPOSE 3000
 
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
+# The S3 endpoint resolves to both A and AAAA records. On a host without an
+# IPv6 route every new connection otherwise burns a failed IPv6 attempt first.
+ENV NODE_OPTIONS=--dns-result-order=ipv4first
 
 # server.js is created by next build from the standalone output
 # https://nextjs.org/docs/pages/api-reference/next-config-js/output
