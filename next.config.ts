@@ -12,7 +12,8 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['@base-ui/react'],
     inlineCss: true,
     serverActions: {
-      bodySizeLimit: '8mb'
+      // Keep in sync with client_max_body_size on the nginx vhost (30M)
+      bodySizeLimit: '30mb'
     }
   },
   transpilePackages: ['@t3-oss/env-nextjs', '@t3-oss/env-core'],

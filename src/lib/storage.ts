@@ -29,11 +29,29 @@ async function saveFileLocally(buffer: Buffer) {
   return filename
 }
 
+// Uploads to the S3 endpoint occasionally fail on a dropped connection
+// (UND_ERR_SOCKET "other side closed"). s3mini does not retry those, so without
+// this a single blip surfaces to the user as a failed attachment upload.
+const S3_UPLOAD_ATTEMPTS = 3
+
 async function saveFileToS3(buffer: Buffer) {
   if (!isS3 || !s3mini) throw new Error('S3 storage not configured')
   const fileId = randomUUID()
-  await s3mini.putObject(fileId, buffer, undefined, undefined, undefined, buffer.length)
-  return fileId
+  // The key is fixed for the whole call, so a retry just overwrites whatever a
+  // previous attempt may have left behind.
+  for (let attempt = 1; ; attempt++) {
+    try {
+      await s3mini.putObject(fileId, buffer, undefined, undefined, undefined, buffer.length)
+      return fileId
+    } catch (e) {
+      if (attempt === S3_UPLOAD_ATTEMPTS) {
+        console.error(`Failed to upload file to S3 after ${attempt} attempts`, e)
+        throw e
+      }
+      console.warn(`S3 upload attempt ${attempt} failed, retrying`, e)
+      await new Promise((resolve) => setTimeout(resolve, 200 * 2 ** (attempt - 1)))
+    }
+  }
 }
 
 export async function saveFile(buffer: Buffer) {
