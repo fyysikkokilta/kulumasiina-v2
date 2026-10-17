@@ -80,9 +80,13 @@ jobs:
         ports:
           - 5432:5432
 
-    # Everything else comes from the test defaults in playwright.config.ts
+    # Everything else comes from the test defaults in playwright.config.ts. The
+    # workflow-level NODE_ENV and SKIP_ENV_VALIDATION are for the build; tests
+    # run `next dev` with validation on.
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/kulumasiina_test
+      NODE_ENV: development
+      SKIP_ENV_VALIDATION: 'false'
 
     steps:
       - name: Checkout repository
