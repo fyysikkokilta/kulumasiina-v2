@@ -96,11 +96,32 @@ export async function mergeCsvInfos(csvInfos: CsvInfo[]) {
   return mergedCsvInfos
 }
 
+// Payees with the same name and submission date get the same PDF filename, but
+// a ZIP cannot hold two files with the same name. Suffix duplicates (-2, -3...)
+// case-insensitively, since Windows and macOS unzip that way.
+export function withUniquePdfFilenames(csvInfos: CsvInfo[]) {
+  const used = new Set<string>()
+  return csvInfos.map((info) => {
+    if (!info.pdf) return info
+    const original = info.pdf.filename
+    const dot = original.lastIndexOf('.')
+    const base = dot > 0 ? original.slice(0, dot) : original
+    const ext = dot > 0 ? original.slice(dot) : ''
+    let filename = original
+    for (let n = 2; used.has(filename.toLowerCase()); n++) {
+      filename = `${base}-${n}${ext}`
+    }
+    used.add(filename.toLowerCase())
+    return filename === original ? info : { ...info, pdf: { ...info.pdf, filename } }
+  })
+}
+
 export async function generateCsv(csvInfos: CsvInfo[]) {
   const lines: string[] = []
 
-  // Merge CSV infos with the same IBAN and HETU
-  const mergedCsvInfos = await mergeCsvInfos(csvInfos)
+  // Merge CSV infos with the same IBAN and HETU. PDF names must be unique before
+  // the CSV rows are built, since each row references its PDF by filename.
+  const mergedCsvInfos = withUniquePdfFilenames(await mergeCsvInfos(csvInfos))
 
   for (const csvInfo of mergedCsvInfos) {
     const { entryId, name, iban, govId, submissionDate, rows, pdf } = csvInfo
