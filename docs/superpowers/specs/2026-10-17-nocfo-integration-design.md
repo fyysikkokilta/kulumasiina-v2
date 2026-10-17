@@ -50,12 +50,13 @@ the bank:
 - **Debit:** one entry per expense item / mileage row, on the bookkeeping account
   already chosen in Kulumasiina (`item.account`, `mileage.account`), VAT 0 (as the
   Procountor CSV does today).
-- **Credit:** the total, on a payable ("we owe this person") account configured by
-  `NOCFO_PAYABLE_ACCOUNT`.
+- **Credit:** the total, on the bank account configured by `NOCFO_BANK_ACCOUNT`
+  (default `1910`, decided by the user; 1910 is the bank account in NoCFO's
+  default chart of accounts).
 
-The bank line that NoCFO imports later is booked by the treasurer against the same
-payable account, which then returns to zero. Because of this, how claims are
-grouped in Kulumasiina does not need to match how they are paid from the bank.
+The bank line that NoCFO imports later is matched by the treasurer to this
+document in NoCFO, not booked a second time. (Earlier drafts credited a payable
+account instead; the user chose the bank account.)
 
 ## Behaviour
 
@@ -133,12 +134,12 @@ the UI gets a short translated message.
 
 New server env vars in `src/lib/env.ts` and `.env.example`:
 
-| Var                     | Purpose                                                                                                                                                                                                                                                                                                                                                                                      |
-| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NOCFO_API_URL`         | Default `https://api.nocfo.io`; `https://api-tst.nocfo.io` for testing                                                                                                                                                                                                                                                                                                                       |
-| `NOCFO_API_TOKEN`       | Personal Access Token (`Authorization: Token <pat>`), created at login.nocfo.io/auth/tokens/. Actions are attributed to the token's user, so ideally a treasurer account.                                                                                                                                                                                                                    |
-| `NOCFO_BUSINESS_SLUG`   | The guild's business slug in NoCFO                                                                                                                                                                                                                                                                                                                                                           |
-| `NOCFO_PAYABLE_ACCOUNT` | Account number for the payable/debt side. **Temporary placeholder** until the user confirms which account the guild actually uses: default `TODO` in `env.ts` and `.env.example`, with a comment saying so. An account number NoCFO doesn't know makes Pay (with "Send to NoCFO") fail with a clear error naming the account, so the placeholder can never silently book to a wrong account. |
+| Var                   | Purpose                                                                                                                                                                      |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NOCFO_API_URL`       | Default `https://api.nocfo.io`; `https://api-tst.nocfo.io` for testing                                                                                                       |
+| `NOCFO_API_TOKEN`     | Personal Access Token (`Authorization: Token <pat>`), created at login.nocfo.io/auth/tokens/. Actions are attributed to the token's user, so ideally a treasurer account.    |
+| `NOCFO_BUSINESS_SLUG` | The guild's business slug in NoCFO                                                                                                                                           |
+| `NOCFO_BANK_ACCOUNT`  | Account number for the credit (bank) side. Default `1910`. An account number NoCFO doesn't know makes Pay (with "Send to NoCFO") fail with a clear error naming the account. |
 
 ## Data model
 
@@ -171,6 +172,10 @@ document; the treasurer handles that in NoCFO.
 - NoCFO's pricing page doesn't define what counts as a "transaction". It's likely
   one document or bank line each. Worth confirming with NoCFO support. Grouping
   per payee already minimises the count.
+- With the bank account on the credit side, the treasurer must match each imported
+  bank line to the app's document in NoCFO rather than booking it again, or the
+  payment is counted twice. Verify in the NoCFO testing environment that bank
+  transactions can be linked to an existing document crediting 1910.
 - Mileage may be double-booked if NoCFO's payroll also creates bookkeeping
   entries when the treasurer reports kilometrikorvaus to Tulorekisteri there.
   Confirm with NoCFO support / the treasurer before go-live. If it does, the app

@@ -19,7 +19,7 @@
 - Conventional commits, lowercase, imperative, ≤72 chars, ending with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 - NoCFO auth header: `Authorization: Token <NOCFO_API_TOKEN>`. Base paths: `/v1/business/{NOCFO_BUSINESS_SLUG}/...`. List responses are paginated `{ count, next, previous, results }`.
 - Amounts to NoCFO are integer cents. VAT 0 on every line (`vat_rate: 0`).
-- `NOCFO_PAYABLE_ACCOUNT` default is the placeholder `TODO`; an unknown account number must fail Pay with an error naming it.
+- `NOCFO_BANK_ACCOUNT` (credit side) default is `1910`; an unknown account number must fail Pay with an error naming it.
 - No new npm dependencies (use global `fetch`, `FormData`, `Blob`, `node:http`).
 
 ## Review Focus
@@ -28,7 +28,7 @@
 2. Float money (e.g. `10.1 + 0.2`, `123.4 km × 0.25`) → each line rounded to cents, credit total = sum of rounded debit lines, so the document always balances (Task 1 test).
 3. Same payee typed differently (`fi21 1234…` vs `FI2112…`, `govId` `null` vs `''`) → one group (Task 1 test).
 4. Pay pressed twice / selection containing already-paid entries → only `approved` entries are processed; any non-approved id fails the whole action before NoCFO is called (Task 4 test).
-5. Placeholder `TODO` or unknown account number → Pay fails for that group with the account number in the message; entries stay `approved` (Task 4 test).
+5. Unknown account number → Pay fails for that group with the account number in the message; entries stay `approved` (Task 4 test).
 
 ---
 
@@ -52,7 +52,7 @@
   - `documentLines(entry: EntryWithItemsAndMileages): DocumentLine[]`
   - `entriesMissingAccounts(entries: EntryWithItemsAndMileages[]): string[]` (entry ids)
   - `documentMarker(entryIds: string[]): string`
-  - `buildDocumentPayload(args: { entries: EntryWithItemsAndMileages[]; paidDate: Date; accountIds: Map<string, number>; payableAccountId: number; attachmentIds: number[] }): NocfoDocumentCreate`
+  - `buildDocumentPayload(args: { entries: EntryWithItemsAndMileages[]; paidDate: Date; accountIds: Map<string, number>; bankAccountId: number; attachmentIds: number[] }): NocfoDocumentCreate`
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -106,7 +106,7 @@ test('buildDocumentPayload balances and embeds the marker', { tag: '@node' }, ()
       ['4205', 11],
       ['4300', 12]
     ]),
-    payableAccountId: 99,
+    bankAccountId: 99,
     attachmentIds: [501]
   })
   expect(payload.date).toBe('2026-10-17')
@@ -162,14 +162,14 @@ git commit -m "feat: map entries to nocfo document payloads"
 
 - Consumes: `NocfoDocumentCreate` (Task 1).
 - Produces:
-  - env: `NOCFO_API_URL` (default `https://api.nocfo.io`), `NOCFO_API_TOKEN` (`z.string()`), `NOCFO_BUSINESS_SLUG` (`z.string()`), `NOCFO_PAYABLE_ACCOUNT` (default `'TODO'`, with comment `// TODO: placeholder, set the real payable account number`)
+  - env: `NOCFO_API_URL` (default `https://api.nocfo.io`), `NOCFO_API_TOKEN` (`z.string()`), `NOCFO_BUSINESS_SLUG` (`z.string()`), `NOCFO_BANK_ACCOUNT` (default `'1910'`)
   - `class NocfoError extends Error { status: number; body: string }`
   - `findAccountId(number: string): Promise<number | null>` → `GET /account/?number=<n>`, first result's `id` or `null`
   - `findDocumentIdByMarker(marker: string): Promise<number | null>` → `GET /document/?search=<marker>`, first result whose `description` includes `marker`
   - `uploadFile(name: string, data: Buffer): Promise<number>` → `POST /file_upload/` multipart (`file`, `name`), returns `id`
   - `createDocument(payload: NocfoDocumentCreate, idempotencyKey: string): Promise<number>` → `POST /document/` JSON with `Idempotency-Key` header, returns `id`
-  - Fake server: `startFakeNocfo(port: number): Promise<{ close(): Promise<void> }>`, with control routes `POST /__reset` (clears documents and request log), `POST /__clear-requests` (request log only), `GET /__requests` (array of `{ method, path, headers, body }`, body parsed for JSON, `'<multipart>'` otherwise), `POST /__fail-next-document` (next `POST /document/` returns 500). Known accounts: `4205→11`, `4300→12`, `2951→99`; any other number returns empty results. `search` matches against stored document descriptions.
-  - `testEnv` additions: `NOCFO_API_URL: 'http://localhost:55433'`, `NOCFO_API_TOKEN: 'test-nocfo-token'`, `NOCFO_BUSINESS_SLUG: 'test-guild'`, `NOCFO_PAYABLE_ACCOUNT: '2951'`.
+  - Fake server: `startFakeNocfo(port: number): Promise<{ close(): Promise<void> }>`, with control routes `POST /__reset` (clears documents and request log), `POST /__clear-requests` (request log only), `GET /__requests` (array of `{ method, path, headers, body }`, body parsed for JSON, `'<multipart>'` otherwise), `POST /__fail-next-document` (next `POST /document/` returns 500). Known accounts: `4205→11`, `4300→12`, `1910→99`; any other number returns empty results. `search` matches against stored document descriptions.
+  - `testEnv` additions: `NOCFO_API_URL: 'http://localhost:55433'`, `NOCFO_API_TOKEN: 'test-nocfo-token'`, `NOCFO_BUSINESS_SLUG: 'test-guild'`, `NOCFO_BANK_ACCOUNT: '1910'`.
 
 - [ ] **Step 1: Write the failing tests** (spec starts the fake on port 55434 in `beforeAll` and sets `process.env.NOCFO_API_URL` before dynamically importing `@/lib/nocfo`)
 
@@ -179,7 +179,7 @@ test(
   { tag: '@node' },
   async () => {
     expect(await findAccountId('4205')).toBe(11)
-    expect(await findAccountId('TODO')).toBeNull()
+    expect(await findAccountId('9999')).toBeNull()
   }
 )
 
@@ -271,7 +271,7 @@ Action flow (`sendToNocfo: true`):
 
 1. Load the entries with items, attachments and mileages. If any id is missing or not `approved`, throw `ActionError` before calling NoCFO.
 2. If `entriesMissingAccounts` is non-empty, throw `ActionError` naming those entry titles.
-3. Resolve every distinct account number plus `NOCFO_PAYABLE_ACCOUNT` once with `findAccountId`. A group whose numbers include an unresolved one fails with a reason naming the number(s).
+3. Resolve every distinct account number plus `NOCFO_BANK_ACCOUNT` once with `findAccountId`. A group whose numbers include an unresolved one fails with a reason naming the number(s).
 4. For each `groupByPayee` group, in sequence: `findDocumentIdByMarker(documentMarker(ids))`. If nothing is found, generate the paid PDF per entry, upload each with `uploadFile`, then `createDocument(payload, \`${marker}|${YYYY-MM-DD}\`)`. On success, one `db.update`sets`status: 'paid'`, `paidDate`and`nocfoDocumentId`for that group's ids. On failure,`console.error`the group ids with the`NocfoError`status and body, and push`{ entryIds, reason }`.
 5. `updateTag('admin-entries')`; return `{ success: true, failed }`.
 
