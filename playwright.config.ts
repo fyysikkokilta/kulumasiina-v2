@@ -2,7 +2,8 @@ import { defineConfig, devices } from '@playwright/test'
 
 // Tests deliberately do not read .env: the seed deletes every entry, so they
 // must never point at a dev database by accident. These defaults are the whole
-// env contract for local and CI runs; anything already set in the shell wins.
+// env contract for local and CI runs; anything already set in the shell wins,
+// except NOCFO_* below.
 const testEnv = {
   DATABASE_URL: 'postgresql://postgres:postgres@localhost:55432/kulumasiina_test',
   JWT_SECRET: 'test-jwt-secret',
@@ -11,14 +12,21 @@ const testEnv = {
   GOOGLE_CLIENT_SECRET: 'test-google-client-secret',
   GOOGLE_REDIRECT_URI: 'http://localhost:3000/api/auth/google/callback',
   BASE_URL: 'http://localhost:3000',
-  FILE_CLEANUP_SECRET: 'test-cleanup-secret',
+  FILE_CLEANUP_SECRET: 'test-cleanup-secret'
+}
+for (const [key, value] of Object.entries(testEnv)) {
+  process.env[key] ??= value
+}
+
+// Always forced: a NOCFO_* exported in the shell must never send test documents to real NoCFO
+const nocfoTestEnv = {
   NOCFO_API_URL: 'http://localhost:55433',
   NOCFO_API_TOKEN: 'test-nocfo-token',
   NOCFO_BUSINESS_SLUG: 'test-guild',
   NOCFO_BANK_ACCOUNT: '1910'
 }
-for (const [key, value] of Object.entries(testEnv)) {
-  process.env[key] ??= value
+for (const [key, value] of Object.entries(nocfoTestEnv)) {
+  process.env[key] = value
 }
 
 // Set by `pnpm test:node` for tests that need neither the app nor the database
