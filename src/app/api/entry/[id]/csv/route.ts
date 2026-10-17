@@ -26,7 +26,14 @@ export async function GET(_request: NextRequest, { params }: RouteContext<'/api/
 
   try {
     const { id } = await params
-    const entryId = z.uuid().parse(id)
+    const parsedEntryId = z.uuid().safeParse(id)
+    if (!parsedEntryId.success) {
+      return NextResponse.json(
+        { code: 'INVALID_ENTRY_IDS', message: 'Entry ID is invalid.' },
+        { status: 400 }
+      )
+    }
+    const entryId = parsedEntryId.data
 
     // Get entry with all related data
     const entry = await db.query.entry.findFirst({

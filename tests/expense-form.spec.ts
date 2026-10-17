@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { db } from '@/db'
+
 import { addMinimalMileageAndFillCommon } from './utils/expense-form'
 
 const samplePdfBase64 =
@@ -126,11 +128,46 @@ test('shows success screen after valid submission', async ({ page }) => {
 
   await page.getByRole('button', { name: 'Submit' }).click()
 
-  // Submission completes and shows result (success or failure depending on env/DB)
-  await expect(page.getByRole('heading', { name: /Success!|Error!/ })).toBeVisible({
-    timeout: 15000
+  await expect(page.getByRole('heading', { name: 'Success!' })).toBeVisible({ timeout: 15000 })
+  await expect(page.getByRole('button', { name: 'Submit Another' })).toBeVisible()
+})
+
+test('submitting an expense and a mileage creates two entries', async ({ page }) => {
+  const payeeName = `Split Payee ${Date.now()}`
+
+  await page.getByRole('button', { name: 'Expense' }).click()
+  const modal = page.getByRole('dialog')
+  await modal.getByLabel('Description').fill('Office supplies')
+  await modal.getByLabel('Date').fill('2025-01-02')
+  await modal.locator('input[type="file"]').setInputFiles({
+    name: 'receipt.pdf',
+    mimeType: 'application/pdf',
+    buffer: Buffer.from(samplePdfBase64, 'base64')
   })
-  await expect(page.getByRole('button', { name: /Submit Another|Try Again/ })).toBeVisible()
+  await expect(modal.getByLabel('Amount')).toBeVisible({ timeout: 15000 })
+  await modal.getByLabel('Amount').fill('12.50')
+  await modal.getByRole('button', { name: 'OK' }).click()
+
+  await addMinimalMileageAndFillCommon(page, { name: payeeName, govId: '020202A0202' })
+  await page.getByRole('button', { name: 'Submit' }).click()
+  await expect(page.getByRole('heading', { name: 'Success!' })).toBeVisible({ timeout: 15000 })
+
+  const entries = await db.query.entry.findMany({
+    where: { name: payeeName },
+    with: { items: { with: { attachments: true } }, mileages: true }
+  })
+  expect(entries).toHaveLength(2)
+
+  const expenseEntry = entries.find((e) => e.items.length > 0)
+  const mileageEntry = entries.find((e) => e.mileages.length > 0)
+  expect(expenseEntry).toMatchObject({ status: 'submitted', govId: null, mileages: [] })
+  expect(expenseEntry?.items).toHaveLength(1)
+  expect(expenseEntry?.items[0].attachments).toMatchObject([
+    { filename: 'receipt.pdf', value: 12.5 }
+  ])
+  expect(mileageEntry).toMatchObject({ status: 'submitted', govId: '020202A0202', items: [] })
+  expect(mileageEntry?.mileages).toMatchObject([{ description: 'Trip', distance: 1 }])
+  expect(expenseEntry?.submissionDate).toEqual(mileageEntry?.submissionDate)
 })
 
 test('can edit an existing mileage entry', async ({ page }) => {

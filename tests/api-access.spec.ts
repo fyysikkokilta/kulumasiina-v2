@@ -21,8 +21,8 @@ test('entry pdf api works with auth', async ({ request }) => {
       Cookie: await getAdminCookieHeader()
     }
   })
-  // PDF generation may return 500 if storage/files not available in test env
-  expect([200, 500]).toContain(res.status())
+  expect(res.status()).toBe(200)
+  expect(res.headers()['content-type']).toBe('application/pdf')
 })
 
 test('entry csv api requires auth', async ({ request }) => {
@@ -53,8 +53,8 @@ test('multi zip api works with auth', async ({ request }) => {
       }
     }
   )
-  // Zip generation may return 500 if storage/files not available in test env
-  expect([200, 500]).toContain(res.status())
+  expect(res.status()).toBe(200)
+  expect(res.headers()['content-type']).toBe('application/zip')
 })
 
 test('attachment api requires auth for existing file', async ({ request }) => {
@@ -68,6 +68,5 @@ test('attachment api works with auth', async ({ request }) => {
       Cookie: await getAdminCookieHeader()
     }
   })
-  // 404 if seed file not present in server's data dir (e.g. different cwd)
-  expect([200, 404]).toContain(res.status())
+  expect(res.status()).toBe(200)
 })
