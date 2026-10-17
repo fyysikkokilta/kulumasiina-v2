@@ -350,6 +350,31 @@ git commit -m "feat: send paid entries to nocfo"
 
 ---
 
+### Task 4b: Mount dialog forms only while visible (user request)
+
+Apply the PayModal pattern from Task 4 to the other dialog forms: an exported wrapper renders `null` unless `visible`, and the body lives in an inner `*Content` component, so every opening starts with fresh form and error state. Remove the now-redundant `useEffect` + `queueMicrotask` reset blocks.
+
+**Files:**
+
+- Modify: `src/components/ApproveModal.tsx`, `src/components/ItemForm.tsx`, `src/components/MileageForm.tsx`
+
+**Interfaces:** props of all three stay unchanged (callers in `AdminEntryTable.tsx` and `ExpenseForm.tsx` are untouched). ItemForm still pre-fills from `editData` when opened for editing: initialise that state from props on mount instead of in an effect.
+
+- [ ] **Step 1: Refactor the three components**
+- [ ] **Step 2: Verify**
+
+Run: `pnpm typecheck && pnpm lint --fix && pnpm format && pnpm test --project=chromium`
+Expected: all PASS, including the expense-form tests (add/edit item, add mileage) and the approve-modal tests.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/components/ApproveModal.tsx src/components/ItemForm.tsx src/components/MileageForm.tsx
+git commit -m "refactor: mount dialog forms only while visible"
+```
+
+---
+
 ### Task 5: Remove the Procountor export
 
 **Files:**
