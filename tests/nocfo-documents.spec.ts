@@ -25,6 +25,7 @@ const entry: EntryWithItemsAndMileages = {
   approvalNote: null,
   paidDate: null,
   rejectionDate: null,
+  nocfoDocumentId: null,
   archived: false,
   items: [
     {

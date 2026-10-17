@@ -1,0 +1,1 @@
+ALTER TABLE "entry" ADD COLUMN "nocfo_document_id" integer;

@@ -24,7 +24,8 @@ export const resetEntriesAction = actionClient
         approvalDate: null,
         approvalNote: null,
         paidDate: null,
-        rejectionDate: null
+        rejectionDate: null,
+        nocfoDocumentId: null
       })
       .where(inArray(entry.id, parsedInput.ids))
 
