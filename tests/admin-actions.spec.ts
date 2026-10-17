@@ -109,6 +109,7 @@ test.describe('admin actions', () => {
     await modal.getByLabel('Approval Date').fill('2025-01-15')
     await modal.getByLabel('Approval Note').fill('Bulk approval')
     await modal.getByRole('button', { name: 'Approve' }).click()
+    await expect(modal).toBeHidden()
 
     await gotoAdmin(page)
     await expect(statusTag(rowById(page, testEntryIds.submitted), 'APPROVED')).toBeVisible()
@@ -123,8 +124,7 @@ test.describe('admin actions', () => {
     await expect(approvedRowCheckbox).toBeDisabled()
   })
 
-  test('copy to clipboard copies selected entry text', async ({ page, context }) => {
-    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+  test('copy to clipboard copies selected entry text', async ({ page }) => {
     await gotoAdmin(page)
 
     const submittedRow = rowById(page, testEntryIds.submitted)
