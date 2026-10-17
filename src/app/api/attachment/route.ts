@@ -41,7 +41,9 @@ export async function POST(request: NextRequest) {
 
   // If pdf, compress with compress-pdf
   else if (mimeType.startsWith('application/pdf')) {
-    buffer = await compress(fileBuffer)
+    // compress-pdf overrides the result's `.buffer` with the Buffer itself, which
+    // makes fetch hang on it as a request body. Copy into a normal Buffer.
+    buffer = Buffer.from(await compress(fileBuffer))
   } else {
     return new NextResponse('Invalid file type', { status: 400 })
   }

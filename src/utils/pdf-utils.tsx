@@ -520,7 +520,9 @@ export async function generateCombinedPDF(
   const filenameDateStr = submissionDate.toLocaleDateString('fi-FI').replace(/\./g, '-')
   const filename = `${sanitizedName}-${filenameDateStr}.pdf`
 
-  const data = await compress(Buffer.from(finalPdfBytes))
+  // compress-pdf overrides the result's `.buffer` with the Buffer itself, which
+  // makes fetch hang on it as a request body. Copy into a normal Buffer.
+  const data = Buffer.from(await compress(Buffer.from(finalPdfBytes)))
 
   return {
     filename,
