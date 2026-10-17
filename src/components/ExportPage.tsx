@@ -18,11 +18,7 @@ type CopyState = 'idle' | 'success' | 'error'
 
 const UUID_PATTERN = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}'
 
-const EXPORT_API_PATTERNS = [
-  new RegExp(`^/api/entry/${UUID_PATTERN}/pdf$`, 'u'),
-  new RegExp(`^/api/entry/${UUID_PATTERN}/csv$`, 'u'),
-  new RegExp(`^/api/entry/multi/zip\\?entry_ids=${UUID_PATTERN}(?:,${UUID_PATTERN})*$`, 'u')
-]
+const EXPORT_API_PATTERNS = [new RegExp(`^/api/entry/${UUID_PATTERN}/pdf$`, 'u')]
 
 const isAllowedExportApiUrl = (value: string) =>
   EXPORT_API_PATTERNS.some((pattern) => pattern.test(value))

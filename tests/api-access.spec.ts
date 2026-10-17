@@ -25,38 +25,6 @@ test('entry pdf api works with auth', async ({ request }) => {
   expect(res.headers()['content-type']).toBe('application/pdf')
 })
 
-test('entry csv api requires auth', async ({ request }) => {
-  const res = await request.get(`${apiBaseUrl}/api/entry/${testEntryIds.approved}/csv`)
-  expect(res.status()).toBe(401)
-})
-
-test('entry csv api works with auth', async ({ request }) => {
-  const res = await request.get(`${apiBaseUrl}/api/entry/${testEntryIds.approved}/csv`, {
-    headers: {
-      Cookie: await getAdminCookieHeader()
-    }
-  })
-  expect(res.status()).toBe(200)
-})
-
-test('multi zip api requires auth', async ({ request }) => {
-  const res = await request.get(`${apiBaseUrl}/api/entry/multi/zip?entry_ids=${testEntryIds.paid}`)
-  expect(res.status()).toBe(401)
-})
-
-test('multi zip api works with auth', async ({ request }) => {
-  const res = await request.get(
-    `${apiBaseUrl}/api/entry/multi/zip?entry_ids=${testEntryIds.paid}`,
-    {
-      headers: {
-        Cookie: await getAdminCookieHeader()
-      }
-    }
-  )
-  expect(res.status()).toBe(200)
-  expect(res.headers()['content-type']).toBe('application/zip')
-})
-
 test('attachment api requires auth for existing file', async ({ request }) => {
   const res = await request.get(`${apiBaseUrl}/api/attachment/${testAttachmentIds.submitted}`)
   expect(res.status()).toBe(404)

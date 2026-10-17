@@ -44,17 +44,6 @@ const DEFAULT_COLUMN_FILTERS = [
 
 const DEFAULT_SORTING = [{ id: 'submissionDate', desc: true }]
 
-const openExportPage = (locale: string, apiUrl: string) => {
-  const href = `/${locale}/admin/export?apiUrl=${encodeURIComponent(apiUrl)}`
-  const exportWindow = window.open(href, '_blank')
-
-  if (exportWindow) {
-    exportWindow.opener = null
-  } else {
-    window.location.assign(href)
-  }
-}
-
 export function AdminEntryTable({
   entries,
   oldArchivedCutoff
@@ -150,10 +139,6 @@ export function AdminEntryTable({
   }
   const handleArchive = (ids?: string[]) => archiveEntries({ ids: getTargetIds(ids) })
   const handleReset = (ids?: string[]) => resetEntries({ ids: getTargetIds(ids) })
-  const handleMultiZipDownload = () => {
-    const ids = selectedRowKeys.map((k) => String(k))
-    openExportPage(locale, `/api/entry/multi/zip?entry_ids=${ids.join(',')}`)
-  }
   const handleCopyClipboardText = () => {
     const lines = tableData
       .filter((e) => selectedRowKeys.includes(e.id))
@@ -286,6 +271,7 @@ export function AdminEntryTable({
           setPayModalVisible(false)
           setSelectedRowKeys([])
         }}
+        onPartialSuccess={() => setSelectedRowKeys([])}
       />
 
       <DeleteOldArchivedModal
@@ -400,16 +386,6 @@ export function AdminEntryTable({
                 actionStatus={archiveStatus}
               >
                 {t('bulk_actions.archive_selected')}
-              </Button>
-            )}
-            {allSelectedPaid && (
-              <Button
-                variant="secondary"
-                type="button"
-                onClick={handleMultiZipDownload}
-                disabled={selectedRowKeys.length === 0}
-              >
-                {t('bulk_actions.download_zip')}
               </Button>
             )}
             {selectedRowKeys.length > 0 && (

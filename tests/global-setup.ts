@@ -2,6 +2,10 @@ import { drizzle } from 'drizzle-orm/node-postgres'
 import { migrate } from 'drizzle-orm/node-postgres/migrator'
 import { Pool } from 'pg'
 
+import { startFakeNocfo } from './utils/fake-nocfo'
+
+const FAKE_NOCFO_PORT = 55433
+
 // Brings the test database schema up to date, so a fresh `pnpm test:db` is all
 // the database setup a test run needs.
 export default async function globalSetup() {
@@ -17,4 +21,7 @@ export default async function globalSetup() {
   } finally {
     await client.end()
   }
+
+  const nocfo = await startFakeNocfo(FAKE_NOCFO_PORT)
+  return () => nocfo.close()
 }

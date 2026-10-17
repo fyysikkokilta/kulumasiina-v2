@@ -8,7 +8,7 @@ import { NumberField } from '@base-ui/react/number-field'
 import { Check, Plus, Trash2, X } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { HookActionStatus, useAction } from 'next-safe-action/hooks'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { z } from 'zod'
 
 import { EntryCommonFields } from '@/components/EntryCommonFields'
@@ -30,7 +30,12 @@ interface ItemFormProps {
   submittingStatus?: HookActionStatus
 }
 
-export function ItemForm({ visible, onOk, onCancel, editData, submittingStatus }: ItemFormProps) {
+// Mounted only while visible, so every opening starts with fresh form and action state
+export function ItemForm(props: ItemFormProps) {
+  return props.visible ? <ItemFormContent {...props} /> : null
+}
+
+function ItemFormContent({ visible, onOk, onCancel, editData, submittingStatus }: ItemFormProps) {
   const t = useTranslations('ItemForm')
   const locale = useLocale()
   const [errors, setErrors] = useState<Record<string, string | string[]> | undefined>(undefined)
@@ -51,21 +56,6 @@ export function ItemForm({ visible, onOk, onCancel, editData, submittingStatus }
 
   const [previewState, setPreviewState] = useState<PreviewState | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (!visible) return
-    queueMicrotask(() => {
-      setErrors(undefined)
-      setUploadError(null)
-      setPreviewState(null)
-      setAttachments(
-        editData?.attachments?.map((a) => ({
-          fileId: a.fileId,
-          filename: a.filename
-        })) ?? []
-      )
-    })
-  }, [editData, visible])
 
   const { execute: uploadFileAction, status: uploadFileStatus } = useAction(
     uploadAttachmentAction,

@@ -24,6 +24,9 @@
    - `JWT_SECRET` — Random secret (e.g., `openssl rand -base64 32`)
    - `STORAGE_DRIVER` — `local` or `s3`; if `s3`, set S3 endpoint, keys, and region
 
+   - `NOCFO_API_URL`, `NOCFO_API_TOKEN`, `NOCFO_BUSINESS_SLUG` — NoCFO API access; paid entries are sent there
+   - `NOCFO_BANK_ACCOUNT` — Bank account credited by NoCFO documents (default `1910`)
+
    Optional: mileage rate, privacy policy URL, archive age limit, file cleanup secret. See `.env.example`.
 
 2. **Run database migrations:**

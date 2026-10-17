@@ -7,7 +7,7 @@ import { NumberField } from '@base-ui/react/number-field'
 import { X } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { HookActionStatus } from 'next-safe-action/hooks'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { z } from 'zod'
 
 import { EntryCommonFields } from '@/components/EntryCommonFields'
@@ -24,7 +24,12 @@ interface MileageFormProps {
   submittingStatus?: HookActionStatus
 }
 
-export function MileageForm({
+// Mounted only while visible, so every opening starts with fresh form and action state
+export function MileageForm(props: MileageFormProps) {
+  return props.visible ? <MileageFormContent {...props} /> : null
+}
+
+function MileageFormContent({
   visible,
   onOk,
   onCancel,
@@ -36,11 +41,6 @@ export function MileageForm({
   const [errors, setErrors] = useState<Record<string, string | string[]> | undefined>(undefined)
 
   const formRef = useRef<HTMLFormElement>(null)
-
-  useEffect(() => {
-    if (!visible) return
-    queueMicrotask(() => setErrors(undefined))
-  }, [visible])
 
   const mileageFormSchema = z.object({
     description: z.string().min(1, t('errors.description')).max(500),

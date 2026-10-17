@@ -7,7 +7,7 @@ import { Input } from '@base-ui/react/input'
 import { X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useAction } from 'next-safe-action/hooks'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/Button'
@@ -22,15 +22,15 @@ interface ApproveModalProps {
   onSuccess?: () => void
 }
 
-export function ApproveModal({ visible, onCancel, entryIds, onSuccess }: ApproveModalProps) {
+// Mounted only while visible, so every opening starts with fresh form and action state
+export function ApproveModal(props: ApproveModalProps) {
+  return props.visible ? <ApproveModalContent {...props} /> : null
+}
+
+function ApproveModalContent({ visible, onCancel, entryIds, onSuccess }: ApproveModalProps) {
   const formRef = useRef<HTMLFormElement>(null)
   const [errors, setErrors] = useState<Record<string, string | string[]> | undefined>(undefined)
   const t = useTranslations('ApproveModal')
-
-  useEffect(() => {
-    if (!visible) return
-    queueMicrotask(() => setErrors(undefined))
-  }, [visible])
 
   const approveFormSchema = z.object({
     date: z.iso.date(t('date_error')).transform((val) => new Date(val)),

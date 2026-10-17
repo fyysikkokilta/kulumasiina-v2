@@ -1,4 +1,13 @@
-import { pgEnum, text, timestamp, real, boolean, uuid, snakeCase } from 'drizzle-orm/pg-core'
+import {
+  pgEnum,
+  integer,
+  text,
+  timestamp,
+  real,
+  boolean,
+  uuid,
+  snakeCase
+} from 'drizzle-orm/pg-core'
 
 export const status = pgEnum('status', ['submitted', 'approved', 'paid', 'denied'])
 
@@ -25,6 +34,7 @@ export const entry = snakeCase.table('entry', {
   approvalNote: text(),
   paidDate: timestamp(),
   rejectionDate: timestamp(),
+  nocfoDocumentId: integer(),
   archived: boolean().default(false),
   id: uuid().defaultRandom().primaryKey()
 })

@@ -202,8 +202,6 @@ const fi = {
     },
     actions: {
       pdf: 'PDF',
-      csv: 'CSV',
-      zip: 'ZIP',
       edit: 'Muokkaa',
       approve: 'Hyväksy',
       deny: 'Hylkää',
@@ -222,7 +220,6 @@ const fi = {
       mark_as_paid: 'Merkitse maksetuiksi',
       reset_selected: 'Nollaa valitut',
       archive_selected: 'Arkistoi valitut',
-      download_zip: 'Lataa ZIP',
       remove_old_archived: 'Poista vanhat arkistoidut hakemukset ({count})',
       copy_clipboard_text: 'Kopioi leikepöydälle'
     }
@@ -247,12 +244,25 @@ const fi = {
     date_error: 'Valitse maksupäivä',
     submit: 'Merkitse maksetuiksi',
     cancel: 'Peruuta',
-    close: 'Sulje'
+    close: 'Sulje',
+    send_to_nocfo: 'Lähetä NoCFOon',
+    failed_entries: 'Ei lähetetty NoCFOon (yhä hyväksytty):',
+    error_not_approved: 'Vain hyväksytyt hakemukset voi maksaa: {titles}',
+    error_missing_accounts: 'Tilit puuttuvat hakemuksilta: {titles}',
+    failed_unknown_account: 'Tuntematon NoCFO-tili: {accounts}',
+    failed_no_lines: 'Ei lähetettävää, kaikki summat ovat nollia',
+    failed_too_many_entries:
+      'Liikaa saman maksunsaajan hakemuksia yhdessä maksussa, maksa vähemmän kerralla',
+    failed_existing_document:
+      'On jo NoCFO-tositteella {id}; maksa ilman NoCFOon lähettämistä tai korjaa tosite NoCFOssa',
+    failed_attachment: 'Liitetiedostoa ei voitu lukea',
+    failed_nocfo: 'NoCFO-pyyntö epäonnistui',
+    failed_unexpected: 'Odottamaton virhe'
   },
   DeleteOldArchivedModal: {
     title: 'Poista vanhat arkistoidut hakemukset',
     text_1: 'Haluatko varmasti poistaa vanhat arkistoidut hakemukset? Tätä toimintoa ei voi perua.',
-    text_2: 'Varmista, että jokaisen maksetun hakemuksen PDF on arkistoitu Procountoriin.',
+    text_2: 'Varmista, että jokainen maksettu hakemus on lähetetty NoCFO:hon.',
     remove: 'Poista',
     cancel: 'Peruuta',
     close: 'Sulje'

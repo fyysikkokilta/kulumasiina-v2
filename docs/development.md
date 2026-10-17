@@ -19,7 +19,9 @@ pnpm install
 
 # Set up environment
 cp .env.example .env
-# Edit .env — required: DATABASE_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, ADMIN_EMAILS, BASE_URL, JWT_SECRET
+# Edit .env — required: DATABASE_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, ADMIN_EMAILS, BASE_URL, JWT_SECRET,
+# NOCFO_API_TOKEN, NOCFO_BUSINESS_SLUG
+# optional: NOCFO_API_URL (default https://api.nocfo.io), NOCFO_BANK_ACCOUNT (default 1910)
 
 # Run database migrations
 pnpm db:migrate
@@ -69,7 +71,7 @@ npx playwright show-report              # open the report of the last run
 
 How it works:
 
-- **Env:** `playwright.config.ts` sets every required variable to a test default. It deliberately does not read `.env`, because the test seed deletes all entries and must never hit your dev database. Variables already set in your shell win (CI only sets `DATABASE_URL`).
+- **Env:** `playwright.config.ts` sets every required variable to a test default. It deliberately does not read `.env`, because the test seed deletes all entries and must never hit your dev database. Variables already set in your shell win (CI only sets `DATABASE_URL`), except `NOCFO_*`: those always point at the fake NoCFO that global setup starts on port 55433, so tests never reach real NoCFO.
 - **Database:** a global setup runs the migrations against the test database before the tests start.
 - **Dev server:** Playwright starts its own `pnpm dev`. Stop your own dev server first: it uses your `.env`, so Playwright refuses to reuse it and fails with "port 3000 is already used".
 - **Node-side tests:** tag a test with `{ tag: '@node' }` if it only calls functions directly; `pnpm test:node` runs just those.
@@ -124,7 +126,7 @@ src/
 │   │   ├── page.tsx         # Public expense form
 │   │   ├── login/          # Google OAuth login
 │   │   └── admin/          # Admin dashboard
-│   └── api/                # API routes (auth, attachments, PDF/CSV/ZIP export, cleanup)
+│   └── api/                # API routes (auth, attachments, PDF export, cleanup)
 ├── components/             # React components
 ├── data/                   # Server-side data fetching
 ├── db/                     # Drizzle schema, client, migrate script
@@ -133,7 +135,7 @@ src/
 │   ├── actions/            # Server actions (next-safe-action + Zod)
 │   ├── env.ts              # Environment validation (@t3-oss/env-nextjs)
 │   └── storage.ts          # File storage (local or S3/R2)
-├── utils/                  # Validation, PDF/CSV helpers
+├── utils/                  # Validation, PDF helpers
 └── ...
 tests/                      # Playwright E2E tests and utilities
 ```

@@ -203,8 +203,6 @@ const en = {
     },
     actions: {
       pdf: 'PDF',
-      csv: 'CSV',
-      zip: 'ZIP',
       edit: 'Edit',
       approve: 'Approve',
       deny: 'Deny',
@@ -223,7 +221,6 @@ const en = {
       mark_as_paid: 'Mark as Paid',
       reset_selected: 'Reset Selected',
       archive_selected: 'Archive Selected',
-      download_zip: 'Download ZIP',
       remove_old_archived: 'Remove Old Archived Entries ({count})',
       copy_clipboard_text: 'Copy to clipboard'
     }
@@ -248,12 +245,24 @@ const en = {
     date_error: 'Please select payment date',
     submit: 'Mark as Paid',
     cancel: 'Cancel',
-    close: 'Close'
+    close: 'Close',
+    send_to_nocfo: 'Send to NoCFO',
+    failed_entries: 'Not sent to NoCFO (still approved):',
+    error_not_approved: 'Only approved entries can be paid: {titles}',
+    error_missing_accounts: 'Accounts are missing for: {titles}',
+    failed_unknown_account: 'Unknown NoCFO account: {accounts}',
+    failed_no_lines: 'Nothing to send, all amounts are zero',
+    failed_too_many_entries: 'Too many claims for this payee in one payment, pay fewer at once',
+    failed_existing_document:
+      'Already in NoCFO document {id}; pay it without sending to NoCFO or fix it in NoCFO',
+    failed_attachment: 'An attachment file could not be read',
+    failed_nocfo: 'NoCFO request failed',
+    failed_unexpected: 'Unexpected error'
   },
   DeleteOldArchivedModal: {
     title: 'Remove old archived entries',
     text_1: 'Are you sure you want to remove old archived entries? This action cannot be undone.',
-    text_2: 'Make sure that for each paid entry the pdf has been archived to Procountor.',
+    text_2: 'Make sure that each paid entry has been sent to NoCFO.',
     remove: 'Remove',
     cancel: 'Cancel',
     close: 'Close'

@@ -324,16 +324,6 @@ export function getAdminEntryTableColumns({
           >
             {t('actions.pdf')}
           </Button>
-          {(row.original.status === 'paid' || row.original.status === 'approved') && (
-            <Button
-              type="button"
-              variant="secondary"
-              size="small"
-              onClick={() => openExportPage(locale, `/api/entry/${row.original.id}/csv`)}
-            >
-              {row.original.status === 'paid' ? t('actions.zip') : t('actions.csv')}
-            </Button>
-          )}
         </div>
       ),
       size: 140
