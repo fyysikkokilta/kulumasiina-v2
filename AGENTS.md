@@ -31,8 +31,10 @@ pnpm db:generate      # Generate Drizzle migrations from schema
 pnpm db:push          # Push schema changes to database
 pnpm db:migrate       # Run migrations programmatically
 pnpm db:studio        # Open Drizzle Studio GUI
-npx playwright test                    # Run all E2E tests
-npx playwright test tests/admin-actions.spec.ts  # Run a single test file
+pnpm test:db          # Start throwaway test Postgres (Docker, port 55432)
+pnpm test             # Run all Playwright tests (own dev server + test env, ignores .env)
+pnpm test tests/admin-actions.spec.ts  # Run a single test file
+pnpm test:node        # Node-side tests tagged @node only (no server, no DB)
 ```
 
 **After editing any code, always run `pnpm typecheck`, then `pnpm lint --fix`, then `pnpm format`.**

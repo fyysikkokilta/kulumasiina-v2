@@ -50,23 +50,29 @@ The app runs at `http://localhost:3000`. Navigate to `/en/` or `/fi/` for the ap
 
 ## Testing
 
-End-to-end tests use Playwright:
+Tests use Playwright. They need Docker (for a throwaway Postgres) and nothing else: no `.env` setup.
 
 ```bash
-npx playwright test
+pnpm test:db                  # start the test database on port 55432
+pnpm test                     # run every test in every browser
+pnpm test:db:stop             # stop and delete the test database
 ```
 
-Requires a running dev server (or start it manually). To run a single test file:
+Useful variants:
 
 ```bash
-npx playwright test tests/admin-actions.spec.ts
+pnpm test tests/admin-actions.spec.ts   # one file
+pnpm test --project=chromium            # one browser
+pnpm test:node                          # node-side tests only: no dev server, no database
+npx playwright show-report              # open the report of the last run
 ```
 
-To open the test report after a run:
+How it works:
 
-```bash
-npx playwright show-report
-```
+- **Env:** `playwright.config.ts` sets every required variable to a test default. It deliberately does not read `.env`, because the test seed deletes all entries and must never hit your dev database. Variables already set in your shell win (CI only sets `DATABASE_URL`).
+- **Database:** a global setup runs the migrations against the test database before the tests start.
+- **Dev server:** Playwright starts its own `pnpm dev`. Stop your own dev server first: it uses your `.env`, so Playwright refuses to reuse it and fails with "port 3000 is already used".
+- **Node-side tests:** tag a test with `{ tag: '@node' }` if it only calls functions directly; `pnpm test:node` runs just those.
 
 ## Database
 

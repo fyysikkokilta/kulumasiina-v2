@@ -34,7 +34,7 @@ async function readZip(data: Buffer) {
   return { names: entries.map((e) => e.filename), csv }
 }
 
-test('zip export deduplicates colliding pdf filenames', async () => {
+test('zip export deduplicates colliding pdf filenames', { tag: '@node' }, async () => {
   // Same payee name and date but different IBANs, so the entries are not merged
   const { filename, data } = await generateCsv([
     csvInfo('entry-1', 'FI2112345600000785', 'Matti_Meik_l_inen-15-1-2025.pdf'),

@@ -80,17 +80,9 @@ jobs:
         ports:
           - 5432:5432
 
+    # Everything else comes from the test defaults in playwright.config.ts
     env:
-      SKIP_ENV_VALIDATION: 'true'
-      NODE_ENV: test
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/kulumasiina_test
-      JWT_SECRET: test-jwt-secret-key-for-ci-testing-only
-      ADMIN_EMAILS: test@email.com
-      GOOGLE_CLIENT_ID: test-google-client-id
-      GOOGLE_CLIENT_SECRET: test-google-client-secret
-      GOOGLE_REDIRECT_URI: http://localhost:3000/api/auth/google/callback
-      BASE_URL: http://localhost:3000
-      STORAGE_DRIVER: local
 
     steps:
       - name: Checkout repository
@@ -120,9 +112,6 @@ jobs:
           echo 'Dir::Cache "'"$GITHUB_WORKSPACE"'/.apt-cache";' | sudo tee /etc/apt/apt.conf.d/99-ci-apt-cache.conf
           sudo apt-get update
           sudo apt-get install -y ghostscript
-
-      - name: Run database migrations
-        run: pnpm db:migrate
 
       - name: Cache Playwright Browsers
         uses: actions/cache@v6

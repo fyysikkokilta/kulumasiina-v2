@@ -1,6 +1,24 @@
-import 'dotenv/config'
-
 import { defineConfig, devices } from '@playwright/test'
+
+// Tests deliberately do not read .env: the seed deletes every entry, so they
+// must never point at a dev database by accident. These defaults are the whole
+// env contract for local and CI runs; anything already set in the shell wins.
+const testEnv = {
+  DATABASE_URL: 'postgresql://postgres:postgres@localhost:55432/kulumasiina_test',
+  JWT_SECRET: 'test-jwt-secret',
+  ADMIN_EMAILS: 'test@email.com',
+  GOOGLE_CLIENT_ID: 'test-google-client-id',
+  GOOGLE_CLIENT_SECRET: 'test-google-client-secret',
+  GOOGLE_REDIRECT_URI: 'http://localhost:3000/api/auth/google/callback',
+  BASE_URL: 'http://localhost:3000',
+  FILE_CLEANUP_SECRET: 'test-cleanup-secret'
+}
+for (const [key, value] of Object.entries(testEnv)) {
+  process.env[key] ??= value
+}
+
+// Set by `pnpm test:node` for tests that need neither the app nor the database
+const nodeOnly = !!process.env.PW_NODE_ONLY
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -93,13 +111,18 @@ export default defineConfig({
         // },
       ],
 
-  /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'pnpm dev',
-    url: 'http://localhost:3000/',
-    reuseExistingServer: true,
-    env: {
-      STORAGE_DRIVER: 'local'
-    }
-  }
+  globalSetup: nodeOnly ? undefined : './tests/global-setup.ts',
+
+  /* Start a dev server with the test env. A server you already run would use your
+     own .env and database, so an occupied port fails the run instead of reusing it. */
+  webServer: nodeOnly
+    ? undefined
+    : {
+        command: 'pnpm dev',
+        url: 'http://localhost:3000/',
+        reuseExistingServer: false,
+        env: {
+          STORAGE_DRIVER: 'local'
+        }
+      }
 })

@@ -16,6 +16,10 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:migrate": "tsx ./src/db/migrate.ts",
+    "test": "playwright test",
+    "test:node": "PW_NODE_ONLY=1 playwright test --grep @node --project=chromium",
+    "test:db": "docker run --rm -d --name kulumasiina-test-db -p 55432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=kulumasiina_test postgres:18",
+    "test:db:stop": "docker stop kulumasiina-test-db",
     "cleanup-orphaned-files": "tsx ./src/lib/cleanupOrphanedFiles.ts",
     "preinstall": "npx only-allow pnpm",
     "prepare": "simple-git-hooks"
