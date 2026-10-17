@@ -239,7 +239,8 @@ const ExpensePDF = ({
   approvalDate,
   paidDate,
   rejectionDate,
-  logoData
+  logoData,
+  now
 }: {
   status: 'approved' | 'paid' | 'submitted' | 'denied'
   name: string
@@ -253,8 +254,8 @@ const ExpensePDF = ({
   paidDate: Date | null
   rejectionDate: Date | null
   logoData?: string
+  now: Date
 }) => {
-  const now = new Date()
   const tableHeaders = govId
     ? ['Pvm', 'Selite', 'Kilometrikorvaus', 'Hinta']
     : ['Pvm', 'Selite', 'Liitteet', 'Hinta']
@@ -463,6 +464,7 @@ export async function generateCombinedPDF(
       paidDate={paidDate}
       rejectionDate={rejectionDate}
       logoData={logoData}
+      now={new Date()}
     />
   )
 

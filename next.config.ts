@@ -11,6 +11,8 @@ const nextConfig: NextConfig = {
     globalNotFound: true,
     optimizePackageImports: ['@base-ui/react'],
     inlineCss: true,
+    turbopackGc: true,
+    turbopackRustReactCompiler: true,
     serverActions: {
       // Keep in sync with client_max_body_size on the nginx vhost (30M)
       bodySizeLimit: '30mb'
