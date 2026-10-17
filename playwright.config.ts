@@ -11,7 +11,11 @@ const testEnv = {
   GOOGLE_CLIENT_SECRET: 'test-google-client-secret',
   GOOGLE_REDIRECT_URI: 'http://localhost:3000/api/auth/google/callback',
   BASE_URL: 'http://localhost:3000',
-  FILE_CLEANUP_SECRET: 'test-cleanup-secret'
+  FILE_CLEANUP_SECRET: 'test-cleanup-secret',
+  NOCFO_API_URL: 'http://localhost:55433',
+  NOCFO_API_TOKEN: 'test-nocfo-token',
+  NOCFO_BUSINESS_SLUG: 'test-guild',
+  NOCFO_PAYABLE_ACCOUNT: '2951'
 }
 for (const [key, value] of Object.entries(testEnv)) {
   process.env[key] ??= value

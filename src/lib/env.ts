@@ -22,6 +22,13 @@ export const env = createEnv({
 
     MILEAGE_PROCOUNTOR_PRODUCT_ID: z.string().default('v2025_kmkorv'),
 
+    // NoCFO Configuration
+    NOCFO_API_URL: z.string().default('https://api.nocfo.io'),
+    NOCFO_API_TOKEN: z.string(),
+    NOCFO_BUSINESS_SLUG: z.string(),
+    // TODO: placeholder, set the real payable account number
+    NOCFO_PAYABLE_ACCOUNT: z.string().default('TODO'),
+
     // JWT Configuration
     JWT_SECRET: z.string(),
     JWT_EXPIRY_MINUTES: z
