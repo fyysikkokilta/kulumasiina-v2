@@ -137,7 +137,7 @@ test('buildDocumentPayload balances and embeds the marker', { tag: '@node' }, ()
       ['4205', 11],
       ['4300', 12]
     ]),
-    payableAccountId: 99,
+    bankAccountId: 99,
     attachmentIds: [501]
   })
   expect(payload.date).toBe('2026-10-17')
@@ -168,7 +168,7 @@ test('buildDocumentPayload limits line descriptions to 256 chars', { tag: '@node
     entries: [long],
     paidDate: date,
     accountIds,
-    payableAccountId: 99,
+    bankAccountId: 99,
     attachmentIds: []
   })
   for (const e of payload.blueprint.debet_entries) {
@@ -185,7 +185,7 @@ test('buildDocumentPayload keeps the full marker for large groups', { tag: '@nod
     entries,
     paidDate: date,
     accountIds,
-    payableAccountId: 99,
+    bankAccountId: 99,
     attachmentIds: []
   })
   expect(payload.description).toContain(documentMarker(entries.map((e) => e.id)))
@@ -198,7 +198,7 @@ test('buildDocumentPayload throws on unknown account', { tag: '@node' }, () => {
       entries: [entry],
       paidDate: date,
       accountIds: new Map(),
-      payableAccountId: 99,
+      bankAccountId: 99,
       attachmentIds: []
     })
   ).toThrow()

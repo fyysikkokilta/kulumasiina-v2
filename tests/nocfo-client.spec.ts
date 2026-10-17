@@ -58,7 +58,7 @@ test(
   { tag: '@node' },
   async () => {
     expect(await client.findAccountId('4205')).toBe(11)
-    expect(await client.findAccountId('TODO')).toBeNull()
+    expect(await client.findAccountId('9999')).toBeNull()
   }
 )
 

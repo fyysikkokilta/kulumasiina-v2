@@ -99,10 +99,10 @@ export function buildDocumentPayload(args: {
   entries: EntryWithItemsAndMileages[]
   paidDate: Date
   accountIds: Map<string, number>
-  payableAccountId: number
+  bankAccountId: number
   attachmentIds: number[]
 }): NocfoDocumentCreate {
-  const { entries, paidDate, accountIds, payableAccountId, attachmentIds } = args
+  const { entries, paidDate, accountIds, bankAccountId, attachmentIds } = args
   const description = buildDescription(entries)
 
   const debet_entries = entries.flatMap(documentLines).map((line): BlueprintEntry => {
@@ -129,7 +129,7 @@ export function buildDocumentPayload(args: {
       debet_entries,
       credit_entries: [
         {
-          account_id: payableAccountId,
+          account_id: bankAccountId,
           description: limitLineDescription(description),
           amount: total,
           vat_rate: 0

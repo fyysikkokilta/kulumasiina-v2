@@ -15,7 +15,7 @@ const testEnv = {
   NOCFO_API_URL: 'http://localhost:55433',
   NOCFO_API_TOKEN: 'test-nocfo-token',
   NOCFO_BUSINESS_SLUG: 'test-guild',
-  NOCFO_PAYABLE_ACCOUNT: '2951'
+  NOCFO_BANK_ACCOUNT: '1910'
 }
 for (const [key, value] of Object.entries(testEnv)) {
   process.env[key] ??= value

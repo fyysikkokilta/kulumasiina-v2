@@ -26,8 +26,7 @@ export const env = createEnv({
     NOCFO_API_URL: z.string().default('https://api.nocfo.io'),
     NOCFO_API_TOKEN: z.string(),
     NOCFO_BUSINESS_SLUG: z.string(),
-    // TODO: placeholder, set the real payable account number
-    NOCFO_PAYABLE_ACCOUNT: z.string().default('TODO'),
+    NOCFO_BANK_ACCOUNT: z.string().default('1910'),
 
     // JWT Configuration
     JWT_SECRET: z.string(),
