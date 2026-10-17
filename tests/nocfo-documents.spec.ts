@@ -153,20 +153,43 @@ test('buildDocumentPayload balances and embeds the marker', { tag: '@node' }, ()
   ])
 })
 
-test('buildDocumentPayload keeps the marker when truncating', { tag: '@node' }, () => {
-  const long = { ...entry, title: 'x'.repeat(1000) }
+const accountIds = new Map([
+  ['4205', 11],
+  ['4300', 12]
+])
+
+test('buildDocumentPayload limits line descriptions to 256 chars', { tag: '@node' }, () => {
+  const long = {
+    ...entry,
+    items: [{ ...entry.items[0], description: 'x'.repeat(1000) }],
+    mileages: [{ ...entry.mileages[0], description: 'y'.repeat(1000) }]
+  }
   const payload = buildDocumentPayload({
     entries: [long],
     paidDate: date,
-    accountIds: new Map([
-      ['4205', 11],
-      ['4300', 12]
-    ]),
+    accountIds,
     payableAccountId: 99,
     attachmentIds: []
   })
-  expect(payload.description.endsWith(documentMarker([long.id]))).toBe(true)
-  expect(payload.description.length).toBeLessThanOrEqual(255)
+  for (const e of payload.blueprint.debet_entries) {
+    expect(e.description.length).toBeLessThanOrEqual(256)
+  }
+})
+
+test('buildDocumentPayload keeps the full marker for large groups', { tag: '@node' }, () => {
+  const entries = Array.from({ length: 40 }, (_, i) => ({
+    ...entry,
+    id: `${String(i).padStart(8, '0')}-0000-0000-0000-000000000000`
+  }))
+  const payload = buildDocumentPayload({
+    entries,
+    paidDate: date,
+    accountIds,
+    payableAccountId: 99,
+    attachmentIds: []
+  })
+  expect(payload.description).toContain(documentMarker(entries.map((e) => e.id)))
+  expect(payload.blueprint.credit_entries[0].description.length).toBeLessThanOrEqual(256)
 })
 
 test('buildDocumentPayload throws on unknown account', { tag: '@node' }, () => {

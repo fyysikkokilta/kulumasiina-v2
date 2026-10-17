@@ -25,7 +25,7 @@ export type NocfoDocumentCreate = {
   }
 }
 
-const MAX_DESCRIPTION_LENGTH = 255
+const MAX_LINE_DESCRIPTION_LENGTH = 256
 const MARKER_ID_LENGTH = 8
 
 export function toCents(euros: number): number {
@@ -88,10 +88,11 @@ function buildDescription(entries: EntryWithItemsAndMileages[]): string {
   const marker = documentMarker(entries.map((e) => e.id))
   const names = unique(entries.map((e) => e.name)).join(', ')
   const titles = unique(entries.map((e) => e.title)).join(', ')
-  const prefix = `Kulukorvaus: ${names} – ${titles}`
-  const room = MAX_DESCRIPTION_LENGTH - marker.length - 1
-  const head = prefix.length > room ? prefix.slice(0, room) : prefix
-  return `${head} ${marker}`
+  return `Kulukorvaus: ${names} – ${titles} ${marker}`
+}
+
+function limitLineDescription(description: string): string {
+  return description.slice(0, MAX_LINE_DESCRIPTION_LENGTH)
 }
 
 export function buildDocumentPayload(args: {
@@ -111,7 +112,7 @@ export function buildDocumentPayload(args: {
     }
     return {
       account_id: accountId,
-      description: line.description,
+      description: limitLineDescription(line.description),
       amount: line.amountCents,
       vat_rate: 0
     }
@@ -126,7 +127,14 @@ export function buildDocumentPayload(args: {
     attachment_ids: attachmentIds,
     blueprint: {
       debet_entries,
-      credit_entries: [{ account_id: payableAccountId, description, amount: total, vat_rate: 0 }]
+      credit_entries: [
+        {
+          account_id: payableAccountId,
+          description: limitLineDescription(description),
+          amount: total,
+          vat_rate: 0
+        }
+      ]
     }
   }
 }
