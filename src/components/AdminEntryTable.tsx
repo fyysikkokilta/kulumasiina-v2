@@ -271,6 +271,7 @@ export function AdminEntryTable({
           setPayModalVisible(false)
           setSelectedRowKeys([])
         }}
+        onPartialSuccess={() => setSelectedRowKeys([])}
       />
 
       <DeleteOldArchivedModal

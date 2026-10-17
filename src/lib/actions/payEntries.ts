@@ -13,16 +13,20 @@ import { env } from '@/lib/env'
 import {
   createDocument,
   findAccountId,
-  findDocumentIdByMarker,
+  findDocumentsWithEntry,
   NocfoError,
   uploadFile
 } from '@/lib/nocfo'
 import {
   buildDocumentPayload,
+  classifyExistingDocuments,
+  documentDescription,
   documentLines,
   documentMarker,
   entriesMissingAccounts,
-  groupByPayee
+  type ExistingDocument,
+  groupByPayee,
+  TooManyEntriesError
 } from '@/lib/nocfo-documents'
 import {
   AttachmentStorageError,
@@ -77,9 +81,51 @@ async function buildPdfs(group: Group, paidDate: Date) {
 }
 
 function failureReason(error: unknown, t: Translate): string {
+  if (error instanceof TooManyEntriesError) return t('failed_too_many_entries')
   if (error instanceof AttachmentStorageError) return t('failed_attachment')
   if (error instanceof NocfoError) return t('failed_nocfo')
   return t('failed_unexpected')
+}
+
+async function findExistingDocument(entryIds: string[]): Promise<ExistingDocument> {
+  const found = (await Promise.all(entryIds.map(findDocumentsWithEntry))).flat()
+  const byId = new Map(found.map((d) => [d.id, d]))
+  return classifyExistingDocuments(entryIds, [...byId.values()])
+}
+
+async function createGroupDocument(
+  group: Group,
+  paidDate: Date,
+  accountIds: Map<string, number | null>,
+  bankAccountId: number
+): Promise<number> {
+  const pdfs = await buildPdfs(group, paidDate)
+  const attachmentIds = await Promise.all(pdfs.map((pdf) => uploadFile(pdf.filename, pdf.data)))
+  const payload = buildDocumentPayload({
+    entries: group,
+    paidDate,
+    accountIds: new Map([...accountIds].flatMap(([n, id]) => (id === null ? [] : [[n, id]]))),
+    bankAccountId,
+    attachmentIds
+  })
+  const marker = documentMarker(group.map((e) => e.id))
+  return createDocument(payload, `${marker}|${paidDate.toISOString().slice(0, 10)}`)
+}
+
+async function markPaid(entryIds: string[], paidDate: Date, documentId: number) {
+  const updated = await db
+    .update(entry)
+    .set({ status: 'paid', paidDate, nocfoDocumentId: documentId })
+    .where(and(inArray(entry.id, entryIds), eq(entry.status, 'approved')))
+    .returning({ id: entry.id })
+  if (updated.length < entryIds.length) {
+    const updatedIds = new Set(updated.map((e) => e.id))
+    console.error('Fewer entries marked paid than sent to NoCFO', {
+      documentId,
+      entryIds,
+      notUpdated: entryIds.filter((id) => !updatedIds.has(id))
+    })
+  }
 }
 
 async function sendGroup(
@@ -102,24 +148,20 @@ async function sendGroup(
   }
 
   try {
-    const marker = documentMarker(entryIds)
-    let documentId = await findDocumentIdByMarker(marker)
-    if (documentId === null) {
-      const pdfs = await buildPdfs(group, paidDate)
-      const attachmentIds = await Promise.all(pdfs.map((pdf) => uploadFile(pdf.filename, pdf.data)))
-      const payload = buildDocumentPayload({
-        entries: group,
-        paidDate,
-        accountIds: new Map([...accountIds].flatMap(([n, id]) => (id === null ? [] : [[n, id]]))),
-        bankAccountId,
-        attachmentIds
-      })
-      documentId = await createDocument(payload, `${marker}|${paidDate.toISOString().slice(0, 10)}`)
+    // Fails fast, before any NoCFO call, when the group's marker cannot fit
+    documentDescription(group)
+    const existing = await findExistingDocument(entryIds)
+    if (existing.kind === 'conflict') {
+      return {
+        entryIds,
+        reason: `${prefix}: ${t('failed_existing_document', { id: String(existing.documentId) })}`
+      }
     }
-    await db
-      .update(entry)
-      .set({ status: 'paid', paidDate, nocfoDocumentId: documentId })
-      .where(and(inArray(entry.id, entryIds), eq(entry.status, 'approved')))
+    const documentId =
+      existing.kind === 'match'
+        ? existing.documentId
+        : await createGroupDocument(group, paidDate, accountIds, bankAccountId)
+    await markPaid(entryIds, paidDate, documentId)
     return null
   } catch (error) {
     const detail = error instanceof NocfoError ? { status: error.status, body: error.body } : error

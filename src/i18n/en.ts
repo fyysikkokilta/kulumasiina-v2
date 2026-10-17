@@ -252,6 +252,9 @@ const en = {
     error_missing_accounts: 'Accounts are missing for: {titles}',
     failed_unknown_account: 'Unknown NoCFO account: {accounts}',
     failed_no_lines: 'Nothing to send, all amounts are zero',
+    failed_too_many_entries: 'Too many claims for this payee in one payment, pay fewer at once',
+    failed_existing_document:
+      'Already in NoCFO document {id}; pay it without sending to NoCFO or fix it in NoCFO',
     failed_attachment: 'An attachment file could not be read',
     failed_nocfo: 'NoCFO request failed',
     failed_unexpected: 'Unexpected error'

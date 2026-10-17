@@ -21,6 +21,8 @@ interface PayModalProps {
   onCancel: () => void
   entryIds: string[]
   onSuccess?: () => void
+  /** Some entries were paid but others failed and the dialog stays open */
+  onPartialSuccess?: () => void
 }
 
 // Mounted only while visible, so every opening starts with fresh form and action state
@@ -28,8 +30,16 @@ export function PayModal(props: PayModalProps) {
   return props.visible ? <PayModalContent {...props} /> : null
 }
 
-function PayModalContent({ visible, onCancel, entryIds, onSuccess }: PayModalProps) {
+function PayModalContent({
+  visible,
+  onCancel,
+  entryIds,
+  onSuccess,
+  onPartialSuccess
+}: PayModalProps) {
   const formRef = useRef<HTMLFormElement>(null)
+  // Narrowed to the failed entries after a partial failure, so pressing Pay again retries only them
+  const [pendingIds, setPendingIds] = useState(entryIds)
   const [errors, setErrors] = useState<Record<string, string | string[]> | undefined>(undefined)
   const [sendToNocfo, setSendToNocfo] = useState(true)
   const t = useTranslations('PayModal')
@@ -41,7 +51,12 @@ function PayModalContent({ visible, onCancel, entryIds, onSuccess }: PayModalPro
 
   const { execute, status, result } = useAction(payEntriesAction, {
     onSuccess: ({ data }) => {
-      if (data.failed.length > 0) return
+      if (data.failed.length > 0) {
+        const failedIds = data.failed.flatMap((f) => f.entryIds)
+        if (failedIds.length < pendingIds.length) onPartialSuccess?.()
+        setPendingIds(failedIds)
+        return
+      }
       setErrors(undefined)
       onSuccess?.()
       onCancel()
@@ -58,7 +73,7 @@ function PayModalContent({ visible, onCancel, entryIds, onSuccess }: PayModalPro
     }
     setErrors(undefined)
     execute({
-      ids: entryIds,
+      ids: pendingIds,
       date: parsed.data.date,
       sendToNocfo,
       locale: locale as 'en' | 'fi'

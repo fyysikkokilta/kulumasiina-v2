@@ -18,10 +18,35 @@ async function readBody(req: IncomingMessage): Promise<Buffer> {
   return Buffer.concat(chunks)
 }
 
-function parseBody(contentType: string | undefined, raw: Buffer): unknown {
+const MAX_DESCRIPTION_LENGTH = 256
+
+async function parseBody(contentType: string | undefined, raw: Buffer): Promise<unknown> {
   if (raw.length === 0) return null
   if (contentType?.includes('application/json')) return JSON.parse(raw.toString('utf8'))
-  return '<multipart>'
+  const form = await new Response(new Uint8Array(raw), {
+    headers: { 'Content-Type': contentType ?? '' }
+  }).formData()
+  const file = form.get('file')
+  return file instanceof File ? { fileName: file.name, fileType: file.type } : '<multipart>'
+}
+
+type DocumentBody = {
+  description?: string
+  blueprint?: {
+    debet_entries?: { description?: string }[]
+    credit_entries?: { description?: string }[]
+  }
+}
+
+// Mirrors NoCFO's maxLength validation on document and blueprint entry descriptions
+function descriptionTooLong(body: DocumentBody): boolean {
+  const entries = [
+    ...(body.blueprint?.debet_entries ?? []),
+    ...(body.blueprint?.credit_entries ?? [])
+  ]
+  return [body.description, ...entries.map((e) => e.description)].some(
+    (d) => (d?.length ?? 0) > MAX_DESCRIPTION_LENGTH
+  )
 }
 
 function send(res: ServerResponse, status: number, body: unknown) {
@@ -65,7 +90,7 @@ export async function startFakeNocfo(port: number): Promise<{ close(): Promise<v
         method,
         path,
         headers: req.headers,
-        body: parseBody(req.headers['content-type'], raw)
+        body: await parseBody(req.headers['content-type'], raw)
       })
 
       if (!path.startsWith(PREFIX)) return send(res, 404, { detail: 'Not found' })
@@ -87,7 +112,12 @@ export async function startFakeNocfo(port: number): Promise<{ close(): Promise<v
           failNextDocument = false
           return send(res, 500, { detail: 'Injected failure' })
         }
-        const body = JSON.parse(raw.toString('utf8')) as { description?: string }
+        const body = JSON.parse(raw.toString('utf8')) as DocumentBody
+        if (descriptionTooLong(body)) {
+          return send(res, 400, {
+            description: ['Ensure this field has no more than 256 characters.']
+          })
+        }
         const doc = { id: nextId++, description: body.description ?? '' }
         documents = [...documents, doc]
         return send(res, 201, doc)

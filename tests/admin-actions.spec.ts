@@ -138,6 +138,69 @@ test.describe('admin actions', () => {
     expect(docs).toHaveLength(0)
   })
 
+  test('entry already sent with a different selection fails and names the document', async ({
+    page
+  }) => {
+    const res = await fetch(`${NOCFO}/v1/business/test-guild/document/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        description: `Earlier [KM:${testEntryIds.approved.slice(0, 8)},deadbeef]`
+      })
+    })
+    const { id } = (await res.json()) as { id: number }
+    await fetch(`${NOCFO}/__clear-requests`, { method: 'POST' })
+
+    const { approvedRow, modal } = await openPayModal(page)
+    await modal.getByRole('button', { name: 'Mark as Paid' }).click()
+    await expect(modal).toContainText(`Already in NoCFO document ${id}`)
+    const docs = (await nocfoRequests()).filter(
+      (r) => r.method === 'POST' && r.path.endsWith('/document/')
+    )
+    expect(docs).toHaveLength(0)
+    await modal.getByRole('button', { name: 'Cancel' }).click()
+    await ensureRowExpanded(approvedRow)
+    await expect(statusTag(approvedRow, 'APPROVED')).toBeVisible()
+  })
+
+  test('pressing pay again after a partial failure retries only the failed payee', async ({
+    page
+  }) => {
+    // A second approved entry with another payee; approved through the UI so the table refreshes
+    await db
+      .update(entry)
+      .set({ iban: 'FI4950009420028730' })
+      .where(eq(entry.id, testEntryIds.submittedSecond))
+    await db.update(item).set({ account: '4205' }).where(eq(item.id, testItemIds.submittedSecond))
+    const secondRow = rowById(page, testEntryIds.submittedSecond)
+    await ensureRowExpanded(secondRow)
+    await page.getByRole('button', { name: 'Approve', exact: true }).first().click()
+    const approveModal = page.getByRole('dialog')
+    await approveModal.getByLabel('Approval Date').fill('2025-01-15')
+    await approveModal.getByLabel('Approval Note').fill('Second payee')
+    await approveModal.getByRole('button', { name: 'Approve' }).click()
+    await expect(approveModal).toBeHidden()
+    await expect(statusTag(secondRow, 'APPROVED')).toBeVisible()
+
+    await selectRow(rowById(page, testEntryIds.approved))
+    await selectRow(secondRow)
+    await page.getByRole('button', { name: 'Mark as Paid' }).click()
+    const modal = page.getByRole('dialog')
+    await modal.getByLabel('Payment Date').fill('2025-01-15')
+
+    await fetch(`${NOCFO}/__fail-next-document`, { method: 'POST' })
+    await modal.getByRole('button', { name: 'Mark as Paid' }).click()
+    await expect(modal).toContainText('Not sent to NoCFO')
+    await modal.getByRole('button', { name: 'Mark as Paid' }).click()
+    await expect(modal).toBeHidden()
+
+    for (const id of [testEntryIds.approved, testEntryIds.submittedSecond]) {
+      const row = rowById(page, id)
+      await ensureRowExpanded(row)
+      await expect(statusTag(row, 'PAID')).toBeVisible()
+    }
+  })
+
   test('unknown account fails the entry and names the account', async ({ page }) => {
     await db.update(item).set({ account: '9999' }).where(eq(item.id, testItemIds.approved))
     const { approvedRow, modal } = await openPayModal(page)

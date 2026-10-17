@@ -75,17 +75,47 @@ test('createDocument sends token and idempotency key', { tag: '@node' }, async (
   expect(req.headers['idempotency-key']).toBe('key-1')
 })
 
-test('findDocumentIdByMarker finds a created document', { tag: '@node' }, async () => {
-  const id = await client.createDocument(payloadWithMarker('[KM:aaaaaaaa]'), 'key-2')
-  expect(await client.findDocumentIdByMarker('[KM:aaaaaaaa]')).toBe(id)
-  expect(await client.findDocumentIdByMarker('[KM:zzzzzzzz]')).toBeNull()
-})
+test(
+  'findDocumentsWithEntry finds documents whose marker holds the entry',
+  { tag: '@node' },
+  async () => {
+    const id = await client.createDocument(payloadWithMarker('[KM:aaaaaaaa,bbbbbbbb]'), 'key-2')
+    await client.createDocument(
+      payloadWithMarker('Mentions aaaaaaaa outside [KM:cccccccc]'),
+      'key-4'
+    )
+    expect(await client.findDocumentsWithEntry('aaaaaaaa-0000')).toEqual([
+      { id, entryIds: ['aaaaaaaa', 'bbbbbbbb'] }
+    ])
+    expect(await client.findDocumentsWithEntry('dddddddd-0000')).toEqual([])
+  }
+)
+
+test(
+  'createDocument is rejected by the fake when a description is too long',
+  { tag: '@node' },
+  async () => {
+    await expect(
+      client.createDocument(payloadWithMarker('x'.repeat(300)), 'key-5')
+    ).rejects.toMatchObject({ status: 400 })
+    const longLine = {
+      ...payload,
+      blueprint: {
+        ...payload.blueprint,
+        debet_entries: [
+          { account_id: 11, description: 'y'.repeat(257), amount: 1000, vat_rate: 0 as const }
+        ]
+      }
+    }
+    await expect(client.createDocument(longLine, 'key-6')).rejects.toMatchObject({ status: 400 })
+  }
+)
 
 test('uploadFile posts multipart and returns the id', { tag: '@node' }, async () => {
   const id = await client.uploadFile('receipt.pdf', Buffer.from('%PDF-1.4'))
   expect(id).toEqual(expect.any(Number))
   const [req] = await requests('POST', '/v1/business/test-guild/file_upload/')
-  expect(req.body).toBe('<multipart>')
+  expect(req.body).toEqual({ fileName: 'receipt.pdf', fileType: 'application/pdf' })
 })
 
 test('non-2xx responses throw NocfoError with status and body', { tag: '@node' }, async () => {

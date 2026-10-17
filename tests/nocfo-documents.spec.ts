@@ -3,11 +3,14 @@ import { expect, test } from '@playwright/test'
 import type { EntryWithItemsAndMileages } from '@/db/types'
 import {
   buildDocumentPayload,
+  classifyExistingDocuments,
   documentLines,
   documentMarker,
   entriesMissingAccounts,
   groupByPayee,
-  toCents
+  markerEntryIds,
+  toCents,
+  TooManyEntriesError
 } from '@/lib/nocfo-documents'
 
 const date = new Date('2026-10-01T00:00:00Z')
@@ -177,20 +180,88 @@ test('buildDocumentPayload limits line descriptions to 256 chars', { tag: '@node
   }
 })
 
-test('buildDocumentPayload keeps the full marker for large groups', { tag: '@node' }, () => {
-  const entries = Array.from({ length: 40 }, (_, i) => ({
+const manyEntries = (count: number) =>
+  Array.from({ length: count }, (_, i) => ({
     ...entry,
-    id: `${String(i).padStart(8, '0')}-0000-0000-0000-000000000000`
+    id: `${String(i).padStart(8, '0')}-0000-0000-0000-000000000000`,
+    name: `Person ${i} ${'n'.repeat(40)}`,
+    title: `Title ${i} ${'t'.repeat(40)}`
   }))
-  const payload = buildDocumentPayload({
+
+const payloadFor = (entries: EntryWithItemsAndMileages[]) =>
+  buildDocumentPayload({
     entries,
     paidDate: date,
     accountIds,
     bankAccountId: 99,
     attachmentIds: []
   })
+
+test('buildDocumentPayload caps the description at 256 chars', { tag: '@node' }, () => {
+  const long = { ...entry, name: 'n'.repeat(500), title: 't'.repeat(500) }
+  const payload = payloadFor([long])
+  expect(payload.description.length).toBeLessThanOrEqual(256)
+  expect(payload.description).toMatch(/^Kulukorvaus: n+/)
+  expect(payload.description.endsWith(` ${documentMarker([long.id])}`)).toBe(true)
+  expect(payload.blueprint.credit_entries[0].description).toBe(payload.description)
+})
+
+test('buildDocumentPayload keeps the full marker for large groups', { tag: '@node' }, () => {
+  const entries = manyEntries(26)
+  const payload = payloadFor(entries)
+  expect(payload.description.length).toBeLessThanOrEqual(256)
+  expect(payload.description).toMatch(/^Kulukorvaus/)
   expect(payload.description).toContain(documentMarker(entries.map((e) => e.id)))
-  expect(payload.blueprint.credit_entries[0].description.length).toBeLessThanOrEqual(256)
+})
+
+test('buildDocumentPayload rejects groups whose marker cannot fit', { tag: '@node' }, () => {
+  expect(() => payloadFor(manyEntries(27))).toThrow(TooManyEntriesError)
+})
+
+test('documentLines puts the rounding residual on the last line', { tag: '@node' }, () => {
+  const mileage = { ...entry.mileages[0], distance: 12.3 }
+  const trips = {
+    ...entry,
+    items: [],
+    mileages: [mileage, { ...mileage, id: 'm2' }, { ...mileage, id: 'm3' }]
+  }
+  const total = documentLines(trips).reduce((sum, line) => sum + line.amountCents, 0)
+  expect(total).toBe(923)
+  expect(payloadFor([trips]).blueprint.credit_entries[0].amount).toBe(923)
+})
+
+test('empty account strings count as missing', { tag: '@node' }, () => {
+  const blank = {
+    ...entry,
+    id: 'cccccccc-0000-0000-0000-000000000003',
+    items: [{ ...entry.items[0], account: '' }]
+  }
+  expect(entriesMissingAccounts([entry, blank])).toEqual([blank.id])
+  expect(documentLines(blank)[0].accountNumber).toBeNull()
+})
+
+test('markerEntryIds parses every marker in a description', { tag: '@node' }, () => {
+  expect(markerEntryIds('Kulukorvaus: x [KM:aaaaaaaa,bbbbbbbb] [KM:cccccccc]')).toEqual([
+    ['aaaaaaaa', 'bbbbbbbb'],
+    ['cccccccc']
+  ])
+  expect(markerEntryIds('no marker here')).toEqual([])
+})
+
+test('classifyExistingDocuments links exact sets and flags overlaps', { tag: '@node' }, () => {
+  const ids = ['aaaaaaaa-1', 'bbbbbbbb-2']
+  expect(classifyExistingDocuments(ids, [])).toEqual({ kind: 'none' })
+  expect(classifyExistingDocuments(ids, [{ id: 7, entryIds: ['bbbbbbbb', 'aaaaaaaa'] }])).toEqual({
+    kind: 'match',
+    documentId: 7
+  })
+  expect(classifyExistingDocuments(ids, [{ id: 8, entryIds: ['aaaaaaaa'] }])).toEqual({
+    kind: 'conflict',
+    documentId: 8
+  })
+  expect(
+    classifyExistingDocuments(ids, [{ id: 9, entryIds: ['aaaaaaaa', 'bbbbbbbb', 'cccccccc'] }])
+  ).toEqual({ kind: 'conflict', documentId: 9 })
 })
 
 test('buildDocumentPayload throws on unknown account', { tag: '@node' }, () => {

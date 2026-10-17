@@ -1,5 +1,10 @@
 import { env } from '@/lib/env'
-import type { NocfoDocumentCreate } from '@/lib/nocfo-documents'
+import {
+  markerEntryIds,
+  markerId,
+  type MarkedDocument,
+  type NocfoDocumentCreate
+} from '@/lib/nocfo-documents'
 
 export class NocfoError extends Error {
   status: number
@@ -35,16 +40,21 @@ export async function findAccountId(number: string): Promise<number | null> {
   return data.results[0]?.id ?? null
 }
 
-export async function findDocumentIdByMarker(marker: string): Promise<number | null> {
+/** Documents whose `[KM:...]` marker holds the entry, with the marker's entry ids */
+export async function findDocumentsWithEntry(entryId: string): Promise<MarkedDocument[]> {
+  const id = markerId(entryId)
   const data = await request<ListResponse<{ id: number; description?: string | null }>>(
-    `document/?search=${encodeURIComponent(marker)}`
+    `document/?search=${encodeURIComponent(id)}`
   )
-  return data.results.find((d) => d.description?.includes(marker))?.id ?? null
+  return data.results.flatMap((d) => {
+    const marker = markerEntryIds(d.description ?? '').find((ids) => ids.includes(id))
+    return marker ? [{ id: d.id, entryIds: marker }] : []
+  })
 }
 
 export async function uploadFile(name: string, data: Buffer): Promise<number> {
   const form = new FormData()
-  form.append('file', new Blob([new Uint8Array(data)]), name)
+  form.append('file', new Blob([new Uint8Array(data)], { type: 'application/pdf' }), name)
   form.append('name', name)
   const res = await request<{ id: number }>('file_upload/', { method: 'POST', body: form })
   return res.id

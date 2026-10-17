@@ -21,7 +21,7 @@ export const env = createEnv({
       }),
 
     // NoCFO Configuration
-    NOCFO_API_URL: z.string().default('https://api.nocfo.io'),
+    NOCFO_API_URL: z.url().default('https://api.nocfo.io'),
     NOCFO_API_TOKEN: z.string(),
     NOCFO_BUSINESS_SLUG: z.string(),
     NOCFO_BANK_ACCOUNT: z.string().default('1910'),

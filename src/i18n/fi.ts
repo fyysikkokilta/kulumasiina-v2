@@ -251,6 +251,10 @@ const fi = {
     error_missing_accounts: 'Tilit puuttuvat hakemuksilta: {titles}',
     failed_unknown_account: 'Tuntematon NoCFO-tili: {accounts}',
     failed_no_lines: 'Ei lähetettävää, kaikki summat ovat nollia',
+    failed_too_many_entries:
+      'Liikaa saman maksunsaajan hakemuksia yhdessä maksussa, maksa vähemmän kerralla',
+    failed_existing_document:
+      'On jo NoCFO-tositteella {id}; maksa ilman NoCFOon lähettämistä tai korjaa tosite NoCFOssa',
     failed_attachment: 'Liitetiedostoa ei voitu lukea',
     failed_nocfo: 'NoCFO-pyyntö epäonnistui',
     failed_unexpected: 'Odottamaton virhe'
