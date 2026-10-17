@@ -1,13 +1,14 @@
 'use client'
 
+import { Checkbox } from '@base-ui/react/checkbox'
 import { Dialog } from '@base-ui/react/dialog'
 import { Field } from '@base-ui/react/field'
 import { Form } from '@base-ui/react/form'
 import { Input } from '@base-ui/react/input'
-import { X } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { Check, X } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
 import { useAction } from 'next-safe-action/hooks'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/Button'
@@ -22,38 +23,46 @@ interface PayModalProps {
   onSuccess?: () => void
 }
 
-export function PayModal({ visible, onCancel, entryIds, onSuccess }: PayModalProps) {
+// Mounted only while visible, so every opening starts with fresh form and action state
+export function PayModal(props: PayModalProps) {
+  return props.visible ? <PayModalContent {...props} /> : null
+}
+
+function PayModalContent({ visible, onCancel, entryIds, onSuccess }: PayModalProps) {
   const formRef = useRef<HTMLFormElement>(null)
   const [errors, setErrors] = useState<Record<string, string | string[]> | undefined>(undefined)
+  const [sendToNocfo, setSendToNocfo] = useState(true)
   const t = useTranslations('PayModal')
-
-  useEffect(() => {
-    if (!visible) return
-    queueMicrotask(() => setErrors(undefined))
-  }, [visible])
+  const locale = useLocale()
 
   const payFormSchema = z.object({
     date: z.iso.date(t('date_error')).transform((val) => new Date(val))
   })
 
-  const { execute, status } = useAction(payEntriesAction, {
-    onSuccess: () => {
+  const { execute, status, result } = useAction(payEntriesAction, {
+    onSuccess: ({ data }) => {
+      if (data.failed.length > 0) return
       setErrors(undefined)
       onSuccess?.()
       onCancel()
     }
   })
+  const failures = result.data?.failed ?? []
 
   const handleFormSubmit = (formValues: Record<string, string>) => {
     const toParse = { date: formValues.date }
-    const result = payFormSchema.safeParse(toParse)
-    if (!result.success) {
-      setErrors(z.flattenError(result.error).fieldErrors)
+    const parsed = payFormSchema.safeParse(toParse)
+    if (!parsed.success) {
+      setErrors(z.flattenError(parsed.error).fieldErrors)
       return
     }
     setErrors(undefined)
-    execute({ ids: entryIds, date: result.data.date })
-    formRef.current?.reset()
+    execute({
+      ids: entryIds,
+      date: parsed.data.date,
+      sendToNocfo,
+      locale: locale as 'en' | 'fi'
+    })
   }
 
   const handleCancel = () => {
@@ -90,6 +99,36 @@ export function PayModal({ visible, onCancel, entryIds, onSuccess }: PayModalPro
               <Input type="date" className={inputClass} />
               <Field.Error className="mt-1 text-sm text-red-600" />
             </Field.Root>
+
+            <Field.Root name="sendToNocfo">
+              <Field.Label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                <Checkbox.Root
+                  checked={sendToNocfo}
+                  onCheckedChange={setSendToNocfo}
+                  className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                  <Checkbox.Indicator
+                    keepMounted
+                    className="flex size-full items-center justify-center data-checked:text-blue-600 data-unchecked:text-white"
+                  >
+                    <Check className="h-4 w-4" />
+                  </Checkbox.Indicator>
+                </Checkbox.Root>
+                {t('send_to_nocfo')}
+              </Field.Label>
+            </Field.Root>
+
+            {(failures.length > 0 || status === 'hasErrored') && (
+              <div role="alert" className="text-sm text-red-600">
+                {failures.length > 0 && <p className="font-medium">{t('failed_entries')}</p>}
+                <ul className="list-disc pl-5">
+                  {failures.map((f) => (
+                    <li key={f.entryIds.join(',')}>{f.reason}</li>
+                  ))}
+                  {result.serverError && <li>{result.serverError}</li>}
+                </ul>
+              </div>
+            )}
 
             <div className="flex gap-2">
               <Button type="submit" variant="primary" actionStatus={status}>

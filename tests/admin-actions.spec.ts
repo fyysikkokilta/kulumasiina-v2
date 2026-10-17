@@ -1,4 +1,9 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
+
+import { eq } from 'drizzle-orm'
+
+import { db } from '@/db'
+import { entry, item } from '@/db/schema'
 
 import { loginAdmin } from './utils/admin-login'
 import {
@@ -12,11 +17,34 @@ import {
   statusTag
 } from './utils/admin-table'
 import { seedTestData } from './utils/seed'
-import { testEntryIds } from './utils/test-data'
+import { testEntryIds, testItemIds } from './utils/test-data'
+
+const NOCFO = 'http://localhost:55433'
+
+type NocfoRequest = {
+  method: string
+  path: string
+  headers: Record<string, string>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  body: any
+}
+
+const nocfoRequests = async (): Promise<NocfoRequest[]> =>
+  (await fetch(`${NOCFO}/__requests`)).json()
+
+const openPayModal = async (page: Page) => {
+  const approvedRow = rowById(page, testEntryIds.approved)
+  await ensureRowExpanded(approvedRow)
+  await page.getByRole('button', { name: 'Pay' }).first().click()
+  const modal = page.getByRole('dialog')
+  await modal.getByLabel('Payment Date').fill('2025-01-15')
+  return { approvedRow, modal }
+}
 
 test.describe('admin actions', () => {
   test.beforeEach(async ({ page }) => {
     await seedTestData()
+    await fetch(`${NOCFO}/__reset`, { method: 'POST' })
     await loginAdmin(page)
     await gotoAdmin(page)
   })
@@ -57,6 +85,75 @@ test.describe('admin actions', () => {
 
     await ensureRowExpanded(approvedRow)
     await expect(statusTag(approvedRow, 'PAID')).toBeVisible()
+  })
+
+  test('pay sends one nocfo document per payee with pdf attached', async ({ page }) => {
+    const { approvedRow, modal } = await openPayModal(page)
+    await modal.getByRole('button', { name: 'Mark as Paid' }).click()
+    await ensureRowExpanded(approvedRow)
+    await expect(statusTag(approvedRow, 'PAID')).toBeVisible()
+
+    const reqs = await nocfoRequests()
+    expect(reqs.filter((r) => r.path.endsWith('/file_upload/'))).toHaveLength(1)
+    const docs = reqs.filter((r) => r.method === 'POST' && r.path.endsWith('/document/'))
+    expect(docs).toHaveLength(1)
+    expect(docs[0].body.blueprint.credit_entries[0].account_id).toBe(99)
+    expect(docs[0].headers['idempotency-key']).toBeTruthy()
+  })
+
+  test('pay without nocfo only marks paid', async ({ page }) => {
+    const { approvedRow, modal } = await openPayModal(page)
+    await modal.getByRole('checkbox', { name: 'Send to NoCFO' }).click()
+    await modal.getByRole('button', { name: 'Mark as Paid' }).click()
+    await ensureRowExpanded(approvedRow)
+    await expect(statusTag(approvedRow, 'PAID')).toBeVisible()
+    expect((await nocfoRequests()).length).toBe(0)
+  })
+
+  test('failed nocfo send leaves entry approved and shows the failure', async ({ page }) => {
+    await fetch(`${NOCFO}/__fail-next-document`, { method: 'POST' })
+    const { approvedRow, modal } = await openPayModal(page)
+    await modal.getByRole('button', { name: 'Mark as Paid' }).click()
+    await expect(modal).toContainText('Not sent to NoCFO')
+    await modal.getByRole('button', { name: 'Cancel' }).click()
+    await ensureRowExpanded(approvedRow)
+    await expect(statusTag(approvedRow, 'APPROVED')).toBeVisible()
+  })
+
+  test('retry after lost response reuses existing nocfo document', async ({ page }) => {
+    await fetch(`${NOCFO}/v1/business/test-guild/document/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description: `Earlier [KM:${testEntryIds.approved.slice(0, 8)}]` })
+    })
+    await fetch(`${NOCFO}/__clear-requests`, { method: 'POST' })
+
+    const { approvedRow, modal } = await openPayModal(page)
+    await modal.getByRole('button', { name: 'Mark as Paid' }).click()
+    await ensureRowExpanded(approvedRow)
+    await expect(statusTag(approvedRow, 'PAID')).toBeVisible()
+    const docs = (await nocfoRequests()).filter(
+      (r) => r.method === 'POST' && r.path.endsWith('/document/')
+    )
+    expect(docs).toHaveLength(0)
+  })
+
+  test('unknown account fails the entry and names the account', async ({ page }) => {
+    await db.update(item).set({ account: '9999' }).where(eq(item.id, testItemIds.approved))
+    const { approvedRow, modal } = await openPayModal(page)
+    await modal.getByRole('button', { name: 'Mark as Paid' }).click()
+    await expect(modal).toContainText('9999')
+    await modal.getByRole('button', { name: 'Cancel' }).click()
+    await ensureRowExpanded(approvedRow)
+    await expect(statusTag(approvedRow, 'APPROVED')).toBeVisible()
+  })
+
+  test('paying an already paid entry shows an error and does not call nocfo', async ({ page }) => {
+    const { modal } = await openPayModal(page)
+    await db.update(entry).set({ status: 'paid' }).where(eq(entry.id, testEntryIds.approved))
+    await modal.getByRole('button', { name: 'Mark as Paid' }).click()
+    await expect(modal).toContainText('Approved entry')
+    expect(await nocfoRequests()).toHaveLength(0)
   })
 
   test('can reset a denied entry', async ({ page }) => {

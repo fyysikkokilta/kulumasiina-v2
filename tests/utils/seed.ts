@@ -90,7 +90,7 @@ export async function seedTestData() {
       entryId: testEntryIds.approved,
       description: 'Approved item',
       date: new Date('2025-01-01T10:00:00.000Z'),
-      account: null
+      account: '4205'
     },
     {
       id: testItemIds.paid,

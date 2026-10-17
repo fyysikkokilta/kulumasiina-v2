@@ -4,13 +4,14 @@ import type { NocfoDocumentCreate } from '@/lib/nocfo-documents'
 
 import { startFakeNocfo } from './utils/fake-nocfo'
 
-const PORT = 55434
+// Same port as the fake that global setup starts: the app env (and so the client) is fixed to it
+const PORT = 55433
 const fake = `http://localhost:${PORT}`
 const DOCUMENT_PATH = '/v1/business/test-guild/document/'
 
 type Client = typeof import('@/lib/nocfo')
 let client: Client
-let server: { close(): Promise<void> }
+let server: { close(): Promise<void> } | null
 
 const payloadWithMarker = (marker: string): NocfoDocumentCreate => ({
   date: '2026-10-01',
@@ -40,13 +41,17 @@ async function requests(method: string, path: string): Promise<LoggedRequest[]> 
 test.describe.configure({ mode: 'serial' })
 
 test.beforeAll(async () => {
-  server = await startFakeNocfo(PORT)
+  // Under `pnpm test` global setup already runs the fake; under `test:node` nothing does
+  server = await startFakeNocfo(PORT).catch((error: NodeJS.ErrnoException) => {
+    if (error.code === 'EADDRINUSE') return null
+    throw error
+  })
   process.env.NOCFO_API_URL = fake
   client = await import('@/lib/nocfo')
 })
 
 test.afterAll(async () => {
-  await server.close()
+  await server?.close()
 })
 
 test.beforeEach(async () => {

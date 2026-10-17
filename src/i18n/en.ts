@@ -248,7 +248,16 @@ const en = {
     date_error: 'Please select payment date',
     submit: 'Mark as Paid',
     cancel: 'Cancel',
-    close: 'Close'
+    close: 'Close',
+    send_to_nocfo: 'Send to NoCFO',
+    failed_entries: 'Not sent to NoCFO (still approved):',
+    error_not_approved: 'Only approved entries can be paid: {titles}',
+    error_missing_accounts: 'Accounts are missing for: {titles}',
+    failed_unknown_account: 'Unknown NoCFO account: {accounts}',
+    failed_no_lines: 'Nothing to send, all amounts are zero',
+    failed_attachment: 'An attachment file could not be read',
+    failed_nocfo: 'NoCFO request failed',
+    failed_unexpected: 'Unexpected error'
   },
   DeleteOldArchivedModal: {
     title: 'Remove old archived entries',

@@ -247,7 +247,16 @@ const fi = {
     date_error: 'Valitse maksupäivä',
     submit: 'Merkitse maksetuiksi',
     cancel: 'Peruuta',
-    close: 'Sulje'
+    close: 'Sulje',
+    send_to_nocfo: 'Lähetä NoCFOon',
+    failed_entries: 'Ei lähetetty NoCFOon (yhä hyväksytty):',
+    error_not_approved: 'Vain hyväksytyt hakemukset voi maksaa: {titles}',
+    error_missing_accounts: 'Tilit puuttuvat hakemuksilta: {titles}',
+    failed_unknown_account: 'Tuntematon NoCFO-tili: {accounts}',
+    failed_no_lines: 'Ei lähetettävää, kaikki summat ovat nollia',
+    failed_attachment: 'Liitetiedostoa ei voitu lukea',
+    failed_nocfo: 'NoCFO-pyyntö epäonnistui',
+    failed_unexpected: 'Odottamaton virhe'
   },
   DeleteOldArchivedModal: {
     title: 'Poista vanhat arkistoidut hakemukset',
