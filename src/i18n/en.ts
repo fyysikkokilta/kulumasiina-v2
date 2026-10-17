@@ -203,8 +203,6 @@ const en = {
     },
     actions: {
       pdf: 'PDF',
-      csv: 'CSV',
-      zip: 'ZIP',
       edit: 'Edit',
       approve: 'Approve',
       deny: 'Deny',
@@ -223,7 +221,6 @@ const en = {
       mark_as_paid: 'Mark as Paid',
       reset_selected: 'Reset Selected',
       archive_selected: 'Archive Selected',
-      download_zip: 'Download ZIP',
       remove_old_archived: 'Remove Old Archived Entries ({count})',
       copy_clipboard_text: 'Copy to clipboard'
     }
@@ -262,7 +259,7 @@ const en = {
   DeleteOldArchivedModal: {
     title: 'Remove old archived entries',
     text_1: 'Are you sure you want to remove old archived entries? This action cannot be undone.',
-    text_2: 'Make sure that for each paid entry the pdf has been archived to Procountor.',
+    text_2: 'Make sure that each paid entry has been sent to NoCFO.',
     remove: 'Remove',
     cancel: 'Cancel',
     close: 'Close'

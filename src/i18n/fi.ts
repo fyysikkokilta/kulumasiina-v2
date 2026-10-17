@@ -202,8 +202,6 @@ const fi = {
     },
     actions: {
       pdf: 'PDF',
-      csv: 'CSV',
-      zip: 'ZIP',
       edit: 'Muokkaa',
       approve: 'Hyväksy',
       deny: 'Hylkää',
@@ -222,7 +220,6 @@ const fi = {
       mark_as_paid: 'Merkitse maksetuiksi',
       reset_selected: 'Nollaa valitut',
       archive_selected: 'Arkistoi valitut',
-      download_zip: 'Lataa ZIP',
       remove_old_archived: 'Poista vanhat arkistoidut hakemukset ({count})',
       copy_clipboard_text: 'Kopioi leikepöydälle'
     }
@@ -261,7 +258,7 @@ const fi = {
   DeleteOldArchivedModal: {
     title: 'Poista vanhat arkistoidut hakemukset',
     text_1: 'Haluatko varmasti poistaa vanhat arkistoidut hakemukset? Tätä toimintoa ei voi perua.',
-    text_2: 'Varmista, että jokaisen maksetun hakemuksen PDF on arkistoitu Procountoriin.',
+    text_2: 'Varmista, että jokainen maksettu hakemus on lähetetty NoCFO:hon.',
     remove: 'Poista',
     cancel: 'Peruuta',
     close: 'Sulje'

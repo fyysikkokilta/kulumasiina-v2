@@ -46,7 +46,7 @@ pnpm test:node        # Node-side tests tagged @node only (no server, no DB)
 - `src/app/[locale]/page.tsx` — Public expense submission form
 - `src/app/[locale]/login/page.tsx` — Google OAuth login
 - `src/app/[locale]/admin/page.tsx` — Protected admin dashboard (requires auth + ADMIN_EMAILS)
-- `src/app/api/` — REST API routes (auth, attachments, PDF/CSV export, bulk ZIP)
+- `src/app/api/` — REST API routes (auth, attachments, single-entry PDF export)
 
 ### Key Directories
 

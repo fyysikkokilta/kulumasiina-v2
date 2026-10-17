@@ -41,7 +41,7 @@ The process works as follows:
 3. **Approve or deny** — Admins approve entries (with a note and date) or deny them (with a rejection date). Status becomes `approved` or `denied`.
 4. **Mark as paid** — Approved entries can be marked as paid (with a payment date). Status becomes `paid`.
 5. **Archive** — Entries can be archived. Old archived entries can be deleted automatically based on configurable age.
-6. **Export** — PDF and CSV export per entry; bulk ZIP export for multiple entries. Used for bookkeeping and records.
+6. **Export** — PDF export per entry. Paid entries are sent to NoCFO for bookkeeping.
 
 ## Database Schema
 

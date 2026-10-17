@@ -6,13 +6,17 @@ Ways to adapt Kulumasiina to your organization with minimal code changes.
 
 See `.env.example` for the full list. Key customization options:
 
-| Variable                                      | Description                                            |
-| --------------------------------------------- | ------------------------------------------------------ |
-| `BASE_URL`                                    | Public URL of the app (used for redirects and links)   |
-| `ADMIN_EMAILS`                                | Comma-separated emails that can access the admin panel |
-| `NEXT_PUBLIC_PRIVACY_POLICY_URL`              | Link shown for privacy policy                          |
-| `NEXT_PUBLIC_MILEAGE_REIMBURSEMENT_RATE`      | Rate per km for mileage claims                         |
-| `NEXT_PUBLIC_ARCHIVED_ENTRIES_AGE_LIMIT_DAYS` | Days after which archived entries can be deleted       |
+| Variable                                      | Description                                             |
+| --------------------------------------------- | ------------------------------------------------------- |
+| `BASE_URL`                                    | Public URL of the app (used for redirects and links)    |
+| `ADMIN_EMAILS`                                | Comma-separated emails that can access the admin panel  |
+| `NOCFO_API_URL`                               | NoCFO API base URL                                      |
+| `NOCFO_API_TOKEN`                             | NoCFO API token                                         |
+| `NOCFO_BUSINESS_SLUG`                         | Business slug in NoCFO API paths                        |
+| `NOCFO_BANK_ACCOUNT`                          | Bank account credited by NoCFO documents (default 1910) |
+| `NEXT_PUBLIC_PRIVACY_POLICY_URL`              | Link shown for privacy policy                           |
+| `NEXT_PUBLIC_MILEAGE_REIMBURSEMENT_RATE`      | Rate per km for mileage claims                          |
+| `NEXT_PUBLIC_ARCHIVED_ENTRIES_AGE_LIMIT_DAYS` | Days after which archived entries can be deleted        |
 
 These can be set in `.env` or in your deployment environment.
 

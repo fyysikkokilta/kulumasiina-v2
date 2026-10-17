@@ -124,7 +124,7 @@ src/
 │   │   ├── page.tsx         # Public expense form
 │   │   ├── login/          # Google OAuth login
 │   │   └── admin/          # Admin dashboard
-│   └── api/                # API routes (auth, attachments, PDF/CSV/ZIP export, cleanup)
+│   └── api/                # API routes (auth, attachments, PDF export, cleanup)
 ├── components/             # React components
 ├── data/                   # Server-side data fetching
 ├── db/                     # Drizzle schema, client, migrate script
@@ -133,7 +133,7 @@ src/
 │   ├── actions/            # Server actions (next-safe-action + Zod)
 │   ├── env.ts              # Environment validation (@t3-oss/env-nextjs)
 │   └── storage.ts          # File storage (local or S3/R2)
-├── utils/                  # Validation, PDF/CSV helpers
+├── utils/                  # Validation, PDF helpers
 └── ...
 tests/                      # Playwright E2E tests and utilities
 ```

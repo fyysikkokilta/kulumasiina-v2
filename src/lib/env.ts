@@ -20,8 +20,6 @@ export const env = createEnv({
         message: 'ADMIN_EMAILS must be a comma-separated list of email addresses'
       }),
 
-    MILEAGE_PROCOUNTOR_PRODUCT_ID: z.string().default('v2025_kmkorv'),
-
     // NoCFO Configuration
     NOCFO_API_URL: z.string().default('https://api.nocfo.io'),
     NOCFO_API_TOKEN: z.string(),

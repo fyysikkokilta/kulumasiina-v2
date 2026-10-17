@@ -1,6 +1,6 @@
 /**
  * Structured error payload returned by export API routes on failure.
- * Success responses remain binary downloads (PDF/CSV/ZIP).
+ * Success responses remain binary downloads (PDF).
  */
 export interface ExportErrorPayload {
   code: ExportErrorCode
